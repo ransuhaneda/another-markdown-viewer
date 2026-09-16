@@ -35,3 +35,35 @@ test('prints only the rendered document content', async ({ page }) => {
   await expect(page.locator('.preview-content')).toBeVisible()
   await expect(page.locator('.pane-preview > .pane-header')).toBeHidden()
 })
+
+test('resizes the editor and preview panes by dragging the split handle', async ({ page }) => {
+  await page.goto('/')
+
+  const editorPane = page.locator('[data-pane="editor"]')
+  const splitHandle = page.getByRole('separator', { name: 'Resize editor and preview panes' })
+  const initialEditorBox = await editorPane.boundingBox()
+  const handleBox = await splitHandle.boundingBox()
+
+  expect(initialEditorBox).not.toBeNull()
+  expect(handleBox).not.toBeNull()
+  if (!initialEditorBox || !handleBox) return
+
+  await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(handleBox.x + 160, handleBox.y + handleBox.height / 2)
+  await page.mouse.up()
+
+  const resizedEditorBox = await editorPane.boundingBox()
+  expect(resizedEditorBox).not.toBeNull()
+  expect(resizedEditorBox!.width).toBeGreaterThan(initialEditorBox.width + 100)
+})
+
+test('resizes the split panes from the keyboard', async ({ page }) => {
+  await page.goto('/')
+
+  const splitHandle = page.getByRole('separator', { name: 'Resize editor and preview panes' })
+  await splitHandle.focus()
+  await splitHandle.press('ArrowRight')
+
+  await expect(splitHandle).toHaveAttribute('aria-valuenow', '51')
+})

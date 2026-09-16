@@ -42,7 +42,7 @@ const app = document.querySelector<HTMLDivElement>('#app')!
 app.innerHTML = `
   <div class="app-shell">
     <header class="app-header">
-      <div class="brand-lockup"><span class="brand-mark" aria-hidden="true">M</span><div><p class="eyebrow">Writing surface</p><h1>Markdown Preview</h1></div></div>
+      <div class="brand-lockup"><span class="brand-mark" aria-hidden="true">M</span><h1>Markdown Preview</h1></div>
       <nav class="header-actions" aria-label="Document actions">
         <button class="icon-button" data-action="new" type="button" aria-label="New document" title="New document"><i data-lucide="file-plus"></i></button>
         <button class="icon-button" data-action="open" type="button" aria-label="Open file" title="Open file"><i data-lucide="folder-open"></i></button>
@@ -52,8 +52,8 @@ app.innerHTML = `
       </nav>
     </header>
     <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="Editor mode"><button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview"><i data-lucide="eye"></i></button><button class="segment" data-mode="source" type="button" aria-label="Source" title="Source"><i data-lucide="code"></i></button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button" aria-label="Editor only" title="Editor only"><i data-lucide="panel-left"></i></button><button class="segment" data-layout="split" type="button" aria-label="Split view" title="Split view"><i data-lucide="columns-2"></i></button><button class="segment" data-layout="preview" type="button" aria-label="Preview only" title="Preview only"><i data-lucide="panel-right"></i></button></div></div><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div></section>
-      <section class="document-region" data-layout="split" aria-label="Document panes"><article class="pane pane-editor" data-pane="editor" aria-label="Source editor"><div class="pane-header"><span class="pane-label" data-editor-label>Live Preview</span><span class="pane-hint" data-editor-hint>Click and type to edit</span></div><div class="editor-container" data-editor></div></article><div class="split-handle" aria-hidden="true"><span></span></div><article class="pane pane-preview" data-pane="preview" aria-label="Rendered preview"><div class="pane-header"><span class="pane-label">Rendered Preview</span><span class="pane-hint">Read only</span></div><div class="preview-content" data-preview></div></article></section></main>
-    <footer class="app-footer"><span data-recovery-note>Local recovery protects your latest draft.</span><div class="footer-actions"><button class="icon-button icon-button--quiet" data-action="help" type="button" aria-label="Markdown help" title="Markdown help" aria-haspopup="dialog" aria-controls="help-dialog"><i data-lucide="circle-help"></i></button><button class="icon-button icon-button--quiet" data-action="clear" type="button" aria-label="Clear draft" title="Clear draft"><i data-lucide="trash"></i></button></div></footer>
+      <section class="document-region" data-layout="split" aria-label="Document panes"><article class="pane pane-editor" data-pane="editor" aria-label="Source editor"><div class="pane-header"><span class="pane-label" data-editor-label>Live Preview</span></div><div class="editor-container" data-editor></div></article><div class="split-handle" role="separator" aria-label="Resize editor and preview panes" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"><span aria-hidden="true"></span></div><article class="pane pane-preview" data-pane="preview" aria-label="Rendered preview"><div class="pane-header"><span class="pane-label">Rendered Preview</span></div><div class="preview-content" data-preview></div></article></section></main>
+    <footer class="app-footer"><div class="footer-actions"><button class="icon-button icon-button--quiet" data-action="help" type="button" aria-label="Markdown help" title="Markdown help" aria-haspopup="dialog" aria-controls="help-dialog"><i data-lucide="circle-help"></i></button><button class="icon-button icon-button--quiet" data-action="clear" type="button" aria-label="Clear draft" title="Clear draft"><i data-lucide="trash"></i></button></div></footer>
     <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title"><form method="dialog" class="help-dialog__surface"><button class="help-dialog__close icon-button icon-button--quiet" value="cancel" aria-label="Close help" title="Close help"><i data-lucide="x"></i></button><h2 id="help-title">Markdown help</h2><section><h3>Syntax reference</h3><dl><dt><code># Heading</code></dt><dd>Creates a heading.</dd><dt><code>**bold**</code></dt><dd>Creates bold text.</dd><dt><code>[label](url)</code></dt><dd>Creates a link.</dd><dt><code>- item</code></dt><dd>Creates a list.</dd><dt><code>fenced code</code></dt><dd>Creates a code block.</dd></dl></section><section><h3>Keyboard shortcuts</h3><p><kbd>Escape</kbd> closes this help dialog. Use standard text-editing shortcuts in the editor.</p></section></form></dialog>
   </div>`
 
@@ -96,10 +96,50 @@ app.querySelectorAll<HTMLElement>('[data-lucide]').forEach((placeholder) => {
 })
 
 const workspace = app.querySelector<HTMLElement>('.document-region')!
+const splitHandle = app.querySelector<HTMLElement>('.split-handle')!
 const status = app.querySelector<HTMLElement>('[data-status]')!
 const recoveryNote = app.querySelector<HTMLElement>('[data-recovery-note]')!
 const helpDialog = app.querySelector<HTMLDialogElement>('#help-dialog')!
 const helpTrigger = app.querySelector<HTMLButtonElement>('[data-action="help"]')!
+
+const MIN_PANE_WIDTH = 240
+
+function resizePanes(clientX: number): void {
+  const workspaceBounds = workspace.getBoundingClientRect()
+  const availableWidth = workspaceBounds.width - splitHandle.offsetWidth
+  const minimumWidth = Math.min(MIN_PANE_WIDTH, availableWidth * 0.4)
+  const editorWidth = Math.min(
+    Math.max(clientX - workspaceBounds.left, minimumWidth),
+    availableWidth - minimumWidth,
+  )
+  const editorPercent = Math.round((editorWidth / availableWidth) * 100)
+
+  workspace.style.setProperty('--editor-pane-width', `${editorWidth}px`)
+  splitHandle.setAttribute('aria-valuenow', String(editorPercent))
+}
+
+splitHandle.addEventListener('pointerdown', (event) => {
+  if (documentState.layout !== 'split') return
+  event.preventDefault()
+  splitHandle.setPointerCapture(event.pointerId)
+  splitHandle.classList.add('is-dragging')
+  document.body.classList.add('is-resizing-panes')
+  resizePanes(event.clientX)
+})
+splitHandle.addEventListener('pointermove', (event) => {
+  if (splitHandle.hasPointerCapture(event.pointerId)) resizePanes(event.clientX)
+})
+splitHandle.addEventListener('pointerup', (event) => {
+  if (splitHandle.hasPointerCapture(event.pointerId)) splitHandle.releasePointerCapture(event.pointerId)
+  splitHandle.classList.remove('is-dragging')
+  document.body.classList.remove('is-resizing-panes')
+})
+splitHandle.addEventListener('keydown', (event) => {
+  if (documentState.layout !== 'split' || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return
+  event.preventDefault()
+  const direction = event.key === 'ArrowLeft' ? -1 : 1
+  resizePanes(splitHandle.getBoundingClientRect().left + direction * (event.shiftKey ? 50 : 10))
+})
 
 helpTrigger.addEventListener('click', () => helpDialog.showModal())
 helpDialog.addEventListener('close', () => helpTrigger.focus())

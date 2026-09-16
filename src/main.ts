@@ -27,7 +27,7 @@ const app = document.querySelector<HTMLDivElement>('#app')!
 app.innerHTML = `
   <div class="app-shell">
     <header class="app-header"><div class="brand-lockup"><span class="brand-mark" aria-hidden="true">M</span><div><p class="eyebrow">Writing surface</p><h1>Markdown Preview</h1></div></div><nav class="header-actions" aria-label="Document actions"><button class="button button-secondary" data-action="new" type="button">New document</button><button class="button button-secondary" data-action="open" type="button">Open file</button><button class="button button-secondary" data-action="save" type="button">Save Markdown</button><button class="button button-primary" data-action="pdf" type="button">Download PDF</button></nav></header>
-    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="View mode"><button class="segment" data-mode="live-preview" type="button">Live Preview</button><button class="segment" data-mode="source" type="button">Source</button><button class="segment" data-mode="preview" type="button">Preview</button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button">Editor</button><button class="segment" data-layout="split" type="button">Split</button><button class="segment" data-layout="preview" type="button">Preview</button></div></div><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div></section>
+    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="Editor mode"><button class="segment" data-mode="live-preview" type="button">Live Preview</button><button class="segment" data-mode="source" type="button">Source</button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button">Editor</button><button class="segment" data-layout="split" type="button">Split</button><button class="segment" data-layout="preview" type="button">Rendered Preview</button></div></div><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div></section>
       <section class="document-region" data-layout="split" aria-label="Document panes"><article class="pane pane-editor" data-pane="editor" aria-label="Source editor"><div class="pane-header"><span class="pane-label" data-editor-label>Live Preview</span><span class="pane-hint" data-editor-hint>Click and type to edit</span></div><div class="editor-container" data-editor></div></article><div class="split-handle" aria-hidden="true"><span></span></div><article class="pane pane-preview" data-pane="preview" aria-label="Rendered preview"><div class="pane-header"><span class="pane-label">Rendered Preview</span><span class="pane-hint">Read only</span></div><div class="preview-content" data-preview></div></article></section></main>
     <footer class="app-footer"><span data-recovery-note>Local recovery protects your latest draft.</span><div class="footer-actions"><button class="text-button" data-action="help" type="button" aria-haspopup="dialog" aria-controls="help-dialog">Markdown help</button><button class="text-button" data-action="clear" type="button">Clear draft</button></div></footer>
     <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title"><form method="dialog" class="help-dialog__surface"><button class="help-dialog__close" value="cancel" aria-label="Close help">×</button><h2 id="help-title">Markdown help</h2><section><h3>Syntax reference</h3><dl><dt><code># Heading</code></dt><dd>Creates a heading.</dd><dt><code>**bold**</code></dt><dd>Creates bold text.</dd><dt><code>[label](url)</code></dt><dd>Creates a link.</dd><dt><code>- item</code></dt><dd>Creates a list.</dd><dt><code>fenced code</code></dt><dd>Creates a code block.</dd></dl></section><section><h3>Keyboard shortcuts</h3><p><kbd>Escape</kbd> closes this help dialog. Use standard text-editing shortcuts in the editor.</p></section></form></dialog>
@@ -84,6 +84,15 @@ function readSourceRange(element: HTMLElement): { start: number; end: number } |
   return Number.isFinite(start) && Number.isFinite(end) ? { start, end } : null
 }
 
+function focusRenderedBlock(element: HTMLElement): void {
+  const range = readSourceRange(element)
+  if (!range) return
+  applyMode('live-preview')
+  applyLayout('split')
+  editor.focus()
+  editor.dispatch({ selection: { anchor: range.start } })
+}
+
 async function updatePreview(): Promise<void> {
   const preview = app.querySelector<HTMLElement>('[data-preview]')!
   preview.innerHTML = await renderMarkdown(documentState.markdown)
@@ -126,6 +135,7 @@ function captureViewState(): void {
 
 function applyMode(mode: ViewMode): void {
   documentState.mode = mode
+  if (mode !== 'preview' && documentState.layout === 'preview') documentState.layout = 'split'
   app.querySelector<HTMLElement>('[data-pane="editor"]')!.classList.toggle('is-hidden', mode === 'preview')
   app.querySelector<HTMLElement>('[data-pane="preview"]')!.classList.toggle('is-hidden', mode === 'source')
   setSourceEditorLivePreview(editor, mode === 'live-preview')
@@ -169,12 +179,21 @@ const editor = createSourceEditor({
 restoreSourceEditorSnapshot(editor, { cursorPosition: documentState.cursorPosition, scrollTop: documentState.editorScrollTop })
 setSourceEditorLivePreview(editor, documentState.mode === 'live-preview')
 app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => {
-  if (isViewMode(button.dataset.mode)) applyMode(button.dataset.mode)
+  if (isViewMode(button.dataset.mode)) {
+    applyMode(button.dataset.mode)
+    updateLayoutButtons()
+  }
 }))
 app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => button.addEventListener('click', () => {
   if (isWorkspaceLayout(button.dataset.layout)) applyLayout(button.dataset.layout)
 }))
 const preview = app.querySelector<HTMLElement>('[data-preview]')!
+preview.addEventListener('click', (event) => {
+  const target = event.target
+  if (!(target instanceof HTMLElement)) return
+  const block = target.closest<HTMLElement>('[data-source-start]')
+  if (block) focusRenderedBlock(block)
+})
 preview.addEventListener('scroll', () => { documentState.previewScrollTop = preview.scrollTop; scheduleRecovery() })
 
 function clearDraft(): void {

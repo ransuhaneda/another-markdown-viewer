@@ -7,6 +7,21 @@ import { clearRecovery, readRecovery, writeRecovery } from './persistence/recove
 import { createDocumentState, type DocumentState, type ViewMode, type WorkspaceLayout } from './state/document-state'
 import { openMarkdownFile, saveMarkdownFile } from './files/markdown-files'
 import { findActiveBlock } from './markdown/live-preview'
+import {
+  CircleHelp,
+  Code,
+  Columns2,
+  Eye,
+  FileDown,
+  FilePlus,
+  FolderOpen,
+  PanelLeft,
+  PanelRight,
+  Save,
+  Trash,
+  X,
+  type IconNode,
+} from 'lucide'
 
 const welcomeMarkdown = `# Markdown Preview
 
@@ -26,12 +41,59 @@ let recoveryTimer: number | undefined
 const app = document.querySelector<HTMLDivElement>('#app')!
 app.innerHTML = `
   <div class="app-shell">
-    <header class="app-header"><div class="brand-lockup"><span class="brand-mark" aria-hidden="true">M</span><div><p class="eyebrow">Writing surface</p><h1>Markdown Preview</h1></div></div><nav class="header-actions" aria-label="Document actions"><button class="button button-secondary" data-action="new" type="button">New document</button><button class="button button-secondary" data-action="open" type="button">Open file</button><button class="button button-secondary" data-action="save" type="button">Save Markdown</button><button class="button button-primary" data-action="pdf" type="button">Download PDF</button></nav></header>
-    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="Editor mode"><button class="segment" data-mode="live-preview" type="button">Live Preview</button><button class="segment" data-mode="source" type="button">Source</button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button">Editor</button><button class="segment" data-layout="split" type="button">Split</button><button class="segment" data-layout="preview" type="button">Rendered Preview</button></div></div><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div></section>
+    <header class="app-header">
+      <div class="brand-lockup"><span class="brand-mark" aria-hidden="true">M</span><div><p class="eyebrow">Writing surface</p><h1>Markdown Preview</h1></div></div>
+      <nav class="header-actions" aria-label="Document actions">
+        <button class="icon-button" data-action="new" type="button" aria-label="New document" title="New document"><i data-lucide="file-plus"></i></button>
+        <button class="icon-button" data-action="open" type="button" aria-label="Open file" title="Open file"><i data-lucide="folder-open"></i></button>
+        <button class="icon-button" data-action="save" type="button" aria-label="Save Markdown" title="Save Markdown"><i data-lucide="save"></i></button>
+        <span class="action-divider" aria-hidden="true"></span>
+        <button class="icon-button icon-button--primary" data-action="pdf" type="button" aria-label="Download PDF" title="Download PDF"><i data-lucide="file-down"></i></button>
+      </nav>
+    </header>
+    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="Editor mode"><button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview"><i data-lucide="eye"></i></button><button class="segment" data-mode="source" type="button" aria-label="Source" title="Source"><i data-lucide="code"></i></button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button" aria-label="Editor only" title="Editor only"><i data-lucide="panel-left"></i></button><button class="segment" data-layout="split" type="button" aria-label="Split view" title="Split view"><i data-lucide="columns-2"></i></button><button class="segment" data-layout="preview" type="button" aria-label="Preview only" title="Preview only"><i data-lucide="panel-right"></i></button></div></div><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div></section>
       <section class="document-region" data-layout="split" aria-label="Document panes"><article class="pane pane-editor" data-pane="editor" aria-label="Source editor"><div class="pane-header"><span class="pane-label" data-editor-label>Live Preview</span><span class="pane-hint" data-editor-hint>Click and type to edit</span></div><div class="editor-container" data-editor></div></article><div class="split-handle" aria-hidden="true"><span></span></div><article class="pane pane-preview" data-pane="preview" aria-label="Rendered preview"><div class="pane-header"><span class="pane-label">Rendered Preview</span><span class="pane-hint">Read only</span></div><div class="preview-content" data-preview></div></article></section></main>
-    <footer class="app-footer"><span data-recovery-note>Local recovery protects your latest draft.</span><div class="footer-actions"><button class="text-button" data-action="help" type="button" aria-haspopup="dialog" aria-controls="help-dialog">Markdown help</button><button class="text-button" data-action="clear" type="button">Clear draft</button></div></footer>
-    <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title"><form method="dialog" class="help-dialog__surface"><button class="help-dialog__close" value="cancel" aria-label="Close help">×</button><h2 id="help-title">Markdown help</h2><section><h3>Syntax reference</h3><dl><dt><code># Heading</code></dt><dd>Creates a heading.</dd><dt><code>**bold**</code></dt><dd>Creates bold text.</dd><dt><code>[label](url)</code></dt><dd>Creates a link.</dd><dt><code>- item</code></dt><dd>Creates a list.</dd><dt><code>fenced code</code></dt><dd>Creates a code block.</dd></dl></section><section><h3>Keyboard shortcuts</h3><p><kbd>Escape</kbd> closes this help dialog. Use standard text-editing shortcuts in the editor.</p></section></form></dialog>
+    <footer class="app-footer"><span data-recovery-note>Local recovery protects your latest draft.</span><div class="footer-actions"><button class="icon-button icon-button--quiet" data-action="help" type="button" aria-label="Markdown help" title="Markdown help" aria-haspopup="dialog" aria-controls="help-dialog"><i data-lucide="circle-help"></i></button><button class="icon-button icon-button--quiet" data-action="clear" type="button" aria-label="Clear draft" title="Clear draft"><i data-lucide="trash"></i></button></div></footer>
+    <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title"><form method="dialog" class="help-dialog__surface"><button class="help-dialog__close icon-button icon-button--quiet" value="cancel" aria-label="Close help" title="Close help"><i data-lucide="x"></i></button><h2 id="help-title">Markdown help</h2><section><h3>Syntax reference</h3><dl><dt><code># Heading</code></dt><dd>Creates a heading.</dd><dt><code>**bold**</code></dt><dd>Creates bold text.</dd><dt><code>[label](url)</code></dt><dd>Creates a link.</dd><dt><code>- item</code></dt><dd>Creates a list.</dd><dt><code>fenced code</code></dt><dd>Creates a code block.</dd></dl></section><section><h3>Keyboard shortcuts</h3><p><kbd>Escape</kbd> closes this help dialog. Use standard text-editing shortcuts in the editor.</p></section></form></dialog>
   </div>`
+
+const icons: Record<string, IconNode> = {
+  'circle-help': CircleHelp,
+  code: Code,
+  'columns-2': Columns2,
+  eye: Eye,
+  'file-down': FileDown,
+  'file-plus': FilePlus,
+  'folder-open': FolderOpen,
+  'panel-left': PanelLeft,
+  'panel-right': PanelRight,
+  save: Save,
+  trash: Trash,
+  x: X,
+}
+
+function renderIcon(placeholder: HTMLElement, icon: IconNode): void {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  const attributes = {
+    xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24',
+    fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round',
+    'stroke-linejoin': 'round', 'aria-hidden': 'true',
+  }
+  Object.entries(attributes).forEach(([name, value]) => svg.setAttribute(name, value))
+  icon.forEach(([tag, iconAttributes]) => {
+    const element = document.createElementNS('http://www.w3.org/2000/svg', tag)
+    Object.entries(iconAttributes).forEach(([name, value]) => {
+      if (value !== undefined) element.setAttribute(name, String(value))
+    })
+    svg.append(element)
+  })
+  placeholder.replaceWith(svg)
+}
+
+app.querySelectorAll<HTMLElement>('[data-lucide]').forEach((placeholder) => {
+  const icon = icons[placeholder.dataset.lucide ?? '']
+  if (icon) renderIcon(placeholder, icon)
+})
 
 const workspace = app.querySelector<HTMLElement>('.document-region')!
 const status = app.querySelector<HTMLElement>('[data-status]')!

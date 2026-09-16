@@ -55,13 +55,13 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
         if (update.selectionSet && !update.docChanged) onSelectionChange?.(update.state.selection.main.head)
       }),
       EditorView.theme({
-        '&': { height: '100%', backgroundColor: 'transparent' },
+        '&': { height: '100%', backgroundColor: 'transparent', color: 'var(--color-ink)' },
         '.cm-scroller': { overflow: 'auto', fontFamily: 'var(--font-mono)' },
-        '.cm-content': { minHeight: '100%', padding: 'var(--space-5)' },
+        '.cm-content': { minHeight: '100%', padding: 'var(--space-6)', caretColor: 'var(--color-caret)' },
         '.cm-gutters': { display: 'none' },
         '.cm-line': { padding: '0' },
         '.cm-focused': { outline: 'none' },
-        '.cm-cursor': { borderLeftColor: 'var(--color-accent)' },
+        '&.cm-focused .cm-cursor': { borderLeft: '2px solid var(--color-caret)' },
         '.cm-selectionBackground, ::selection': { backgroundColor: 'var(--color-accent-soft)' },
         '.ͼ1, .cm-header': { fontWeight: '650' },
         '.ͼ2': { fontWeight: '700' },

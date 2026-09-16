@@ -180,12 +180,16 @@ Do not use pill-shaped controls except for compact status indicators when requir
 Keep the header compact.
 Place the product name and primary actions in a stable order.
 Do not let utility controls compete with the document.
+Use 16px icons inside 40px controls for familiar document actions.
+Give every icon-only control an accessible name and a tooltip.
+Use only standard icon sizes: 16px, 24px, or 32px.
 
 ### Mode and layout controls
 
 Expose Live Preview, Source, Preview, and Split behavior through clear controls.
 Use text labels where an icon could be unclear.
 Show the active state with accent color, a visible boundary, and an accessible state.
+Use consistent spacing tokens between control groups.
 
 ### Editor surface
 

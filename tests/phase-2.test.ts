@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { renderMarkdown } from '../src/markdown/render-markdown'
 import { clearRecovery, readRecovery, writeRecovery } from '../src/persistence/recovery'
 import { clampCursorPosition, createDocumentState } from '../src/state/document-state'
+import { sanitizeUrl } from '../src/markdown/url-policy'
+import { convertPastedContent } from '../src/markdown/paste-markdown'
 
 describe('phase 2 markdown flow', () => {
   it('renders GFM content and removes unsafe HTML', async () => {
@@ -48,6 +50,18 @@ describe('phase 2 markdown flow', () => {
     expect(clampCursorPosition(-4, 10)).toBe(0)
     expect(clampCursorPosition(20, 10)).toBe(10)
     expect(clampCursorPosition(4.8, 10)).toBe(4)
+  })
+
+  it('keeps safe URLs and rejects unsafe schemes', () => {
+    expect(sanitizeUrl('https://example.com/docs')).toBe('https://example.com/docs')
+    expect(sanitizeUrl('/local/path')).toBe('/local/path')
+    expect(sanitizeUrl('javascript:alert(1)')).toBeNull()
+    expect(sanitizeUrl('data:text/html,alert(1)')).toBeNull()
+  })
+
+  it('converts common rich text HTML to Markdown', () => {
+    expect(convertPastedContent('', '<h2>Title</h2><p><strong>Bold</strong> text</p>')).toBe('## Title\n\n**Bold** text')
+    expect(convertPastedContent('**already Markdown**', '<strong>ignored</strong>')).toBe('**already Markdown**')
   })
 })
 

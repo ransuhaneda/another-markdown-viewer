@@ -1,11 +1,13 @@
 import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
+import { convertPastedContent } from '../markdown/paste-markdown'
 
 export interface SourceEditorOptions {
   parent: HTMLElement
   initialValue: string
   onChange: (value: string) => void
+  onPaste?: (value: string) => void
 }
 
 export interface SourceEditorSnapshot {
@@ -19,6 +21,17 @@ export function createSourceEditor({ parent, initialValue, onChange }: SourceEdi
     extensions: [
       markdown(),
       EditorView.lineWrapping,
+      EditorView.domEventHandlers({
+        paste: (event, view) => {
+          const clipboard = event.clipboardData
+          if (!clipboard) return false
+          const converted = convertPastedContent(clipboard.getData('text/plain'), clipboard.getData('text/html'))
+          if (!converted) return false
+          event.preventDefault()
+          view.dispatch(view.state.replaceSelection(converted))
+          return true
+        },
+      }),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChange(update.state.doc.toString())
       }),

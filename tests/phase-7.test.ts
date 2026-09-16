@@ -15,4 +15,5 @@ describe('phase 7 live preview', () => {
     expect(html).toContain('data-source-start="0"')
     expect(html).toContain('data-source-end="9"')
   })
+
 })

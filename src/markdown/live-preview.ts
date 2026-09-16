@@ -8,6 +8,7 @@ export interface LivePreviewBlock {
   type: 'heading' | 'emphasis' | 'code' | 'link' | 'image' | 'block'
 }
 
+
 const BLOCK_PATTERNS: Array<[LivePreviewBlock['type'], RegExp]> = [
   ['heading', /^#{1,6}\s+/u],
   ['code', /^```/u],

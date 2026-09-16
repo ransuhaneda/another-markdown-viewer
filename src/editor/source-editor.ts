@@ -1,6 +1,13 @@
-import { EditorState } from '@codemirror/state'
+import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
+import {
+  collapseOnSelectionFacet,
+  livePreviewPlugin,
+  markdownStylePlugin,
+  mouseSelectingField,
+  setMouseSelecting,
+} from 'codemirror-live-markdown'
 import { convertPastedContent } from '../markdown/paste-markdown'
 
 export interface SourceEditorOptions {
@@ -16,11 +23,21 @@ export interface SourceEditorSnapshot {
   scrollTop: number
 }
 
+const livePreviewMode = new Compartment()
+
+const livePreviewExtensions = [
+  collapseOnSelectionFacet.of(true),
+  mouseSelectingField,
+  livePreviewPlugin,
+  markdownStylePlugin,
+]
+
 export function createSourceEditor({ parent, initialValue, onChange, onSelectionChange }: SourceEditorOptions): EditorView {
   const state = EditorState.create({
     doc: initialValue,
     extensions: [
       markdown(),
+      livePreviewMode.of(livePreviewExtensions),
       EditorView.lineWrapping,
       EditorView.domEventHandlers({
         paste: (event, view) => {
@@ -46,11 +63,33 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
         '.cm-focused': { outline: 'none' },
         '.cm-cursor': { borderLeftColor: 'var(--color-accent)' },
         '.cm-selectionBackground, ::selection': { backgroundColor: 'var(--color-accent-soft)' },
+        '.ͼ1, .cm-header': { fontWeight: '650' },
+        '.ͼ2': { fontWeight: '700' },
+        '.ͼ3': { fontStyle: 'italic' },
+        '.ͼ4': { textDecoration: 'line-through' },
+        '.ͼ5': { padding: '0 var(--space-1)', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--color-raised)' },
       }),
     ],
   })
 
-  return new EditorView({ state, parent })
+  const view = new EditorView({ state, parent })
+  view.contentDOM.addEventListener('mousedown', () => {
+    view.dispatch({ effects: setMouseSelecting.of(true) })
+  })
+  const handleMouseUp = (): void => {
+    window.requestAnimationFrame(() => view.dispatch({ effects: setMouseSelecting.of(false) }))
+  }
+  document.addEventListener('mouseup', handleMouseUp)
+  const originalDestroy = view.destroy.bind(view)
+  view.destroy = (): void => {
+    document.removeEventListener('mouseup', handleMouseUp)
+    originalDestroy()
+  }
+  return view
+}
+
+export function setSourceEditorLivePreview(editor: EditorView, enabled: boolean): void {
+  editor.dispatch({ effects: livePreviewMode.reconfigure(enabled ? livePreviewExtensions : []) })
 }
 
 export function getSourceEditorSnapshot(editor: EditorView): SourceEditorSnapshot {

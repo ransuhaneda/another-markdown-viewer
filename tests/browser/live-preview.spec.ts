@@ -27,3 +27,11 @@ test('uses accessible standard-size icons and a visible caret', async ({ page })
   await expect(editor).toHaveCSS('caret-color', 'rgb(255, 255, 255)')
   await expect(editor).toBeFocused()
 })
+
+test('prints only the rendered document content', async ({ page }) => {
+  await page.goto('/')
+  await page.emulateMedia({ media: 'print' })
+
+  await expect(page.locator('.preview-content')).toBeVisible()
+  await expect(page.locator('.pane-preview > .pane-header')).toBeHidden()
+})

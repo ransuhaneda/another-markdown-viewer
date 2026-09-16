@@ -20,6 +20,7 @@
   .app-header,
   .workspace-toolbar,
   .pane-editor,
+  .pane-preview > .pane-header,
   .split-handle,
   .app-footer {
     display: none !important;

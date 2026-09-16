@@ -6,6 +6,7 @@ describe('phase 6 PDF export', () => {
     const styles = readFileSync(new URL('../src/styles/print.css', import.meta.url), 'utf8')
     expect(styles).toContain('@media print')
     expect(styles).toContain('.app-header')
+    expect(styles).toContain('.pane-preview > .pane-header')
     expect(styles).toContain('.preview-content')
     expect(styles).toContain('break-inside: avoid')
   })

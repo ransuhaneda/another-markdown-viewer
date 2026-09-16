@@ -8,6 +8,7 @@ export interface SourceEditorOptions {
   initialValue: string
   onChange: (value: string) => void
   onPaste?: (value: string) => void
+  onSelectionChange?: (position: number) => void
 }
 
 export interface SourceEditorSnapshot {
@@ -15,7 +16,7 @@ export interface SourceEditorSnapshot {
   scrollTop: number
 }
 
-export function createSourceEditor({ parent, initialValue, onChange }: SourceEditorOptions): EditorView {
+export function createSourceEditor({ parent, initialValue, onChange, onSelectionChange }: SourceEditorOptions): EditorView {
   const state = EditorState.create({
     doc: initialValue,
     extensions: [
@@ -34,6 +35,7 @@ export function createSourceEditor({ parent, initialValue, onChange }: SourceEdi
       }),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChange(update.state.doc.toString())
+        if (update.selectionSet && !update.docChanged) onSelectionChange?.(update.state.selection.main.head)
       }),
       EditorView.theme({
         '&': { height: '100%', backgroundColor: 'transparent' },

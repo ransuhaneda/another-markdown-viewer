@@ -8,7 +8,7 @@ import { convertPastedContent } from '../src/markdown/paste-markdown'
 describe('phase 2 markdown flow', () => {
   it('renders GFM content and removes unsafe HTML', async () => {
     const html = await renderMarkdown('# Title\n\n- **bold**\n\n<script>alert(1)</script>')
-    expect(html).toContain('<h1>Title</h1>')
+    expect(html).toContain('>Title</h1>')
     expect(html).toContain('<strong>bold</strong>')
     expect(html).not.toContain('<script>')
   })

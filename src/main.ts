@@ -6,6 +6,7 @@ import { renderMarkdown, prepareRenderedLinks } from './markdown/render-markdown
 import { clearRecovery, readRecovery, writeRecovery } from './persistence/recovery'
 import { createDocumentState, type DocumentState, type ViewMode, type WorkspaceLayout } from './state/document-state'
 import { openMarkdownFile, saveMarkdownFile } from './files/markdown-files'
+import { findActiveBlock } from './markdown/live-preview'
 
 const welcomeMarkdown = `# Markdown Preview
 
@@ -100,6 +101,16 @@ function applyLayout(layout: WorkspaceLayout): void {
   scheduleRecovery()
 }
 
+function updateLivePreviewFocus(cursorPosition: number): void {
+  const preview = app.querySelector<HTMLElement>('[data-preview]')!
+  const block = findActiveBlock(documentState.markdown, cursorPosition)
+  preview.querySelectorAll<HTMLElement>('[data-source-start]').forEach((element) => {
+    const start = Number(element.dataset.sourceStart)
+    const end = Number(element.dataset.sourceEnd)
+    element.classList.toggle('is-active-source-block', start <= block.range.end && end >= block.range.start)
+  })
+}
+
 const editor = createSourceEditor({
   parent: app.querySelector<HTMLElement>('[data-editor]')!,
   initialValue: documentState.markdown,
@@ -109,6 +120,10 @@ const editor = createSourceEditor({
     updateCount()
     scheduleRecovery()
     void updatePreview()
+  },
+  onSelectionChange: (position) => {
+    documentState.cursorPosition = position
+    updateLivePreviewFocus(position)
   },
 })
 

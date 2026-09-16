@@ -9,7 +9,7 @@ describe('phase 1 application shell', () => {
     expect(source).toContain('Markdown Preview')
     expect(source).toContain('aria-label="Source editor"')
     expect(source).toContain('aria-label="Rendered preview"')
-    expect(source).toContain('data-layout="split"')
+    expect(source).toContain('aria-label="Editor controls"')
   })
 
   it('supports single-pane layouts and narrow-screen behavior', () => {

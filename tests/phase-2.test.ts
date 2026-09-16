@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { renderMarkdown } from '../src/markdown/render-markdown'
 import { clearRecovery, readRecovery, writeRecovery } from '../src/persistence/recovery'
+import { clampCursorPosition, createDocumentState } from '../src/state/document-state'
 
 describe('phase 2 markdown flow', () => {
   it('renders GFM content and removes unsafe HTML', async () => {
@@ -17,7 +18,7 @@ describe('phase 2 markdown flow', () => {
       setItem: (key: string, value: string) => { storage.set(key, value) },
       removeItem: (key: string) => { storage.delete(key) },
     } as Storage
-    const state = { markdown: '# Draft', mode: 'live-preview' as const, updatedAt: 1 }
+    const state = createDocumentState('# Draft', { updatedAt: 1 })
     expect(writeRecovery(state, fakeStorage)).toBe(true)
     expect(readRecovery(fakeStorage)).toEqual(state)
     clearRecovery(fakeStorage)
@@ -30,4 +31,31 @@ describe('phase 2 markdown flow', () => {
     } as unknown as Storage
     expect(readRecovery(fakeStorage)).toBeNull()
   })
+
+  it('persists document layout and view positions', () => {
+    const state = createDocumentState('# Draft', {
+      layout: 'preview',
+      cursorPosition: 4,
+      editorScrollTop: 12,
+      previewScrollTop: 24,
+    })
+    const storage = fakeStorageForState()
+    expect(writeRecovery(state, storage)).toBe(true)
+    expect(readRecovery(storage)).toEqual(state)
+  })
+
+  it('clamps cursor positions to the document bounds', () => {
+    expect(clampCursorPosition(-4, 10)).toBe(0)
+    expect(clampCursorPosition(20, 10)).toBe(10)
+    expect(clampCursorPosition(4.8, 10)).toBe(4)
+  })
 })
+
+function fakeStorageForState(): Storage {
+  const storage = new Map<string, string>()
+  return {
+    getItem: (key: string) => storage.get(key) ?? null,
+    setItem: (key: string, value: string) => { storage.set(key, value) },
+    removeItem: (key: string) => { storage.delete(key) },
+  } as unknown as Storage
+}

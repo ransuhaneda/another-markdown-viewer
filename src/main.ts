@@ -1,5 +1,6 @@
 import './styles/tokens.css'
 import './style.css'
+import './styles/print.css'
 import { createSourceEditor, getSourceEditorSnapshot, restoreSourceEditorSnapshot } from './editor/source-editor'
 import { renderMarkdown, prepareRenderedLinks } from './markdown/render-markdown'
 import { clearRecovery, readRecovery, writeRecovery } from './persistence/recovery'
@@ -144,7 +145,10 @@ app.querySelector<HTMLButtonElement>('[data-action="save"]')!.addEventListener('
   setStatus('Saving Markdown…')
   void saveMarkdownFile(documentState.markdown).then(() => setStatus('Markdown saved')).catch(() => setStatus('Could not save Markdown', true))
 })
-app.querySelector<HTMLButtonElement>('[data-action="pdf"]')!.addEventListener('click', () => window.print())
+app.querySelector<HTMLButtonElement>('[data-action="pdf"]')!.addEventListener('click', () => {
+  setStatus('Preparing print preview…')
+  window.setTimeout(() => window.print(), 0)
+})
 updateCount()
 updateModeButtons()
 updateLayoutButtons()

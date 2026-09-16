@@ -30,11 +30,18 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     </header>
 
     <main class="workspace" aria-label="Markdown workspace">
-      <section class="workspace-toolbar" aria-label="Editor controls">
+      <section class="workspace-toolbar" aria-label="Workspace controls">
+        <div class="toolbar-groups">
         <div class="segmented-control" role="group" aria-label="View mode">
-          <button class="segment is-active" type="button" aria-pressed="true">Live Preview</button>
-          <button class="segment" type="button" aria-pressed="false">Source</button>
-          <button class="segment" type="button" aria-pressed="false">Preview</button>
+          <button class="segment is-active" type="button" aria-pressed="true" data-mode="live-preview">Live Preview</button>
+          <button class="segment" type="button" aria-pressed="false" data-mode="source">Source</button>
+          <button class="segment" type="button" aria-pressed="false" data-mode="preview">Preview</button>
+        </div>
+        <div class="segmented-control layout-control" role="group" aria-label="Pane layout">
+          <button class="segment" type="button" aria-pressed="false" data-layout="editor">Editor</button>
+          <button class="segment is-active" type="button" aria-pressed="true" data-layout="split">Split</button>
+          <button class="segment" type="button" aria-pressed="false" data-layout="preview">Preview</button>
+        </div>
         </div>
         <div class="toolbar-meta">
           <span class="status-dot" aria-hidden="true"></span>
@@ -45,7 +52,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       </section>
 
       <section class="document-region" aria-label="Document panes">
-        <article class="pane pane-editor">
+        <article class="pane pane-editor" aria-label="Source editor">
           <div class="pane-header">
             <span class="pane-label">Source</span>
             <span class="pane-hint">Markdown</span>
@@ -56,7 +63,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           </div>
         </article>
         <div class="split-handle" aria-hidden="true"><span></span></div>
-        <article class="pane pane-preview">
+        <article class="pane pane-preview" aria-label="Rendered preview">
           <div class="pane-header">
             <span class="pane-label">Live Preview</span>
             <span class="pane-hint">Rendered document</span>
@@ -76,3 +83,26 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     </footer>
   </div>
 `
+
+const workspace = document.querySelector<HTMLElement>('.document-region')!
+const modeButtons = document.querySelectorAll<HTMLButtonElement>('[data-mode]')
+const layoutButtons = document.querySelectorAll<HTMLButtonElement>('[data-layout]')
+
+function setPressed(buttons: NodeListOf<HTMLButtonElement>, active: HTMLButtonElement) {
+  buttons.forEach((button) => {
+    const isActive = button === active
+    button.classList.toggle('is-active', isActive)
+    button.setAttribute('aria-pressed', String(isActive))
+  })
+}
+
+modeButtons.forEach((button) => {
+  button.addEventListener('click', () => setPressed(modeButtons, button))
+})
+
+layoutButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    setPressed(layoutButtons, button)
+    workspace.dataset.layout = button.dataset.layout
+  })
+})

@@ -8,6 +8,11 @@ export interface SourceEditorOptions {
   onChange: (value: string) => void
 }
 
+export interface SourceEditorSnapshot {
+  cursorPosition: number
+  scrollTop: number
+}
+
 export function createSourceEditor({ parent, initialValue, onChange }: SourceEditorOptions): EditorView {
   const state = EditorState.create({
     doc: initialValue,
@@ -31,4 +36,17 @@ export function createSourceEditor({ parent, initialValue, onChange }: SourceEdi
   })
 
   return new EditorView({ state, parent })
+}
+
+export function getSourceEditorSnapshot(editor: EditorView): SourceEditorSnapshot {
+  return {
+    cursorPosition: editor.state.selection.main.head,
+    scrollTop: editor.scrollDOM.scrollTop,
+  }
+}
+
+export function restoreSourceEditorSnapshot(editor: EditorView, snapshot: SourceEditorSnapshot): void {
+  const position = Math.max(0, Math.min(snapshot.cursorPosition, editor.state.doc.length))
+  editor.dispatch({ selection: { anchor: position } })
+  editor.scrollDOM.scrollTop = Math.max(0, snapshot.scrollTop)
 }

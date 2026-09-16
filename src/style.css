@@ -58,6 +58,7 @@ h1 { font-size: 1.0625rem; font-weight: 650; line-height: 1.2; }
 .preview-content img { max-width: 100%; height: auto; }
 .preview-content input[type='checkbox'] { accent-color: var(--color-accent); }
 .preview-content img.is-broken::after { content: 'Image unavailable'; }
+.preview-content [data-source-start].is-active-source-block { border-radius: var(--radius-sm); background: var(--color-accent-soft); }
 .editor-placeholder pre { max-width: 65ch; margin: 0; white-space: pre-wrap; color: var(--color-ink-soft); font: 0.9375rem/1.7 var(--font-mono); }
 .cursor-line { position: absolute; top: 4.8rem; left: var(--space-5); width: 2px; height: 1.45rem; background: var(--color-accent); }
 .split-handle { display: grid; width: 0.7rem; place-items: center; border-inline: 1px solid var(--color-rule); background: var(--color-canvas); }

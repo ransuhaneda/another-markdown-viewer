@@ -1,0 +1,96 @@
+@media print {
+  @page {
+    margin: 18mm 16mm;
+    size: A4;
+  }
+
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    min-width: 0;
+    background: white;
+    color: #111417;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11pt;
+    line-height: 1.55;
+  }
+
+  .app-header,
+  .workspace-toolbar,
+  .pane-editor,
+  .split-handle,
+  .app-footer {
+    display: none !important;
+  }
+
+  .app-shell,
+  .workspace,
+  .document-region,
+  .pane-preview {
+    display: block;
+    min-height: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .preview-content {
+    display: block;
+    width: auto;
+    max-width: none;
+    height: auto;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .preview-content h1,
+  .preview-content h2,
+  .preview-content h3,
+  .preview-content h4,
+  .preview-content h5,
+  .preview-content h6 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .preview-content pre,
+  .preview-content figure,
+  .preview-content table,
+  .preview-content blockquote,
+  .preview-content img {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .preview-content pre {
+    overflow: visible;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border: 1px solid #d6dadd;
+    background: #f4f6f7;
+    color: #111417;
+  }
+
+  .preview-content a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .preview-content img {
+    max-width: 100%;
+  }
+
+  .preview-content table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .preview-content th,
+  .preview-content td {
+    border: 1px solid #b7bec3;
+    padding: 0.35rem 0.5rem;
+    text-align: left;
+  }
+}

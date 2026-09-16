@@ -67,7 +67,21 @@ function setStatus(message: string, failed = false): void {
 
 function updateCount(): void {
   const words = documentState.markdown.trim() ? documentState.markdown.trim().split(/\s+/u).length : 0
-  app.querySelector('[data-count]')!.textContent = `${words} ${words === 1 ? 'word' : 'words'}`
+  app.querySelector<HTMLElement>('[data-count]')!.textContent = `${words} ${words === 1 ? 'word' : 'words'}`
+}
+
+function isViewMode(value: string | undefined): value is ViewMode {
+  return value === 'live-preview' || value === 'source' || value === 'preview'
+}
+
+function isWorkspaceLayout(value: string | undefined): value is WorkspaceLayout {
+  return value === 'editor' || value === 'split' || value === 'preview'
+}
+
+function readSourceRange(element: HTMLElement): { start: number; end: number } | null {
+  const start = Number(element.dataset.sourceStart)
+  const end = Number(element.dataset.sourceEnd)
+  return Number.isFinite(start) && Number.isFinite(end) ? { start, end } : null
 }
 
 async function updatePreview(): Promise<void> {
@@ -128,9 +142,8 @@ function updateLivePreviewFocus(cursorPosition: number): void {
   const preview = app.querySelector<HTMLElement>('[data-preview]')!
   const block = findActiveBlock(documentState.markdown, cursorPosition)
   preview.querySelectorAll<HTMLElement>('[data-source-start]').forEach((element) => {
-    const start = Number(element.dataset.sourceStart)
-    const end = Number(element.dataset.sourceEnd)
-    element.classList.toggle('is-active-source-block', start <= block.range.end && end >= block.range.start)
+    const range = readSourceRange(element)
+    element.classList.toggle('is-active-source-block', range !== null && range.start <= block.range.end && range.end >= block.range.start)
   })
 }
 
@@ -151,9 +164,14 @@ const editor = createSourceEditor({
 })
 
 restoreSourceEditorSnapshot(editor, { cursorPosition: documentState.cursorPosition, scrollTop: documentState.editorScrollTop })
-app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => applyMode(button.dataset.mode as ViewMode)))
-app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => button.addEventListener('click', () => applyLayout(button.dataset.layout as WorkspaceLayout)))
-app.querySelector<HTMLElement>('[data-preview]')!.addEventListener('scroll', () => { documentState.previewScrollTop = app.querySelector<HTMLElement>('[data-preview]')!.scrollTop; scheduleRecovery() })
+app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => {
+  if (isViewMode(button.dataset.mode)) applyMode(button.dataset.mode)
+}))
+app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => button.addEventListener('click', () => {
+  if (isWorkspaceLayout(button.dataset.layout)) applyLayout(button.dataset.layout)
+}))
+const preview = app.querySelector<HTMLElement>('[data-preview]')!
+preview.addEventListener('scroll', () => { documentState.previewScrollTop = preview.scrollTop; scheduleRecovery() })
 
 function clearDraft(): void {
   editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: '' } })

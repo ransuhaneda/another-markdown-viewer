@@ -28,7 +28,7 @@ function sanitizeHtml(html: string): string {
 }
 
 function inertUnsafeDestinations(html: string): string {
-  return html.replace(/\s(href|src)=(['"])(.*?)\2/giu, (match, attribute: string, quote: string, value: string) => {
+  return html.replace(/\s(href|src)=(['"])(.*?)\2/giu, (_match, attribute: string, quote: string, value: string) => {
     const safeValue = sanitizeUrl(value)
     return safeValue ? ` ${attribute}=${quote}${safeValue}${quote}` : ''
   })
@@ -42,7 +42,7 @@ export async function renderMarkdown(source: string): Promise<string> {
 function addSourceRanges(html: string, source: string): string {
   const blocks = source.split('\n\n')
   let cursor = 0
-  return html.replace(/<(h[1-6]|p|blockquote|pre|ul|ol|table)([ >])/giu, (match, tag: string, suffix: string) => {
+  return html.replace(/<(h[1-6]|p|blockquote|pre|ul|ol|table)([ >])/giu, (_match, tag: string, suffix: string) => {
     const block = blocks.find((candidate) => source.indexOf(candidate, cursor) >= cursor) ?? ''
     const start = source.indexOf(block, cursor)
     const end = start + block.length

@@ -16,5 +16,6 @@
     "isolatedModules": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src", "tests", "vite.config.ts"]
+  "include": ["src", "tests", "vite.config.ts"],
+  "exclude": ["tests/browser"]
 }

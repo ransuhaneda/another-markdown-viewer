@@ -76,6 +76,7 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
   })
 
   const view = new EditorView({ state, parent })
+  parent.classList.add('editor-container--ready')
   view.contentDOM.addEventListener('mousedown', () => {
     view.dispatch({ effects: setMouseSelecting.of(true) })
   })

@@ -55,7 +55,11 @@ h1 { font-size: 1.0625rem; font-weight: 650; line-height: 1.2; }
 .document-region[data-layout='preview'] .pane-editor, .document-region[data-layout='preview'] .split-handle { display: none; }
 .pane-header { display: flex; align-items: center; min-height: var(--space-7); justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-rule); }
 .pane-label { color: var(--color-ink-soft); font-size: 0.8125rem; font-weight: 650; }
-.editor-container { height: calc(100% - var(--space-7)); }
+/* Keep CodeMirror's first paint on the app palette before its runtime theme mounts. */
+.editor-container, .cm-editor, .cm-editor .cm-scroller, .cm-editor .cm-content, .cm-editor .cm-line { color: var(--color-ink); background: transparent; font-family: var(--font-mono); }
+.cm-editor { height: 100%; }
+.cm-editor .cm-content { min-height: 100%; padding: var(--space-6); caret-color: var(--color-caret); }
+.editor-container { height: calc(100% - var(--space-7)); background: var(--color-surface); }
 .preview-content { max-width: 46rem; height: calc(100% - var(--space-7)); overflow: auto; padding: clamp(var(--space-3), 5vw, var(--space-5)); }
 .preview-content h1, .preview-content h2, .preview-content h3 { margin-block: var(--space-6) var(--space-4); text-wrap: balance; }
 .preview-content > :first-child { margin-top: 0; }

@@ -34,8 +34,8 @@ function inertUnsafeDestinations(html: string): string {
   })
 }
 
-export async function renderMarkdown(source: string): Promise<string> {
-  const html = await marked.parse(source, { gfm: true, breaks: false })
+export function renderMarkdown(source: string): string {
+  const html = marked.parse(source, { gfm: true, breaks: false, async: false })
   return sanitizeHtml(inertUnsafeDestinations(addSourceRanges(html, source)))
 }
 

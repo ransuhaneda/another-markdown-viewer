@@ -10,6 +10,12 @@ test('opens with an editable CodeMirror Live Preview editor', async ({ page }) =
   await expect(editor).toBeVisible()
   await expect(editor).toBeEditable()
   await expect(page.locator('[data-editor-label]')).toHaveText('Live Preview')
+  await expect(page.locator('[data-preview] h1')).toHaveText('Markdown Preview')
+})
+
+test('renders the initial document before the first edit', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.locator('[data-preview]')).toContainText('A calm place to inspect and export Markdown.')
 })
 
 test('uses accessible standard-size icons and a visible caret', async ({ page }) => {

@@ -206,9 +206,9 @@ function focusRenderedBlock(element: HTMLElement): void {
   editor.dispatch({ selection: { anchor: range.start } })
 }
 
-async function updatePreview(): Promise<void> {
+function updatePreview(): void {
   const preview = app.querySelector<HTMLElement>('[data-preview]')!
-  preview.innerHTML = await renderMarkdown(documentState.markdown)
+  preview.innerHTML = renderMarkdown(documentState.markdown)
   prepareRenderedLinks(preview)
   preview.scrollTop = documentState.previewScrollTop
 }

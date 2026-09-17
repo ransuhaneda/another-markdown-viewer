@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="A calm writing surface for inspecting and exporting Markdown." />
     <title>Markdown Preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-canvas: #111417;
+        --color-surface: #181c20;
+        --color-ink: #f1f4f5;
+        --space-6: 2rem;
+      }
+      html, body { min-width: 320px; min-height: 100%; margin: 0; background: var(--color-canvas); color: var(--color-ink); }
+      .editor-container { height: calc(100% - 4rem); background: var(--color-surface); color: var(--color-ink); }
+      .editor-container .cm-content { padding: 2rem; }
+    </style>
   </head>
   <body>
     <div id="app"></div>

@@ -29,6 +29,8 @@ h1 { font-size: 1.0625rem; font-weight: 650; line-height: 1.2; }
 .icon-button svg, .segment svg { width: var(--icon-size); height: var(--icon-size); pointer-events: none; }
 .icon-button:hover, .segment:hover { border-color: var(--color-rule); background: var(--color-accent-soft); color: var(--color-ink); }
 .icon-button:active, .segment:active { transform: scale(0.96); }
+.icon-button:disabled, .segment:disabled { cursor: not-allowed; opacity: 0.35; }
+.icon-button:disabled:hover, .segment:disabled:hover { border-color: transparent; background: transparent; color: var(--color-ink-muted); }
 .icon-button--primary { background: var(--color-accent); color: var(--color-on-accent); }
 .icon-button--primary:hover { border-color: var(--color-accent); color: var(--color-ink); }
 .icon-button--quiet { background: transparent; }

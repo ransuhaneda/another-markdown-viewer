@@ -1,6 +1,7 @@
 import { Compartment, EditorState } from '@codemirror/state'
-import { EditorView } from '@codemirror/view'
+import { EditorView, keymap } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
+import { history, historyKeymap, redo, redoDepth, undo, undoDepth } from '@codemirror/commands'
 import {
   collapseOnSelectionFacet,
   livePreviewPlugin,
@@ -37,6 +38,8 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
     doc: initialValue,
     extensions: [
       markdown(),
+      history(),
+      keymap.of(historyKeymap),
       livePreviewMode.of(livePreviewExtensions),
       EditorView.lineWrapping,
       EditorView.domEventHandlers({
@@ -90,6 +93,22 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
 
 export function setSourceEditorLivePreview(editor: EditorView, enabled: boolean): void {
   editor.dispatch({ effects: livePreviewMode.reconfigure(enabled ? livePreviewExtensions : []) })
+}
+
+export function undoSourceEditor(editor: EditorView): void {
+  undo(editor)
+}
+
+export function redoSourceEditor(editor: EditorView): void {
+  redo(editor)
+}
+
+export function canUndoSourceEditor(editor: EditorView): boolean {
+  return undoDepth(editor.state) > 0
+}
+
+export function canRedoSourceEditor(editor: EditorView): boolean {
+  return redoDepth(editor.state) > 0
 }
 
 export function getSourceEditorSnapshot(editor: EditorView): SourceEditorSnapshot {

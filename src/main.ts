@@ -1,7 +1,7 @@
 import './styles/tokens.css'
 import './style.css'
 import './styles/print.css'
-import { createSourceEditor, getSourceEditorSnapshot, restoreSourceEditorSnapshot, setSourceEditorLivePreview } from './editor/source-editor'
+import { canRedoSourceEditor, canUndoSourceEditor, createSourceEditor, getSourceEditorSnapshot, redoSourceEditor, restoreSourceEditorSnapshot, setSourceEditorLivePreview, undoSourceEditor } from './editor/source-editor'
 import { renderMarkdown, prepareRenderedLinks } from './markdown/render-markdown'
 import { clearRecovery, readRecovery, writeRecovery } from './persistence/recovery'
 import { createDocumentState, type DocumentState, type ViewMode, type WorkspaceLayout } from './state/document-state'
@@ -19,6 +19,8 @@ import {
   PanelRight,
   Save,
   Trash,
+  Undo2,
+  Redo2,
   X,
   type IconNode,
 } from 'lucide'
@@ -51,9 +53,9 @@ app.innerHTML = `
         <button class="icon-button icon-button--primary" data-action="pdf" type="button" aria-label="Download PDF" title="Download PDF"><i data-lucide="file-down"></i></button>
       </nav>
     </header>
-    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="Editor mode"><button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview"><i data-lucide="eye"></i></button><button class="segment" data-mode="source" type="button" aria-label="Source" title="Source"><i data-lucide="code"></i></button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button" aria-label="Editor only" title="Editor only"><i data-lucide="panel-left"></i></button><button class="segment" data-layout="split" type="button" aria-label="Split view" title="Split view"><i data-lucide="columns-2"></i></button><button class="segment" data-layout="preview" type="button" aria-label="Preview only" title="Preview only"><i data-lucide="panel-right"></i></button></div></div><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div></section>
+    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="Editor history"><button class="segment" data-action="undo" type="button" aria-label="Undo" title="Undo (Ctrl/Cmd+Z)" disabled><i data-lucide="undo-2"></i></button><button class="segment" data-action="redo" type="button" aria-label="Redo" title="Redo (Ctrl/Cmd+Shift+Z)" disabled><i data-lucide="redo-2"></i></button></div><div class="segmented-control" role="group" aria-label="Editor mode"><button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview"><i data-lucide="eye"></i></button><button class="segment" data-mode="source" type="button" aria-label="Source" title="Source"><i data-lucide="code"></i></button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button" aria-label="Editor only" title="Editor only"><i data-lucide="panel-left"></i></button><button class="segment" data-layout="split" type="button" aria-label="Split view" title="Split view"><i data-lucide="columns-2"></i></button><button class="segment" data-layout="preview" type="button" aria-label="Preview only" title="Preview only"><i data-lucide="panel-right"></i></button></div></div></section>
       <section class="document-region" data-layout="split" aria-label="Document panes"><article class="pane pane-editor" data-pane="editor" aria-label="Source editor"><div class="pane-header"><span class="pane-label" data-editor-label>Live Preview</span></div><div class="editor-container" data-editor></div></article><div class="split-handle" role="separator" aria-label="Resize editor and preview panes" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"><span aria-hidden="true"></span></div><article class="pane pane-preview" data-pane="preview" aria-label="Rendered preview"><div class="pane-header"><span class="pane-label">Rendered Preview</span></div><div class="preview-content" data-preview></div></article></section></main>
-    <footer class="app-footer"><div class="footer-actions"><button class="icon-button icon-button--quiet" data-action="help" type="button" aria-label="Markdown help" title="Markdown help" aria-haspopup="dialog" aria-controls="help-dialog"><i data-lucide="circle-help"></i></button><button class="icon-button icon-button--quiet" data-action="clear" type="button" aria-label="Clear draft" title="Clear draft"><i data-lucide="trash"></i></button></div></footer>
+    <footer class="app-footer"><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div><div class="footer-actions"><button class="icon-button icon-button--quiet" data-action="help" type="button" aria-label="Markdown help" title="Markdown help" aria-haspopup="dialog" aria-controls="help-dialog"><i data-lucide="circle-help"></i></button><button class="icon-button icon-button--quiet" data-action="clear" type="button" aria-label="Clear draft" title="Clear draft"><i data-lucide="trash"></i></button></div></footer>
     <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title"><form method="dialog" class="help-dialog__surface"><button class="help-dialog__close icon-button icon-button--quiet" value="cancel" aria-label="Close help" title="Close help"><i data-lucide="x"></i></button><h2 id="help-title">Markdown help</h2><section><h3>Syntax reference</h3><dl><dt><code># Heading</code></dt><dd>Creates a heading.</dd><dt><code>**bold**</code></dt><dd>Creates bold text.</dd><dt><code>[label](url)</code></dt><dd>Creates a link.</dd><dt><code>- item</code></dt><dd>Creates a list.</dd><dt><code>fenced code</code></dt><dd>Creates a code block.</dd></dl></section><section><h3>Keyboard shortcuts</h3><p><kbd>Escape</kbd> closes this help dialog. Use standard text-editing shortcuts in the editor.</p></section></form></dialog>
   </div>`
 
@@ -69,6 +71,8 @@ const icons: Record<string, IconNode> = {
   'panel-right': PanelRight,
   save: Save,
   trash: Trash,
+  'undo-2': Undo2,
+  'redo-2': Redo2,
   x: X,
 }
 
@@ -101,6 +105,8 @@ const status = app.querySelector<HTMLElement>('[data-status]')!
 const recoveryNote = app.querySelector<HTMLElement>('[data-recovery-note]')!
 const helpDialog = app.querySelector<HTMLDialogElement>('#help-dialog')!
 const helpTrigger = app.querySelector<HTMLButtonElement>('[data-action="help"]')!
+const undoButton = app.querySelector<HTMLButtonElement>('[data-action="undo"]')!
+const redoButton = app.querySelector<HTMLButtonElement>('[data-action="redo"]')!
 
 const MIN_PANE_WIDTH = 240
 
@@ -170,6 +176,11 @@ function setStatus(message: string, failed = false): void {
 function updateCount(): void {
   const words = documentState.markdown.trim() ? documentState.markdown.trim().split(/\s+/u).length : 0
   app.querySelector<HTMLElement>('[data-count]')!.textContent = `${words} ${words === 1 ? 'word' : 'words'}`
+}
+
+function updateHistoryButtons(): void {
+  undoButton.disabled = !canUndoSourceEditor(editor)
+  redoButton.disabled = !canRedoSourceEditor(editor)
 }
 
 function isViewMode(value: string | undefined): value is ViewMode {
@@ -271,6 +282,7 @@ const editor = createSourceEditor({
     updateCount()
     scheduleRecovery()
     void updatePreview()
+    updateHistoryButtons()
   },
   onSelectionChange: (position) => {
     documentState.cursorPosition = position
@@ -279,6 +291,8 @@ const editor = createSourceEditor({
 })
 
 restoreSourceEditorSnapshot(editor, { cursorPosition: documentState.cursorPosition, scrollTop: documentState.editorScrollTop })
+undoButton.addEventListener('click', () => { editor.focus(); undoSourceEditor(editor) })
+redoButton.addEventListener('click', () => { editor.focus(); redoSourceEditor(editor) })
 setSourceEditorLivePreview(editor, documentState.mode === 'live-preview')
 app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => {
   if (isViewMode(button.dataset.mode)) {
@@ -333,5 +347,6 @@ app.querySelector<HTMLButtonElement>('[data-action="pdf"]')!.addEventListener('c
 updateCount()
 updateModeButtons()
 updateLayoutButtons()
+updateHistoryButtons()
 if (recovered) setStatus('Draft restored locally')
 void updatePreview()

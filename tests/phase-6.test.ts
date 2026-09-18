@@ -12,8 +12,9 @@ describe('phase 6 PDF export', () => {
   })
 
   it('keeps the PDF action on the browser print flow', () => {
-    const source = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8')
-    expect(source).toContain("data-action=\"pdf\"")
-    expect(source).toContain('window.print()')
+    const shell = readFileSync(new URL('../src/components/app-shell.ts', import.meta.url), 'utf8')
+    const application = readFileSync(new URL('../src/app/markdown-app.ts', import.meta.url), 'utf8')
+    expect(shell).toContain("data-action=\"pdf\"")
+    expect(application).toContain('window.print()')
   })
 })

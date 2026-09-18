@@ -1,0 +1,22 @@
+.preview-content { max-width: 46rem; height: calc(100% - var(--space-7)); overflow: auto; padding: clamp(var(--space-3), 5vw, var(--space-5)); font-size: var(--document-body-size); line-height: var(--document-body-leading); }
+.preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 { margin-block: var(--space-6) var(--space-4); font-weight: var(--document-heading-weight); line-height: 1.15; text-wrap: balance; }
+.preview-content h1 { font-size: var(--document-heading-1-size); letter-spacing: -0.02em; }
+.preview-content h2 { font-size: var(--document-heading-2-size); letter-spacing: -0.015em; }
+.preview-content h3 { font-size: var(--document-heading-3-size); }
+.preview-content h4 { font-size: var(--document-heading-4-size); }
+.preview-content h5 { font-size: var(--document-heading-5-size); }
+.preview-content h6 { font-size: var(--document-heading-6-size); }
+.preview-content > :first-child { margin-top: 0; }
+.preview-content p, .preview-content ul, .preview-content ol, .preview-content blockquote, .preview-content pre, .preview-content table, .preview-content figure { margin-block: 0 var(--space-5); }
+.preview-content a { color: var(--color-accent); }
+.preview-content code, .preview-content pre { font-family: var(--font-mono); }
+.preview-content pre { overflow-x: auto; padding: var(--space-4); border-radius: var(--radius-sm); background: var(--color-raised); }
+.preview-content blockquote { border-inline-start: 3px solid var(--color-accent); padding-inline-start: var(--space-4); color: var(--color-ink-soft); }
+.preview-content img { max-width: 100%; height: auto; }
+.preview-content input[type='checkbox'] { accent-color: var(--color-accent); }
+.preview-content img.is-broken::after { content: 'Image unavailable'; }
+.preview-content [data-source-start].is-active-source-block { border-radius: var(--radius-sm); background: var(--color-accent-soft); }
+.preview-placeholder { max-width: 42rem; padding: clamp(var(--space-5), 5vw, var(--space-7)); }
+.preview-kicker { margin-bottom: var(--space-3); color: var(--color-accent); font: 0.75rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; }
+.preview-placeholder h2 { max-width: 18ch; margin-bottom: var(--space-4); font-size: clamp(1.75rem, 4vw, 2.5rem); line-height: 1.15; letter-spacing: -0.02em; }
+.preview-placeholder > p:last-child { max-width: 48ch; color: var(--color-ink-soft); }

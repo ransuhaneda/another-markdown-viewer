@@ -2,25 +2,27 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { DEFAULT_MARKDOWN } from '../src/default-markdown'
 
-const source = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8')
-const styles = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8')
+const shell = readFileSync(new URL('../src/components/app-shell.ts', import.meta.url), 'utf8')
+const application = readFileSync(new URL('../src/app/markdown-app.ts', import.meta.url), 'utf8')
+const workspaceStyles = readFileSync(new URL('../src/styles/workspace.css', import.meta.url), 'utf8')
+const responsiveStyles = readFileSync(new URL('../src/styles/responsive.css', import.meta.url), 'utf8')
 
 describe('phase 1 application shell', () => {
   it('exposes the product flow and semantic workspace regions', () => {
-    expect(source).toContain('Markdown Preview')
-    expect(source).toContain('aria-label="Markdown editor"')
-    expect(source).toContain('aria-label="Rendered view"')
-    expect(source).toContain('aria-label="Workspace controls"')
+    expect(shell).toContain('Markdown Preview')
+    expect(shell).toContain('aria-label="Markdown editor"')
+    expect(shell).toContain('aria-label="Rendered view"')
+    expect(shell).toContain('aria-label="Workspace controls"')
   })
 
   it('supports single-pane layouts and narrow-screen behavior', () => {
-    expect(styles).toContain("data-layout='editor'")
-    expect(styles).toContain("data-layout='preview'")
-    expect(styles).toContain('@media (max-width: 760px)')
+    expect(workspaceStyles).toContain("data-layout='editor'")
+    expect(workspaceStyles).toContain("data-layout='preview'")
+    expect(responsiveStyles).toContain('@media (max-width: 760px)')
   })
 
   it('uses the GFM showcase as the first-load document', () => {
-    expect(source).toContain('createDocumentState(DEFAULT_MARKDOWN, recovered ?? undefined)')
+    expect(application).toContain('createDocumentState(DEFAULT_MARKDOWN, recovered ?? undefined)')
     expect(DEFAULT_MARKDOWN).toContain('# Common Markdown + GitHub-Flavored Markdown')
     expect(DEFAULT_MARKDOWN).toContain('```javascript')
     expect(DEFAULT_MARKDOWN).toContain('| :--- | :---: | ---: |')

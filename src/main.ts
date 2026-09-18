@@ -1,6 +1,7 @@
 import './styles/tokens.css'
 import './style.css'
 import './styles/print.css'
+import { DEFAULT_MARKDOWN } from './default-markdown'
 import { canRedoSourceEditor, canUndoSourceEditor, createSourceEditor, getSourceEditorSnapshot, redoSourceEditor, restoreSourceEditorSnapshot, setSourceEditorLivePreview, undoSourceEditor } from './editor/source-editor'
 import { renderMarkdown, prepareRenderedLinks } from './markdown/render-markdown'
 import { clearRecovery, readRecovery, writeRecovery } from './persistence/recovery'
@@ -37,7 +38,7 @@ A calm place to inspect and export Markdown.
 `
 
 const recovered = readRecovery()
-let documentState: DocumentState = createDocumentState(welcomeMarkdown, recovered ?? undefined)
+let documentState: DocumentState = createDocumentState(DEFAULT_MARKDOWN, recovered ?? undefined)
 let recoveryTimer: number | undefined
 
 const app = document.querySelector<HTMLDivElement>('#app')!

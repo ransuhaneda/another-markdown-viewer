@@ -8,8 +8,8 @@ const styles = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8'
 describe('phase 1 application shell', () => {
   it('exposes the product flow and semantic workspace regions', () => {
     expect(source).toContain('Markdown Preview')
-    expect(source).toContain('aria-label="Source editor"')
-    expect(source).toContain('aria-label="Rendered preview"')
+    expect(source).toContain('aria-label="Markdown editor"')
+    expect(source).toContain('aria-label="Rendered view"')
     expect(source).toContain('aria-label="Workspace controls"')
   })
 

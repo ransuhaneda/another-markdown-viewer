@@ -22,8 +22,11 @@ This file records decisions settled during the project discovery interview. Impl
 - When a selection spans formatted regions, the relevant Markdown syntax should become visible so the selected content remains predictable to edit.
 - If reliable Live Preview cursor mapping cannot be achieved, the safe fallback is Source plus Preview rather than a fragile approximation.
 - Plain/source editing remains available for users who need to see the actual Markdown.
-- Planned editor modes: Live Preview and Source.
-- Planned layouts: editor-only, preview-only, and split view.
+- Editor modes are Live and Source.
+- Live shows formatted Markdown in the editable pane. Source shows raw Markdown.
+- Rendered View is a pane, not an editor mode.
+- Pane layouts are editor-only, rendered-view-only, and split view.
+- Both editor modes support split view. The rendered pane stays visible when Source is active.
 - On small screens, show one pane at a time with a clear editor/preview toggle.
 - The initial keyboard scope is standard text editing only; no command palette or custom shortcut system in v1.
 

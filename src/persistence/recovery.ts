@@ -9,8 +9,11 @@ export function readRecovery(storage: Storage = localStorage): RecoveryState | n
     const value = storage.getItem(RECOVERY_KEY)
     if (!value) return null
     const parsed: unknown = JSON.parse(value)
-    if (!isRecoveryState(parsed)) return null
-    return parsed
+    if (!isStoredRecoveryState(parsed)) return null
+    return {
+      ...parsed,
+      mode: parsed.mode === 'preview' ? 'live-preview' : parsed.mode,
+    }
   } catch {
     return null
   }
@@ -33,11 +36,13 @@ export function clearRecovery(storage: Storage = localStorage): void {
   }
 }
 
-function isRecoveryState(value: unknown): value is RecoveryState {
+type StoredRecoveryState = Omit<RecoveryState, 'mode'> & { mode: ViewMode | 'preview' }
+
+function isStoredRecoveryState(value: unknown): value is StoredRecoveryState {
   if (!value || typeof value !== 'object') return false
-  const candidate = value as Partial<RecoveryState>
+  const candidate = value as Partial<StoredRecoveryState>
   return typeof candidate.markdown === 'string'
-    && isViewMode(candidate.mode)
+    && isStoredViewMode(candidate.mode)
     && isWorkspaceLayout(candidate.layout)
     && isNonNegativeInteger(candidate.cursorPosition)
     && isNonNegativeNumber(candidate.editorScrollTop)
@@ -45,7 +50,7 @@ function isRecoveryState(value: unknown): value is RecoveryState {
     && typeof candidate.updatedAt === 'number'
 }
 
-function isViewMode(value: unknown): value is ViewMode {
+function isStoredViewMode(value: unknown): value is StoredRecoveryState['mode'] {
   return value === 'live-preview' || value === 'source' || value === 'preview'
 }
 

@@ -26,19 +26,9 @@ import {
   type IconNode,
 } from 'lucide'
 
-const welcomeMarkdown = `# Markdown Preview
-
-A calm place to inspect and export Markdown.
-
-- Paste Markdown into the source pane.
-- Keep the raw document as your source of truth.
-- Use Live Preview to inspect the rendered result.
-
-> Phase 3 adds explicit document state, layouts, and complete recovery metadata.
-`
-
 const recovered = readRecovery()
 let documentState: DocumentState = createDocumentState(DEFAULT_MARKDOWN, recovered ?? undefined)
+if (recovered) documentState.mode = 'live-preview'
 let recoveryTimer: number | undefined
 
 const app = document.querySelector<HTMLDivElement>('#app')!
@@ -54,8 +44,8 @@ app.innerHTML = `
         <button class="icon-button icon-button--primary" data-action="pdf" type="button" aria-label="Download PDF" title="Download PDF"><i data-lucide="file-down"></i></button>
       </nav>
     </header>
-    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="Editor history"><button class="segment" data-action="undo" type="button" aria-label="Undo" title="Undo (Ctrl/Cmd+Z)" disabled><i data-lucide="undo-2"></i></button><button class="segment" data-action="redo" type="button" aria-label="Redo" title="Redo (Ctrl/Cmd+Shift+Z)" disabled><i data-lucide="redo-2"></i></button></div><div class="segmented-control" role="group" aria-label="Editor mode"><button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview"><i data-lucide="eye"></i></button><button class="segment" data-mode="source" type="button" aria-label="Source" title="Source"><i data-lucide="code"></i></button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button" aria-label="Editor only" title="Editor only"><i data-lucide="panel-left"></i></button><button class="segment" data-layout="split" type="button" aria-label="Split view" title="Split view"><i data-lucide="columns-2"></i></button><button class="segment" data-layout="preview" type="button" aria-label="Preview only" title="Preview only"><i data-lucide="panel-right"></i></button></div></div></section>
-      <section class="document-region" data-layout="split" aria-label="Document panes"><article class="pane pane-editor" data-pane="editor" aria-label="Source editor"><div class="pane-header"><span class="pane-label" data-editor-label>Live Preview</span></div><div class="editor-container" data-editor></div></article><div class="split-handle" role="separator" aria-label="Resize editor and preview panes" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"><span aria-hidden="true"></span></div><article class="pane pane-preview" data-pane="preview" aria-label="Rendered preview"><div class="pane-header"><span class="pane-label">Rendered Preview</span></div><div class="preview-content" data-preview></div></article></section></main>
+    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="Editor history"><button class="segment" data-action="undo" type="button" aria-label="Undo" title="Undo (Ctrl/Cmd+Z)" disabled><i data-lucide="undo-2"></i></button><button class="segment" data-action="redo" type="button" aria-label="Redo" title="Redo (Ctrl/Cmd+Shift+Z)" disabled><i data-lucide="redo-2"></i></button></div><div class="segmented-control" role="group" aria-label="Editor mode"><button class="segment" data-mode="live-preview" type="button" aria-label="Live" title="Live"><i data-lucide="eye"></i></button><button class="segment" data-mode="source" type="button" aria-label="Source" title="Source"><i data-lucide="code"></i></button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button" aria-label="Editor only" title="Editor only"><i data-lucide="panel-left"></i></button><button class="segment" data-layout="split" type="button" aria-label="Split view" title="Split view"><i data-lucide="columns-2"></i></button><button class="segment" data-layout="preview" type="button" aria-label="Rendered view only" title="Rendered view only"><i data-lucide="panel-right"></i></button></div></div></section>
+      <section class="document-region" data-layout="split" aria-label="Document panes"><article class="pane pane-editor" data-pane="editor" aria-label="Markdown editor"><div class="pane-header"><span class="pane-label" data-editor-label>Live</span></div><div class="editor-container" data-editor></div></article><div class="split-handle" role="separator" aria-label="Resize editor and rendered view panes" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"><span aria-hidden="true"></span></div><article class="pane pane-preview" data-pane="preview" aria-label="Rendered view"><div class="pane-header"><span class="pane-label">Rendered View</span></div><div class="preview-content" data-preview></div></article></section></main>
     <footer class="app-footer"><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div><div class="footer-actions"><button class="icon-button icon-button--quiet" data-action="help" type="button" aria-label="Markdown help" title="Markdown help" aria-haspopup="dialog" aria-controls="help-dialog"><i data-lucide="circle-help"></i></button><button class="icon-button icon-button--quiet" data-action="clear" type="button" aria-label="Clear draft" title="Clear draft"><i data-lucide="trash"></i></button></div></footer>
     <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title"><form method="dialog" class="help-dialog__surface"><button class="help-dialog__close icon-button icon-button--quiet" value="cancel" aria-label="Close help" title="Close help"><i data-lucide="x"></i></button><h2 id="help-title">Markdown help</h2><section><h3>Syntax reference</h3><dl><dt><code># Heading</code></dt><dd>Creates a heading.</dd><dt><code>**bold**</code></dt><dd>Creates bold text.</dd><dt><code>[label](url)</code></dt><dd>Creates a link.</dd><dt><code>- item</code></dt><dd>Creates a list.</dd><dt><code>fenced code</code></dt><dd>Creates a code block.</dd></dl></section><section><h3>Keyboard shortcuts</h3><p><kbd>Escape</kbd> closes this help dialog. Use standard text-editing shortcuts in the editor.</p></section></form></dialog>
   </div>`
@@ -103,7 +93,6 @@ app.querySelectorAll<HTMLElement>('[data-lucide]').forEach((placeholder) => {
 const workspace = app.querySelector<HTMLElement>('.document-region')!
 const splitHandle = app.querySelector<HTMLElement>('.split-handle')!
 const status = app.querySelector<HTMLElement>('[data-status]')!
-const recoveryNote = app.querySelector<HTMLElement>('[data-recovery-note]')!
 const helpDialog = app.querySelector<HTMLDialogElement>('#help-dialog')!
 const helpTrigger = app.querySelector<HTMLButtonElement>('[data-action="help"]')!
 const undoButton = app.querySelector<HTMLButtonElement>('[data-action="undo"]')!
@@ -171,7 +160,6 @@ helpDialog.addEventListener('keydown', trapHelpFocus)
 function setStatus(message: string, failed = false): void {
   status.textContent = message
   status.classList.toggle('status-warning', failed)
-  recoveryNote.textContent = failed ? 'Local recovery is unavailable. Your draft remains in memory.' : 'Local recovery protects your latest draft.'
 }
 
 function updateCount(): void {
@@ -185,7 +173,7 @@ function updateHistoryButtons(): void {
 }
 
 function isViewMode(value: string | undefined): value is ViewMode {
-  return value === 'live-preview' || value === 'source' || value === 'preview'
+  return value === 'live-preview' || value === 'source'
 }
 
 function isWorkspaceLayout(value: string | undefined): value is WorkspaceLayout {
@@ -222,6 +210,12 @@ function updateModeButtons(): void {
   })
 }
 
+function updateEditorModePresentation(): void {
+  setSourceEditorLivePreview(editor, documentState.mode === 'live-preview')
+  app.querySelector<HTMLElement>('[data-editor-label]')!.textContent = documentState.mode === 'live-preview' ? 'Live' : 'Source'
+  updateModeButtons()
+}
+
 function updateLayoutButtons(): void {
   workspace.dataset.layout = documentState.layout
   app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => {
@@ -249,13 +243,7 @@ function captureViewState(): void {
 
 function applyMode(mode: ViewMode): void {
   documentState.mode = mode
-  if (mode !== 'preview' && documentState.layout === 'preview') documentState.layout = 'split'
-  app.querySelector<HTMLElement>('[data-pane="editor"]')!.classList.toggle('is-hidden', mode === 'preview')
-  app.querySelector<HTMLElement>('[data-pane="preview"]')!.classList.toggle('is-hidden', mode === 'source')
-  setSourceEditorLivePreview(editor, mode === 'live-preview')
-  app.querySelector<HTMLElement>('[data-editor-label]')!.textContent = mode === 'live-preview' ? 'Live Preview' : 'Source'
-  app.querySelector<HTMLElement>('[data-editor-hint]')!.textContent = mode === 'live-preview' ? 'Click and type to edit' : 'Raw Markdown'
-  updateModeButtons()
+  updateEditorModePresentation()
   scheduleRecovery()
 }
 
@@ -294,7 +282,7 @@ const editor = createSourceEditor({
 restoreSourceEditorSnapshot(editor, { cursorPosition: documentState.cursorPosition, scrollTop: documentState.editorScrollTop })
 undoButton.addEventListener('click', () => { editor.focus(); undoSourceEditor(editor) })
 redoButton.addEventListener('click', () => { editor.focus(); redoSourceEditor(editor) })
-setSourceEditorLivePreview(editor, documentState.mode === 'live-preview')
+updateEditorModePresentation()
 app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => {
   if (isViewMode(button.dataset.mode)) {
     applyMode(button.dataset.mode)
@@ -346,7 +334,6 @@ app.querySelector<HTMLButtonElement>('[data-action="pdf"]')!.addEventListener('c
   window.setTimeout(() => window.print(), 0)
 })
 updateCount()
-updateModeButtons()
 updateLayoutButtons()
 updateHistoryButtons()
 if (recovered) setStatus('Draft restored locally')

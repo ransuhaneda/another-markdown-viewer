@@ -1,4 +1,4 @@
-export type ViewMode = 'live-preview' | 'source' | 'preview'
+export type ViewMode = 'live-preview' | 'source'
 export type WorkspaceLayout = 'editor' | 'split' | 'preview'
 
 export interface DocumentState {
@@ -16,7 +16,7 @@ export const DEFAULT_LAYOUT: WorkspaceLayout = 'split'
 export function createDocumentState(markdown: string, recovered?: Partial<DocumentState>): DocumentState {
   return {
     markdown,
-    mode: recovered?.mode ?? 'live-preview',
+    mode: recovered?.mode ?? 'source',
     layout: recovered?.layout ?? DEFAULT_LAYOUT,
     cursorPosition: recovered?.cursorPosition ?? 0,
     editorScrollTop: recovered?.editorScrollTop ?? 0,

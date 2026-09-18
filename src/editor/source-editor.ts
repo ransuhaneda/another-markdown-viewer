@@ -1,13 +1,11 @@
-import { Compartment, EditorState } from '@codemirror/state'
-import { EditorView, keymap } from '@codemirror/view'
+import { Compartment, EditorState, type Extension } from '@codemirror/state'
+import { EditorView, highlightActiveLine, keymap } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { history, historyKeymap, redo, redoDepth, undo, undoDepth } from '@codemirror/commands'
 import {
   collapseOnSelectionFacet,
   livePreviewPlugin,
   markdownStylePlugin,
-  mouseSelectingField,
-  setMouseSelecting,
 } from 'codemirror-live-markdown'
 import { convertPastedContent } from '../markdown/paste-markdown'
 
@@ -28,10 +26,49 @@ const livePreviewMode = new Compartment()
 
 const livePreviewExtensions = [
   collapseOnSelectionFacet.of(true),
-  mouseSelectingField,
   livePreviewPlugin,
   markdownStylePlugin,
 ]
+
+function configureLivePreview(editor: EditorView, enabled: boolean): void {
+  editor.dom.classList.toggle('cm-live-preview', enabled)
+  editor.dom.classList.toggle('cm-source', !enabled)
+  editor.dispatch({ effects: livePreviewMode.reconfigure(enabled ? livePreviewExtensions : []) })
+}
+
+function createEditorTheme(): Extension {
+  return EditorView.theme({
+    '&': { height: '100%', backgroundColor: 'transparent', color: 'var(--color-ink)' },
+    '.cm-scroller': { overflow: 'auto', fontFamily: 'var(--font-body)' },
+    '.cm-content': { minHeight: '100%', padding: 'var(--space-6)', caretColor: 'var(--color-caret)', fontFamily: 'var(--font-body)', fontSize: 'var(--document-body-size)', lineHeight: 'var(--document-body-leading)' },
+    '.cm-gutters': { display: 'none' },
+    '.cm-line': { padding: '0' },
+    '.cm-focused': { outline: 'none' },
+    '&.cm-focused .cm-cursor': { borderLeft: '2px solid var(--color-caret)' },
+    '.cm-selectionBackground, ::selection': { backgroundColor: 'var(--color-accent-soft)' },
+    '.cm-active-line': { backgroundColor: 'var(--color-accent-soft)' },
+    '.cm-formatting-inline': { display: 'inline-flex', maxWidth: '0', overflow: 'hidden', whiteSpace: 'nowrap', verticalAlign: 'baseline', opacity: '0', color: 'var(--color-ink-muted)', fontSize: '0.85em', pointerEvents: 'none' },
+    '.cm-formatting-inline-visible': { maxWidth: '4ch', margin: '0 1px', opacity: '1', pointerEvents: 'auto' },
+    '.cm-formatting-block': { display: 'inline', fontSize: '0.01em', lineHeight: 'inherit', opacity: '0', color: 'var(--color-ink-muted)' },
+    '.cm-formatting-block-visible': { fontSize: '1em', opacity: '0.6' },
+    '.cm-header-1': { display: 'inline', fontSize: 'var(--document-heading-1-size)', fontWeight: 'var(--document-heading-weight)', lineHeight: '1.15', letterSpacing: '-0.02em' },
+    '.cm-header-2': { display: 'inline', fontSize: 'var(--document-heading-2-size)', fontWeight: 'var(--document-heading-weight)', lineHeight: '1.15', letterSpacing: '-0.015em' },
+    '.cm-header-3': { display: 'inline', fontSize: 'var(--document-heading-3-size)', fontWeight: 'var(--document-heading-weight)', lineHeight: '1.15' },
+    '.cm-header-4': { display: 'inline', fontSize: 'var(--document-heading-4-size)', fontWeight: 'var(--document-heading-weight)', lineHeight: '1.15' },
+    '.cm-header-5': { display: 'inline', fontSize: 'var(--document-heading-5-size)', fontWeight: 'var(--document-heading-weight)', lineHeight: '1.15' },
+    '.cm-header-6': { display: 'inline', fontSize: 'var(--document-heading-6-size)', fontWeight: 'var(--document-heading-weight)', lineHeight: '1.15' },
+    '.cm-strong': { fontWeight: '700' },
+    '.cm-emphasis': { fontStyle: 'italic' },
+    '.cm-strikethrough': { textDecoration: 'line-through' },
+    '.cm-code': { padding: '0 var(--space-1)', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--color-raised)', fontFamily: 'var(--font-mono)' },
+    '.cm-link': { color: 'var(--color-accent)', textDecoration: 'underline', textDecorationThickness: '0.08em', textUnderlineOffset: '0.15em' },
+    '.ͼ1, .cm-header': { fontWeight: '650' },
+    '.ͼ2': { fontWeight: '700' },
+    '.ͼ3': { fontStyle: 'italic' },
+    '.ͼ4': { textDecoration: 'line-through' },
+    '.ͼ5': { padding: '0 var(--space-1)', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--color-raised)' },
+  })
+}
 
 export function createSourceEditor({ parent, initialValue, onChange, onSelectionChange }: SourceEditorOptions): EditorView {
   const state = EditorState.create({
@@ -40,9 +77,19 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
       markdown(),
       history(),
       keymap.of(historyKeymap),
+      highlightActiveLine(),
       livePreviewMode.of(livePreviewExtensions),
       EditorView.lineWrapping,
       EditorView.domEventHandlers({
+        mousedown: (event, view) => {
+          const target = event.target
+          if (!(target instanceof HTMLElement) || !target.classList.contains('cm-line')) return false
+          event.preventDefault()
+          const position = view.posAtDOM(target, target.childNodes.length)
+          view.focus()
+          view.dispatch({ selection: { anchor: position } })
+          return true
+        },
         paste: (event, view) => {
           const clipboard = event.clipboardData
           if (!clipboard) return false
@@ -55,45 +102,19 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
       }),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) onChange(update.state.doc.toString())
-        if (update.selectionSet && !update.docChanged) onSelectionChange?.(update.state.selection.main.head)
+        if (update.selectionSet || update.docChanged) onSelectionChange?.(update.state.selection.main.head)
       }),
-      EditorView.theme({
-        '&': { height: '100%', backgroundColor: 'transparent', color: 'var(--color-ink)' },
-        '.cm-scroller': { overflow: 'auto', fontFamily: 'var(--font-mono)' },
-        '.cm-content': { minHeight: '100%', padding: 'var(--space-6)', caretColor: 'var(--color-caret)' },
-        '.cm-gutters': { display: 'none' },
-        '.cm-line': { padding: '0' },
-        '.cm-focused': { outline: 'none' },
-        '&.cm-focused .cm-cursor': { borderLeft: '2px solid var(--color-caret)' },
-        '.cm-selectionBackground, ::selection': { backgroundColor: 'var(--color-accent-soft)' },
-        '.ͼ1, .cm-header': { fontWeight: '650' },
-        '.ͼ2': { fontWeight: '700' },
-        '.ͼ3': { fontStyle: 'italic' },
-        '.ͼ4': { textDecoration: 'line-through' },
-        '.ͼ5': { padding: '0 var(--space-1)', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--color-raised)' },
-      }),
+      createEditorTheme(),
     ],
   })
 
   const view = new EditorView({ state, parent })
   parent.classList.add('editor-container--ready')
-  view.contentDOM.addEventListener('mousedown', () => {
-    view.dispatch({ effects: setMouseSelecting.of(true) })
-  })
-  const handleMouseUp = (): void => {
-    window.requestAnimationFrame(() => view.dispatch({ effects: setMouseSelecting.of(false) }))
-  }
-  document.addEventListener('mouseup', handleMouseUp)
-  const originalDestroy = view.destroy.bind(view)
-  view.destroy = (): void => {
-    document.removeEventListener('mouseup', handleMouseUp)
-    originalDestroy()
-  }
   return view
 }
 
 export function setSourceEditorLivePreview(editor: EditorView, enabled: boolean): void {
-  editor.dispatch({ effects: livePreviewMode.reconfigure(enabled ? livePreviewExtensions : []) })
+  configureLivePreview(editor, enabled)
 }
 
 export function undoSourceEditor(editor: EditorView): void {

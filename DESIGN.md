@@ -186,7 +186,9 @@ Use only standard icon sizes: 16px, 24px, or 32px.
 
 ### Mode and layout controls
 
-Expose Live Preview, Source, Preview, and Split behavior through clear controls.
+Expose Live and Source as editor modes.
+Expose editor-only, rendered-view-only, and split behavior as pane layouts.
+Keep Rendered View visible in split layout for both editor modes.
 Use text labels where an icon could be unclear.
 Show the active state with accent color, a visible boundary, and an accessible state.
 Use consistent spacing tokens between control groups.

@@ -39,3 +39,9 @@ Do not implement an item without an explicit product decision.
 - A dedicated PDF generation path if browser print styles cannot meet the quality contract.
 - Installable offline PWA behavior.
 - Additional browser and mobile verification tooling.
+- MD-Files came from obsidian, wich has a lot of yaml-Information in the header.
+- use highlight.js or a more broad syntax highlighting
+- support YAML frontmatter (from obsidian)
+- Render mermaid diagrams (flowchart, sequence, gantt, ...) from mermaid fenced code blocks
+- https://github.com/ezyuzin/NppAnotherMarkdown
+- https://medium.com/@LeeAbner/introduce-typora-why-another-markdown-editor-c86e679828d5

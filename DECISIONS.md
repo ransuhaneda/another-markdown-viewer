@@ -28,6 +28,7 @@ This file records decisions settled during the project discovery interview. Impl
 - Pane layouts are editor-only, rendered-view-only, and split view.
 - Both editor modes support split view. The rendered pane stays visible when Source is active.
 - On small screens, show one pane at a time with a clear editor/preview toggle.
+- Keep the application frame fixed for long documents. The editor and Rendered View scroll independently.
 - The initial keyboard scope is standard text editing only; no command palette or custom shortcut system in v1.
 
 ## Markdown support
@@ -84,6 +85,7 @@ This file records decisions settled during the project discovery interview. Impl
 - The document canvas is dark, calm, and developer-tool oriented.
 - The surrounding application controls are restrained and functional.
 - Priorities: calm focus, developer-tool clarity, minimal chrome, excellent typography, Obsidian-like editing behavior, dark document canvas, accessibility, responsive behavior, and image-rich Markdown rendering.
+- Pane scrollbars use the accent color and stay narrow so they do not obscure document content.
 - Motion is subtle and limited to pane, panel, and mode transitions; it must respect reduced-motion preferences and never delay writing or cursor movement.
 - V1 UI includes: product name, new/clear document, open file, save/download, PDF export, mode/layout toggle, split-pane resize handle, word/character count, recovery status, keyboard-shortcut help, and Markdown syntax help.
 - Help is limited to the Markdown syntax reference and keyboard shortcuts.

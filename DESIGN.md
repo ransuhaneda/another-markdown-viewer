@@ -199,6 +199,9 @@ Use CodeMirror for source and editor behavior.
 Keep the editing surface visually quiet.
 Reveal Markdown syntax for the active Live Preview block.
 Do not add decorative editor chrome.
+Keep the editor and rendered document on independent scroll surfaces.
+Use narrow accent scrollbars with transparent tracks.
+Do not let long documents scroll the application frame.
 
 ### Rendered Markdown
 

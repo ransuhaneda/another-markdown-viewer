@@ -1,4 +1,9 @@
-.preview-content { max-width: 46rem; height: calc(100% - var(--space-7)); overflow: auto; padding: clamp(var(--space-3), 5vw, var(--space-5)); font-size: var(--document-body-size); line-height: var(--document-body-leading); }
+.preview-content { width: 100%; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: clamp(var(--space-3), 5vw, var(--space-5)); font-size: var(--document-body-size); line-height: var(--document-body-leading); scrollbar-color: var(--color-accent) transparent; scrollbar-width: thin; }
+.preview-content > * { max-width: 46rem; }
+.preview-content::-webkit-scrollbar { width: var(--scrollbar-size); height: var(--scrollbar-size); }
+.preview-content::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+.preview-content::-webkit-scrollbar-track { background: transparent; }
+.preview-content::-webkit-scrollbar-thumb { border-radius: var(--radius-sm); background: var(--color-accent); }
 .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 { margin-block: var(--space-6) var(--space-4); font-weight: var(--document-heading-weight); line-height: 1.15; text-wrap: balance; }
 .preview-content h1 { font-size: var(--document-heading-1-size); letter-spacing: -0.02em; }
 .preview-content h2 { font-size: var(--document-heading-2-size); letter-spacing: -0.015em; }

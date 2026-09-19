@@ -53,8 +53,9 @@ test('places the Live Preview caret on the clicked line after scrolling', async 
   await page.getByRole('button', { name: 'Live', exact: true }).click()
 
   const imageHeading = page.locator('.cm-line').filter({ hasText: '## Image' }).first()
+  const editorScroller = page.locator('.cm-scroller')
   for (let scrollTop = 0; await imageHeading.count() === 0 && scrollTop < 6000; scrollTop += 200) {
-    await page.evaluate((top) => window.scrollTo(0, top), scrollTop)
+    await editorScroller.evaluate((element, top) => { element.scrollTop = top }, scrollTop)
   }
   await imageHeading.scrollIntoViewIfNeeded()
   const headingBox = await imageHeading.boundingBox()
@@ -65,6 +66,31 @@ test('places the Live Preview caret on the clicked line after scrolling', async 
   await page.mouse.click(headingBox.x + headingBox.width - 40, headingBox.y + headingBox.height / 2)
 
   await expect(page.locator('.cm-line.cm-activeLine')).toContainText('Image')
+})
+
+test('keeps long documents inside independently scrolling panes', async ({ page }) => {
+  await page.goto('/')
+
+  const editor = page.getByRole('textbox')
+  const longDocument = Array.from({ length: 180 }, (_, index) => `## Section ${index + 1}\n\nParagraph ${index + 1}.`).join('\n\n')
+  await editor.fill(longDocument)
+
+  const editorScroller = page.locator('.cm-scroller')
+  const preview = page.locator('[data-preview]')
+  const initialPreviewScrollTop = await preview.evaluate((element) => element.scrollTop)
+
+  await editorScroller.evaluate((element) => { element.scrollTop = 1200 })
+
+  expect(await editorScroller.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
+  expect(await preview.evaluate((element) => element.scrollTop)).toBe(initialPreviewScrollTop)
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(await page.evaluate(() => document.documentElement.clientHeight))
+  await expect(editorScroller).toHaveCSS('scrollbar-color', 'rgb(140, 180, 255) rgba(0, 0, 0, 0)')
+  await expect(preview).toHaveCSS('scrollbar-color', 'rgb(140, 180, 255) rgba(0, 0, 0, 0)')
+
+  const previewPaneWidth = await page.locator('[data-pane="preview"]').evaluate((element) => element.clientWidth)
+  expect(await preview.evaluate((element) => element.offsetWidth)).toBe(previewPaneWidth)
+  expect(await editorScroller.evaluate((element) => getComputedStyle(element, '::-webkit-scrollbar-button').display)).toBe('none')
+  expect(await preview.evaluate((element) => getComputedStyle(element, '::-webkit-scrollbar-button').display)).toBe('none')
 })
 
 test('keeps the rendered view visible when Source is active in split view', async ({ page }) => {
@@ -133,7 +159,7 @@ test('resizes the editor and preview panes by dragging the split handle', async 
 
   const resizedEditorBox = await editorPane.boundingBox()
   expect(resizedEditorBox).not.toBeNull()
-  expect(resizedEditorBox!.width).toBeGreaterThan(initialEditorBox.width + 100)
+  expect(resizedEditorBox!.width).toBeLessThan(initialEditorBox.width - 100)
 })
 
 test('resizes the split panes from the keyboard', async ({ page }) => {

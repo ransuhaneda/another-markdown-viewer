@@ -33,7 +33,8 @@ export function updateDocumentView(app: HTMLElement, elements: WorkspaceElements
   prepareRenderedLinks(elements.preview)
   elements.preview.scrollTop = state.previewScrollTop
   const words = state.markdown.trim() ? state.markdown.trim().split(/\s+/u).length : 0
-  requiredElement<HTMLElement>(app, '[data-count]').textContent = `${words} ${words === 1 ? 'word' : 'words'}`
+  const characters = state.markdown.length
+  requiredElement<HTMLElement>(app, '[data-count]').textContent = `${words} ${words === 1 ? 'word' : 'words'} · ${characters} ${characters === 1 ? 'character' : 'characters'}`
 }
 
 export function updateModeView(app: HTMLElement, editor: EditorView, mode: ViewMode): void {
@@ -70,6 +71,11 @@ export function setStatus(app: HTMLElement, message: string, failed = false): vo
   const status = requiredElement<HTMLElement>(app, '[data-status]')
   status.textContent = message
   status.classList.toggle('status-warning', failed)
+}
+
+export function setRecoveryWarning(app: HTMLElement, unavailable: boolean): void {
+  const warning = requiredElement<HTMLElement>(app, '[data-recovery-warning]')
+  warning.hidden = !unavailable
 }
 
 function updatePressedButtons(app: HTMLElement, selector: string, value: string): void {

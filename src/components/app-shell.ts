@@ -59,7 +59,7 @@ function renderDocumentRegion(): string {
 function renderFooter(): string {
   return `
     <footer class="app-footer">
-      <div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div>
+      <div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words · 0 characters</span><span class="recovery-warning" data-recovery-warning hidden role="status">Local recovery unavailable</span></div>
       <div class="footer-actions">
         <button class="icon-button icon-button--quiet" data-action="help" type="button" aria-label="Markdown help" title="Markdown help" aria-haspopup="dialog" aria-controls="help-dialog"><i data-lucide="circle-help"></i></button>
         <button class="icon-button icon-button--quiet" data-action="clear" type="button" aria-label="Clear draft" title="Clear draft"><i data-lucide="trash"></i></button>

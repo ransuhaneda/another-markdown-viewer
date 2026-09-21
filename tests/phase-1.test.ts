@@ -22,7 +22,8 @@ describe('phase 1 application shell', () => {
   })
 
   it('uses the GFM showcase as the first-load document', () => {
-    expect(application).toContain('createDocumentState(DEFAULT_MARKDOWN, recovered ?? undefined)')
+    expect(application).toContain('createDocumentState(DEFAULT_MARKDOWN)')
+    expect(application).toContain('createDocumentState(recovered.markdown, recovered)')
     expect(DEFAULT_MARKDOWN).toContain('# Common Markdown + GitHub-Flavored Markdown')
     expect(DEFAULT_MARKDOWN).toContain('```javascript')
     expect(DEFAULT_MARKDOWN).toContain('| :--- | :---: | ---: |')

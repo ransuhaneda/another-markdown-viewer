@@ -11,6 +11,7 @@ describe('phase 5 file handling', () => {
   it('keeps file operations separate from recovery state', () => {
     const state = createDocumentState('# Draft')
     expect(state.markdown).toBe('# Draft')
+    expect(state.fileName).toBe('untitled.md')
     expect(Object.keys(state)).toContain('markdown')
   })
 })

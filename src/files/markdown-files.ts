@@ -17,7 +17,8 @@ export async function openMarkdownFile(): Promise<FileOperationResult | null> {
 
 export async function saveMarkdownFile(markdown: string, name = 'untitled.md'): Promise<void> {
   const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' })
-  await fileSave(blob, { fileName: name.endsWith('.md') ? name : `${name}.md`, description: 'Markdown document', extensions: ['.md', '.markdown'], mimeTypes: ['text/markdown'] })
+  const fileName = /\.(?:md|markdown)$/iu.test(name) ? name : `${name}.md`
+  await fileSave(blob, { fileName, description: 'Markdown document', extensions: ['.md', '.markdown'], mimeTypes: ['text/markdown'] })
 }
 
 function isAbortError(error: unknown): boolean {

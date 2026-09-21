@@ -5,6 +5,7 @@ import { connectSplitPane } from '../components/split-pane'
 import {
   getWorkspaceElements,
   readSourceRange,
+  setRecoveryWarning,
   setStatus,
   updateActivePreviewBlock,
   updateDocumentView,
@@ -29,17 +30,21 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
   mountIcons(app)
 
   const recovered = readRecovery()
-  let state: DocumentState = createDocumentState(DEFAULT_MARKDOWN, recovered ?? undefined)
-  if (recovered) state.mode = 'live-preview'
+  let state: DocumentState = recovered
+    ? createDocumentState(recovered.markdown, recovered)
+    : createDocumentState(DEFAULT_MARKDOWN)
   let recoveryTimer: number | undefined
+  let suppressRecovery = false
   const elements = getWorkspaceElements(app)
 
   const scheduleRecovery = (): void => {
+    if (suppressRecovery) return
     window.clearTimeout(recoveryTimer)
     recoveryTimer = window.setTimeout(() => {
       state.updatedAt = Date.now()
       const saved = writeRecovery(state)
-      setStatus(app, saved ? 'Draft recovered locally' : 'Recovery unavailable', !saved)
+      setRecoveryWarning(app, !saved)
+      setStatus(app, saved ? 'Draft saved locally' : 'Editing in memory', !saved)
     }, 500)
   }
 
@@ -79,12 +84,17 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: markdown } })
   }
   const clearDraft = (): void => {
-    replaceDocument('')
+    if (state.markdown.trim() && !window.confirm('Clear this draft?')) return
+    window.clearTimeout(recoveryTimer)
+    suppressRecovery = true
     state = createDocumentState('')
+    replaceDocument('')
     clearRecovery()
+    setRecoveryWarning(app, false)
     applyMode('live-preview')
     applyLayout('split')
     updateDocumentView(app, elements, state)
+    suppressRecovery = false
     setStatus(app, 'Blank draft')
   }
 
@@ -139,7 +149,7 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     try {
       const result = await openMarkdownFile()
       if (!result) return setStatus(app, 'Open cancelled')
-      state = createDocumentState(result.markdown, { layout: state.layout })
+      state = createDocumentState(result.markdown, { fileName: result.name ?? 'untitled.md', layout: state.layout })
       replaceDocument(result.markdown)
       updateDocumentView(app, elements, state)
       setStatus(app, `Opened ${result.name ?? 'Markdown file'}`)
@@ -151,7 +161,7 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
   async function saveDocument(): Promise<void> {
     setStatus(app, 'Saving Markdown…')
     try {
-      await saveMarkdownFile(state.markdown)
+      await saveMarkdownFile(state.markdown, state.fileName)
       setStatus(app, 'Markdown saved')
     } catch {
       setStatus(app, 'Could not save Markdown', true)

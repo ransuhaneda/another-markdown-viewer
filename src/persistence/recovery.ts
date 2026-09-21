@@ -42,6 +42,7 @@ function isStoredRecoveryState(value: unknown): value is StoredRecoveryState {
   if (!value || typeof value !== 'object') return false
   const candidate = value as Partial<StoredRecoveryState>
   return typeof candidate.markdown === 'string'
+    && (candidate.fileName === undefined || typeof candidate.fileName === 'string')
     && isStoredViewMode(candidate.mode)
     && isWorkspaceLayout(candidate.layout)
     && isNonNegativeInteger(candidate.cursorPosition)

@@ -3,6 +3,7 @@ export type WorkspaceLayout = 'editor' | 'split' | 'preview'
 
 export interface DocumentState {
   markdown: string
+  fileName: string
   mode: ViewMode
   layout: WorkspaceLayout
   cursorPosition: number
@@ -16,6 +17,7 @@ export const DEFAULT_LAYOUT: WorkspaceLayout = 'split'
 export function createDocumentState(markdown: string, recovered?: Partial<DocumentState>): DocumentState {
   return {
     markdown,
+    fileName: recovered?.fileName ?? 'untitled.md',
     mode: recovered?.mode ?? 'source',
     layout: recovered?.layout ?? DEFAULT_LAYOUT,
     cursorPosition: recovered?.cursorPosition ?? 0,

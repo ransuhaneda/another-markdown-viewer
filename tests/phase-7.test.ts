@@ -1,3 +1,5 @@
+/** @vitest-environment jsdom */
+
 import { describe, expect, it } from 'vitest'
 import { findActiveBlock, isCursorInBlock } from '../src/markdown/live-preview'
 import { renderMarkdown } from '../src/markdown/render-markdown'

@@ -17,4 +17,14 @@ describe('phase 6 PDF export', () => {
     expect(shell).toContain("data-action=\"pdf\"")
     expect(application).toContain('window.print()')
   })
+
+  it('keeps syntax highlighting in the rendered print content', () => {
+    const renderer = readFileSync(new URL('../src/markdown/render-markdown.ts', import.meta.url), 'utf8')
+    const preview = readFileSync(new URL('../src/styles/preview.css', import.meta.url), 'utf8')
+    const print = readFileSync(new URL('../src/styles/print.css', import.meta.url), 'utf8')
+    expect(renderer).toContain('highlight.js/lib/common')
+    expect(renderer).toContain('class="hljs')
+    expect(preview).toContain('.hljs-keyword')
+    expect(print).toContain('.preview-content .hljs-keyword')
+  })
 })

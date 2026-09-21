@@ -1,3 +1,5 @@
+/** @vitest-environment jsdom */
+
 import { describe, expect, it } from 'vitest'
 import { renderMarkdown } from '../src/markdown/render-markdown'
 import { clearRecovery, readRecovery, writeRecovery } from '../src/persistence/recovery'
@@ -58,6 +60,15 @@ describe('phase 2 markdown flow', () => {
     expect(clampCursorPosition(-4, 10)).toBe(0)
     expect(clampCursorPosition(20, 10)).toBe(10)
     expect(clampCursorPosition(4.8, 10)).toBe(4)
+  })
+
+  it('preserves safe HTML structure while removing executable content', async () => {
+    const html = await renderMarkdown('<section data-note="kept"><mark>Readable</mark><style>bad</style><img src="javascript:alert(1)" onerror="alert(1)"></section>')
+    expect(html).toContain('<section')
+    expect(html).toContain('<mark>Readable</mark>')
+    expect(html).not.toContain('<style>')
+    expect(html).not.toContain('onerror')
+    expect(html).toContain('src=""')
   })
 
   it('keeps safe URLs and rejects unsafe schemes', () => {

@@ -1,42 +1,35 @@
-import * as DOMPurifyModule from 'dompurify'
-import { marked } from 'marked'
+import createDOMPurify from 'dompurify'
+import hljs from 'highlight.js/lib/common'
+import { marked, Renderer } from 'marked'
 import { sanitizeUrl } from './url-policy'
 
-const purifyExport = (DOMPurifyModule.default ?? DOMPurifyModule) as unknown
-const DOMPurify = typeof purifyExport === 'function' && typeof window !== 'undefined'
-  ? purifyExport(window) as { sanitize: (html: string, options: object) => string }
-  : null
-
-const allowedTags = [
-  'a', 'blockquote', 'br', 'code', 'del', 'em', 'figcaption', 'figure', 'h1', 'h2', 'h3',
-  'h4', 'h5', 'h6', 'hr', 'img', 'input', 'li', 'ol', 'p', 'pre', 'strong', 'table', 'tbody', 'td',
-  'tfoot', 'th', 'thead', 'tr', 'ul',
-]
-
-const allowedAttributes = ['alt', 'checked', 'class', 'disabled', 'href', 'loading', 'rel', 'src', 'target', 'title', 'type']
-
-function sanitizeHtml(html: string): string {
-  if (DOMPurify) {
-    return DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: allowedTags,
-      ALLOWED_ATTR: allowedAttributes,
-      FORBID_ATTR: ['style', 'onerror', 'onclick', 'onload', 'onmouseover'],
-      ADD_ATTR: ['target', 'rel', 'loading'],
-    })
-  }
-  return html.replace(/<script[^>]*>[\s\S]*?<\/script>/giu, '').replace(/\s+on[a-z]+\s*=\s*(['"]).*?\1/giu, '')
+const markdownRenderer = new Renderer()
+markdownRenderer.code = ({ text, lang }) => {
+  const language = lang?.trim().toLowerCase()
+  const languageClass = language && /^[a-z0-9_+-]+$/u.test(language) ? ` language-${language}` : ''
+  const highlighted = language && hljs.getLanguage(language)
+    ? hljs.highlight(text, { language }).value
+    : hljs.highlightAuto(text).value
+  return `<pre><code class="hljs${languageClass}">${highlighted}</code></pre>`
 }
 
-function inertUnsafeDestinations(html: string): string {
-  return html.replace(/\s(href|src)=(['"])(.*?)\2/giu, (_match, attribute: string, quote: string, value: string) => {
-    const safeValue = sanitizeUrl(value)
-    return safeValue ? ` ${attribute}=${quote}${safeValue}${quote}` : ` ${attribute}=${quote}${quote}`
-  })
-}
+marked.use({ renderer: markdownRenderer })
+
+const DOMPurify = createDOMPurify(window)
+DOMPurify.addHook('uponSanitizeAttribute', (_node, data) => {
+  if (data.attrName !== 'href' && data.attrName !== 'src') return
+  data.attrValue = sanitizeUrl(data.attrValue ?? '') ?? ''
+})
 
 export function renderMarkdown(source: string): string {
   const html = marked.parse(source, { gfm: true, breaks: false, async: false })
-  return sanitizeHtml(inertUnsafeDestinations(addSourceRanges(html, source)))
+  return DOMPurify.sanitize(addSourceRanges(html, source), {
+    USE_PROFILES: { html: true },
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'base', 'form'],
+    FORBID_ATTR: ['style'],
+    ALLOW_DATA_ATTR: true,
+    ADD_ATTR: ['data-source-start', 'data-source-end', 'target', 'rel', 'loading'],
+  })
 }
 
 function addSourceRanges(html: string, source: string): string {

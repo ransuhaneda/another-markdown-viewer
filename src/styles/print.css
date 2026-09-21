@@ -92,6 +92,37 @@
     color: #111417;
   }
 
+  .preview-content pre code.hljs {
+    color: #263238;
+  }
+
+  .preview-content .hljs-comment,
+  .preview-content .hljs-quote { color: #5f6b73; }
+  .preview-content .hljs-keyword,
+  .preview-content .hljs-selector-tag,
+  .preview-content .hljs-literal,
+  .preview-content .hljs-section,
+  .preview-content .hljs-link { color: #7c3f99; }
+  .preview-content .hljs-string,
+  .preview-content .hljs-title,
+  .preview-content .hljs-name,
+  .preview-content .hljs-type,
+  .preview-content .hljs-attribute,
+  .preview-content .hljs-symbol,
+  .preview-content .hljs-bullet,
+  .preview-content .hljs-addition { color: #216e4b; }
+  .preview-content .hljs-number,
+  .preview-content .hljs-meta,
+  .preview-content .hljs-built_in,
+  .preview-content .hljs-builtin-name,
+  .preview-content .hljs-code,
+  .preview-content .hljs-formula { color: #8a5a00; }
+  .preview-content .hljs-variable,
+  .preview-content .hljs-template-variable,
+  .preview-content .hljs-attr,
+  .preview-content .hljs-params { color: #1456a0; }
+  .preview-content .hljs-deletion { color: #a12a2a; }
+
   .preview-content a {
     color: inherit;
     text-decoration: underline;

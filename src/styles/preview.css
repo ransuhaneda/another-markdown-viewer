@@ -15,7 +15,14 @@
 .preview-content p, .preview-content ul, .preview-content ol, .preview-content blockquote, .preview-content pre, .preview-content table, .preview-content figure { margin-block: 0 var(--space-5); }
 .preview-content a { color: var(--color-accent); }
 .preview-content code, .preview-content pre { font-family: var(--font-mono); }
-.preview-content pre { overflow-x: auto; padding: var(--space-4); border-radius: var(--radius-sm); background: var(--color-raised); }
+.preview-content pre { overflow-x: auto; padding: var(--space-4); border: 1px solid var(--color-rule); border-radius: var(--radius-sm); background: #20262c; color: #e6edf3; }
+.preview-content pre code.hljs { display: block; overflow-x: auto; padding: 0; background: transparent; color: inherit; }
+.hljs-comment, .hljs-quote { color: #8b969e; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link { color: #c792ea; }
+.hljs-string, .hljs-title, .hljs-name, .hljs-type, .hljs-attribute, .hljs-symbol, .hljs-bullet, .hljs-addition { color: #a7e3c1; }
+.hljs-number, .hljs-meta, .hljs-built_in, .hljs-builtin-name, .hljs-code, .hljs-formula { color: #f2c879; }
+.hljs-variable, .hljs-template-variable, .hljs-attr, .hljs-params { color: #8cb4ff; }
+.hljs-deletion { color: #f08a8a; }
 .preview-content blockquote { border-inline-start: 3px solid var(--color-accent); padding-inline-start: var(--space-4); color: var(--color-ink-soft); }
 .preview-content img { max-width: 100%; height: auto; }
 .preview-content input[type='checkbox'] { accent-color: var(--color-accent); }

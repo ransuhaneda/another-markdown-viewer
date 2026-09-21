@@ -3,10 +3,6 @@ import { test, expect } from '@playwright/test'
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear()
-    const originalSetItem = Storage.prototype.setItem
-    Storage.prototype.setItem = function (key, value): void {
-      if (key !== 'markdown-preview:recovery') originalSetItem.call(this, key, value)
-    }
   })
 })
 
@@ -27,9 +23,10 @@ test('styles formatted Live content while preserving syntax access', async ({ pa
   await page.getByRole('button', { name: 'Live', exact: true }).click()
   await editor.fill('# Heading\n\nA **bold** line\n\nA *italic* line\n\nUse `npm` here\n\n[Link](https://example.com)\n\n## Second heading')
 
-  await expect(page.locator('.cm-header-1')).toHaveCSS('font-size', '36px')
-  await expect(page.locator('.cm-header-1')).toHaveCSS('line-height', '41.4px')
-  await expect(page.locator('.cm-header-1')).toHaveCSS('font-weight', '650')
+  const headingText = page.locator('.cm-header-1').filter({ hasText: 'Heading' }).last()
+  await expect(headingText).toHaveCSS('font-size', '36px')
+  await expect(headingText).toHaveCSS('line-height', '41.4px')
+  await expect(headingText).toHaveCSS('font-weight', '650')
   await expect(page.locator('.preview-content h1').first()).toHaveCSS('font-size', '36px')
   await expect(page.locator('.preview-content h1').first()).toHaveCSS('line-height', '41.4px')
   await expect(page.locator('.preview-content h1').first()).toHaveCSS('font-weight', '650')
@@ -42,6 +39,17 @@ test('styles formatted Live content while preserving syntax access', async ({ pa
   await expect(page.locator('.cm-link')).toHaveCSS('color', 'rgb(140, 180, 255)')
 
   await page.locator('.cm-line').nth(2).click({ position: { x: 400, y: 8 } })
+  const headingStart = await headingText.evaluate((element) => element.getBoundingClientRect().left)
+  const paragraphStart = await page.locator('.cm-line').nth(2).evaluate((element) => {
+    const text = [...element.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.startsWith('A '))
+    if (!text) throw new Error('Missing paragraph text')
+    const range = document.createRange()
+    range.setStart(text, 0)
+    range.setEnd(text, 1)
+    return range.getBoundingClientRect().left
+  })
+  expect(headingStart).toBeCloseTo(paragraphStart, 1)
+
   await expect(page.locator('.cm-strong')).toHaveCSS('font-weight', '700')
 
   await page.locator('.cm-line').last().click({ position: { x: 2, y: 8 } })
@@ -52,7 +60,7 @@ test('places the Live Preview caret on the clicked line after scrolling', async 
   await page.goto('/')
   await page.getByRole('button', { name: 'Live', exact: true }).click()
 
-  const imageHeading = page.locator('.cm-line').filter({ hasText: '## Image' }).first()
+  const imageHeading = page.locator('.cm-line').filter({ hasText: /^##\s*Image$/u }).first()
   const editorScroller = page.locator('.cm-scroller')
   for (let scrollTop = 0; await imageHeading.count() === 0 && scrollTop < 6000; scrollTop += 200) {
     await editorScroller.evaluate((element, top) => { element.scrollTop = top }, scrollTop)
@@ -114,6 +122,100 @@ test('renders the initial document before the first edit', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('[data-preview]')).toContainText('Bold and italic text')
   await expect(page.locator('[data-preview] table')).toHaveCount(3)
+})
+
+test('keeps mobile editor and preview layouts usable', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+
+  await expect(page.locator('[data-pane="preview"]')).toBeHidden()
+  await page.locator('[data-layout="preview"]').click()
+  await expect(page.locator('[data-pane="editor"]')).toBeHidden()
+  await expect(page.locator('[data-pane="preview"]')).toBeVisible()
+  await expect(page.locator('[data-count]')).toContainText('characters')
+})
+
+test('restores a recovered draft and its view state', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('markdown-preview:recovery', JSON.stringify({
+      markdown: '# Recovered',
+      fileName: 'notes.md',
+      mode: 'live-preview',
+      layout: 'preview',
+      cursorPosition: 4,
+      editorScrollTop: 0,
+      previewScrollTop: 0,
+      updatedAt: 1,
+    }))
+  })
+  await page.goto('/')
+
+  await expect(page.locator('[data-status]')).toHaveText('Draft restored locally')
+  await expect(page.locator('[data-preview] h1')).toHaveText('Recovered')
+  await expect(page.locator('button[data-layout="preview"]')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-mode="live-preview"]')).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('keeps the recovery warning visible when storage is unavailable', async ({ page }) => {
+  await page.addInitScript(() => {
+    const originalSetItem = Storage.prototype.setItem
+    Storage.prototype.setItem = function (key, value): void {
+      if (key === 'markdown-preview:recovery') throw new DOMException('Quota exceeded', 'QuotaExceededError')
+      originalSetItem.call(this, key, value)
+    }
+  })
+  await page.goto('/')
+  await page.getByRole('textbox').fill('# Unsaved')
+
+  await expect(page.locator('[data-status]')).toHaveText('Editing in memory')
+  await expect(page.locator('[data-recovery-warning]')).toBeVisible()
+  await page.getByRole('button', { name: 'Live', exact: true }).click()
+  await expect(page.locator('[data-recovery-warning]')).toBeVisible()
+})
+
+test('opens and closes help while restoring focus', async ({ page }) => {
+  await page.goto('/')
+  const help = page.getByRole('button', { name: 'Markdown help' })
+  await help.click()
+  await expect(page.getByRole('dialog', { name: 'Markdown help' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(help).toBeFocused()
+})
+
+test('renders unsafe destinations as inert content', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('textbox').fill('[unsafe](javascript:alert(1))\n\n![alt](javascript:alert(1))\n\n<div onclick="alert(1)">Visible</div>')
+  await expect(page.locator('[data-preview] a')).toHaveCount(1)
+  await expect(page.locator('[data-preview] a')).toHaveAttribute('href', '')
+  await expect(page.locator('[data-preview] img')).toHaveCount(1)
+  await expect(page.locator('[data-preview] img')).toHaveAttribute('alt', 'alt')
+  await expect(page.locator('[data-preview] [onclick]')).toHaveCount(0)
+  await expect(page.locator('[data-preview]')).toContainText('Visible')
+})
+
+test('converts rich HTML paste into Markdown', async ({ page }) => {
+  await page.goto('/')
+  const editor = page.getByRole('textbox')
+  await editor.click()
+  await page.evaluate(() => {
+    const clipboard = new DataTransfer()
+    clipboard.setData('text/plain', 'One Two')
+    clipboard.setData('text/html', '<h2>Title</h2><p><strong>Bold</strong> text</p>')
+    document.querySelector('.cm-content')?.dispatchEvent(new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: clipboard }))
+  })
+  await expect(editor).toContainText('## Title')
+  await expect(editor).toContainText('**Bold** text')
+})
+
+test('confirms before clearing a non-empty draft', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('textbox').fill('# Keep this')
+  page.once('dialog', (dialog) => dialog.dismiss())
+  await page.getByRole('button', { name: 'Clear draft' }).click()
+  await expect(page.getByRole('textbox')).toContainText('# Keep this')
+  page.once('dialog', (dialog) => dialog.accept())
+  await page.getByRole('button', { name: 'Clear draft' }).click()
+  await expect(page.locator('[data-count]')).toHaveText('0 words · 0 characters')
 })
 
 test('uses accessible standard-size icons and a visible caret', async ({ page }) => {

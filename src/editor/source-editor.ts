@@ -1,5 +1,6 @@
-import { Compartment, EditorState, type Extension } from '@codemirror/state'
-import { EditorView, highlightActiveLine, keymap } from '@codemirror/view'
+import { Compartment, EditorState, type Extension, type Range } from '@codemirror/state'
+import { syntaxTree } from '@codemirror/language'
+import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate, highlightActiveLine, keymap } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { history, historyKeymap, redo, redoDepth, undo, undoDepth } from '@codemirror/commands'
 import {
@@ -24,11 +25,47 @@ export interface SourceEditorSnapshot {
 
 const livePreviewMode = new Compartment()
 
+const collapseHeadingSeparator = ViewPlugin.fromClass(class {
+  decorations: DecorationSet
+
+  constructor(view: EditorView) {
+    this.decorations = headingSeparatorDecorations(view)
+  }
+
+  update(update: ViewUpdate): void {
+    if (update.docChanged || update.selectionSet || update.viewportChanged) {
+      this.decorations = headingSeparatorDecorations(update.view)
+    }
+  }
+}, { decorations: (value) => value.decorations })
+
 const livePreviewExtensions = [
   collapseOnSelectionFacet.of(true),
   livePreviewPlugin,
   markdownStylePlugin,
+  collapseHeadingSeparator,
 ]
+
+function headingSeparatorDecorations(view: EditorView): DecorationSet {
+  const decorations: Range<Decoration>[] = []
+  const selection = view.state.selection
+
+  syntaxTree(view.state).iterate({
+    from: view.viewport.from,
+    to: view.viewport.to,
+    enter: (node) => {
+      if (node.name !== 'HeaderMark') return
+      const line = view.state.doc.lineAt(node.from)
+      const isActive = selection.ranges.some((range) => range.from <= line.to && range.to >= line.from)
+      if (isActive) return
+
+      const separator = view.state.doc.sliceString(node.to, line.to).match(/^[\t ]+/u)?.[0]
+      if (separator) decorations.push(Decoration.replace({}).range(node.to, node.to + separator.length))
+    },
+  })
+
+  return Decoration.set(decorations)
+}
 
 function configureLivePreview(editor: EditorView, enabled: boolean): void {
   editor.dom.classList.toggle('cm-live-preview', enabled)
@@ -49,7 +86,7 @@ function createEditorTheme(): Extension {
     '.cm-active-line': { backgroundColor: 'var(--color-accent-soft)' },
     '.cm-formatting-inline': { display: 'inline-flex', maxWidth: '0', overflow: 'hidden', whiteSpace: 'nowrap', verticalAlign: 'baseline', opacity: '0', color: 'var(--color-ink-muted)', fontSize: '0.85em', pointerEvents: 'none' },
     '.cm-formatting-inline-visible': { maxWidth: '4ch', margin: '0 1px', opacity: '1', pointerEvents: 'auto' },
-    '.cm-formatting-block': { display: 'inline', fontSize: '0.01em', lineHeight: 'inherit', opacity: '0', color: 'var(--color-ink-muted)' },
+    '.cm-formatting-block': { display: 'inline', fontSize: '0', lineHeight: 'inherit', opacity: '0', color: 'var(--color-ink-muted)' },
     '.cm-formatting-block-visible': { fontSize: '1em', opacity: '0.6' },
     '.cm-header-1': { display: 'inline', fontSize: 'var(--document-heading-1-size)', fontWeight: 'var(--document-heading-weight)', lineHeight: '1.15', letterSpacing: '-0.02em' },
     '.cm-header-2': { display: 'inline', fontSize: 'var(--document-heading-2-size)', fontWeight: 'var(--document-heading-weight)', lineHeight: '1.15', letterSpacing: '-0.015em' },

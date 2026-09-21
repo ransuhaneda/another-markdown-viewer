@@ -6,7 +6,7 @@
 .cm-editor .cm-line { font-family: var(--font-body); font-size: var(--document-body-size); line-height: var(--document-body-leading); }
 .cm-formatting-inline { display: inline-flex; max-width: 0; overflow: hidden; white-space: nowrap; vertical-align: baseline; opacity: 0; color: var(--color-ink-muted); font-size: 0.85em; pointer-events: none; transition: max-width 120ms ease, opacity 120ms ease; }
 .cm-formatting-inline-visible { max-width: 4ch; margin-inline: 1px; opacity: 1; pointer-events: auto; }
-.cm-formatting-block { display: inline; font-size: 0.01em; line-height: inherit; opacity: 0; color: var(--color-ink-muted); transition: font-size 120ms ease, opacity 120ms ease; }
+.cm-formatting-block { display: inline; font-size: 0; line-height: inherit; opacity: 0; color: var(--color-ink-muted); transition: font-size 120ms ease, opacity 120ms ease; }
 .cm-formatting-block-visible { font-size: 1em; opacity: 0.6; }
 .cm-header-1 { display: inline; font-size: var(--document-heading-1-size); font-weight: var(--document-heading-weight); line-height: 1.15; letter-spacing: -0.02em; }
 .cm-header-2 { display: inline; font-size: var(--document-heading-2-size); font-weight: var(--document-heading-weight); line-height: 1.15; letter-spacing: -0.015em; }

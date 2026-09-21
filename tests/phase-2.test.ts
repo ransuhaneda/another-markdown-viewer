@@ -63,13 +63,25 @@ describe('phase 2 markdown flow', () => {
   it('keeps safe URLs and rejects unsafe schemes', () => {
     expect(sanitizeUrl('https://example.com/docs')).toBe('https://example.com/docs')
     expect(sanitizeUrl('/local/path')).toBe('/local/path')
+    expect(sanitizeUrl('relative/path')).toBe('relative/path')
+    expect(sanitizeUrl('#section')).toBe('#section')
+    expect(sanitizeUrl('mailto:hello@example.com')).toBe('mailto:hello@example.com')
     expect(sanitizeUrl('javascript:alert(1)')).toBeNull()
+    expect(sanitizeUrl('java\u0000script:alert(1)')).toBeNull()
     expect(sanitizeUrl('data:text/html,alert(1)')).toBeNull()
   })
 
   it('converts common rich text HTML to Markdown', () => {
     expect(convertPastedContent('', '<h2>Title</h2><p><strong>Bold</strong> text</p>')).toBe('## Title\n\n**Bold** text')
+    expect(convertPastedContent('', '<ol><li>One</li><li><em>Two</em></li></ol><pre><code>const x = 1</code></pre>')).toBe('1. One\n2. *Two*\n\n```\nconst x = 1\n```')
     expect(convertPastedContent('**already Markdown**', '<strong>ignored</strong>')).toBe('**already Markdown**')
+  })
+
+  it('maps repeated Markdown blocks in source order', () => {
+    const source = 'Same\n\nSame'
+    const html = renderMarkdown(source)
+    expect(html).toContain('data-source-start="0" data-source-end="4"')
+    expect(html).toContain('data-source-start="6" data-source-end="10"')
   })
 })
 

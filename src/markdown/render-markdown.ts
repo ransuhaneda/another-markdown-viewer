@@ -20,7 +20,7 @@ function sanitizeHtml(html: string): string {
     return DOMPurify.sanitize(html, {
       ALLOWED_TAGS: allowedTags,
       ALLOWED_ATTR: allowedAttributes,
-      FORBID_ATTR: ['style', ' onerror', 'onclick'],
+      FORBID_ATTR: ['style', 'onerror', 'onclick', 'onload', 'onmouseover'],
       ADD_ATTR: ['target', 'rel', 'loading'],
     })
   }
@@ -30,7 +30,7 @@ function sanitizeHtml(html: string): string {
 function inertUnsafeDestinations(html: string): string {
   return html.replace(/\s(href|src)=(['"])(.*?)\2/giu, (_match, attribute: string, quote: string, value: string) => {
     const safeValue = sanitizeUrl(value)
-    return safeValue ? ` ${attribute}=${quote}${safeValue}${quote}` : ''
+    return safeValue ? ` ${attribute}=${quote}${safeValue}${quote}` : ` ${attribute}=${quote}${quote}`
   })
 }
 
@@ -40,15 +40,30 @@ export function renderMarkdown(source: string): string {
 }
 
 function addSourceRanges(html: string, source: string): string {
-  const blocks = source.split('\n\n')
+  const ranges = marked.lexer(source)
+    .filter((token) => isRangeToken(token.type))
+    .map((token) => ({ raw: token.raw.replace(/\n+$/u, ''), start: 0, end: 0 }))
+
   let cursor = 0
-  return html.replace(/<(h[1-6]|p|blockquote|pre|ul|ol|table)([ >])/giu, (_match, tag: string, suffix: string) => {
-    const block = blocks.find((candidate) => source.indexOf(candidate, cursor) >= cursor) ?? ''
-    const start = source.indexOf(block, cursor)
-    const end = start + block.length
-    cursor = end
-    return `<${tag} data-source-start="${Math.max(0, start)}" data-source-end="${Math.max(0, end)}"${suffix}`
+  ranges.forEach((range) => {
+    const start = source.indexOf(range.raw, cursor)
+    if (start >= 0) {
+      range.start = start
+      range.end = start + range.raw.length
+      cursor = range.end
+    }
   })
+
+  let rangeIndex = 0
+  return html.replace(/<(h[1-6]|p|blockquote|pre|ul|ol|table)([ >])/giu, (_match, tag: string, suffix: string) => {
+    const range = ranges[rangeIndex++]
+    if (!range || range.end <= range.start) return `<${tag}${suffix}`
+    return `<${tag} data-source-start="${range.start}" data-source-end="${range.end}"${suffix}`
+  })
+}
+
+function isRangeToken(type: string): boolean {
+  return ['blockquote', 'code', 'heading', 'html', 'list', 'paragraph', 'table'].includes(type)
 }
 
 export function prepareRenderedLinks(container: HTMLElement): void {

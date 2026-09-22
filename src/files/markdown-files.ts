@@ -2,7 +2,7 @@ import { fileOpen, fileSave } from 'browser-fs-access'
 
 export interface FileOperationResult {
   markdown: string
-  name?: string
+  name: string
 }
 
 export async function openMarkdownFile(): Promise<FileOperationResult | null> {

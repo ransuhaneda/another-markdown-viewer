@@ -48,10 +48,30 @@ function addSourceRanges(html: string, source: string): string {
   })
 
   let rangeIndex = 0
-  return html.replace(/<(h[1-6]|p|blockquote|pre|ul|ol|table)([ >])/giu, (_match, tag: string, suffix: string) => {
-    const range = ranges[rangeIndex++]
-    if (!range || range.end <= range.start) return `<${tag}${suffix}`
-    return `<${tag} data-source-start="${range.start}" data-source-end="${range.end}"${suffix}`
+  let depth = 0
+  const blockTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'blockquote', 'pre', 'ul', 'ol', 'table'])
+  const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'])
+
+  // Mark only rendered top-level blocks. Paragraphs inside a blockquote or a
+  // list are not separate source ranges, but the old tag-only replacement
+  // treated them as top-level blocks and shifted every later range.
+  return html.replace(/<!--[^]*?-->|<\/?[a-z][^>]*>/giu, (tagText) => {
+    const closing = /^<\//u.test(tagText)
+    const tagName = tagText.match(/^<\/?([a-z][\w-]*)/iu)?.[1]?.toLowerCase()
+    if (!tagName) return tagText
+
+    if (closing) {
+      depth = Math.max(0, depth - 1)
+      return tagText
+    }
+
+    const range = depth === 0 && blockTags.has(tagName) ? ranges[rangeIndex++] : undefined
+    const selfClosing = /\/\s*>$/u.test(tagText) || voidTags.has(tagName)
+    if (!selfClosing) depth += 1
+    if (!range || range.end <= range.start) return tagText
+
+    const insertion = ` data-source-start="${range.start}" data-source-end="${range.end}"`
+    return tagText.replace(/^<([a-z][\w-]*)/iu, `<$1${insertion}`)
   })
 }
 

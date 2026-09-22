@@ -15,6 +15,14 @@ describe('phase 2 markdown flow', () => {
     expect(html).not.toContain('<script>')
   })
 
+  it('renders GFM table alignment and preserves nested list structure', () => {
+    const html = renderMarkdown('| Left | Center | Right |\n| :--- | :----: | ----: |\n| Text | Text | 100 |\n\n1. First item\n   - Sub-item\n2. Second item')
+    expect(html).toContain('<th align="left">Left</th>')
+    expect(html).toContain('<th align="center">Center</th>')
+    expect(html).toContain('<th align="right">Right</th>')
+    expect(html).toMatch(/<ol(?:\s[^>]*)?>[\s\S]*<li>First item<ul>[\s\S]*<\/ul>[\s\S]*<\/li>[\s\S]*<\/ol>/u)
+  })
+
   it('round-trips the latest recovery draft', () => {
     const storage = new Map<string, string>()
     const fakeStorage = {
@@ -93,6 +101,23 @@ describe('phase 2 markdown flow', () => {
     const html = renderMarkdown(source)
     expect(html).toContain('data-source-start="0" data-source-end="4"')
     expect(html).toContain('data-source-start="6" data-source-end="10"')
+  })
+
+  it('keeps source ranges aligned after nested block content', () => {
+    const source = '## Blockquote\n\n> This is a blockquote.\n\n## Mixed List\n\n1. First item\n- Sub-item\n\n## Task List — GFM\n\n- [x] Completed'
+    const html = renderMarkdown(source)
+    const ranges = [...html.matchAll(/data-source-start="(\d+)" data-source-end="(\d+)"/gu)]
+      .map((match) => [Number(match[1]), Number(match[2])] as const)
+
+    expect(ranges).toEqual([
+      [0, 13],
+      [15, 38],
+      [40, 53],
+      [55, 68],
+      [69, 79],
+      [81, 99],
+      [101, 116],
+    ])
   })
 })
 

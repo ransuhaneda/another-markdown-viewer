@@ -14,7 +14,6 @@ export interface SourceEditorOptions {
   parent: HTMLElement
   initialValue: string
   onChange: (value: string) => void
-  onPaste?: (value: string) => void
   onSelectionChange?: (position: number) => void
 }
 
@@ -24,6 +23,20 @@ export interface SourceEditorSnapshot {
 }
 
 const livePreviewMode = new Compartment()
+
+const revealSelectedLineSyntax = ViewPlugin.fromClass(class {
+  decorations: DecorationSet
+
+  constructor(view: EditorView) {
+    this.decorations = selectedLineDecorations(view)
+  }
+
+  update(update: ViewUpdate): void {
+    if (update.docChanged || update.selectionSet || update.viewportChanged) {
+      this.decorations = selectedLineDecorations(update.view)
+    }
+  }
+}, { decorations: (value) => value.decorations })
 
 const collapseHeadingSeparator = ViewPlugin.fromClass(class {
   decorations: DecorationSet
@@ -43,8 +56,25 @@ const livePreviewExtensions = [
   collapseOnSelectionFacet.of(true),
   livePreviewPlugin,
   markdownStylePlugin,
+  revealSelectedLineSyntax,
   collapseHeadingSeparator,
 ]
+
+function selectedLineDecorations(view: EditorView): DecorationSet {
+  const lines = new Set<number>()
+  for (const range of view.state.selection.ranges) {
+    if (range.from === range.to) continue
+    const first = view.state.doc.lineAt(range.from).number
+    const last = view.state.doc.lineAt(range.to).number
+    for (let line = first; line <= last; line += 1) lines.add(line)
+  }
+
+  const decorations: Range<Decoration>[] = []
+  for (const line of lines) {
+    decorations.push(Decoration.line({ class: 'cm-selection-line' }).range(view.state.doc.line(line).from))
+  }
+  return decorations.length > 0 ? Decoration.set(decorations) : Decoration.none
+}
 
 function headingSeparatorDecorations(view: EditorView): DecorationSet {
   const decorations: Range<Decoration>[] = []
@@ -86,6 +116,8 @@ function createEditorTheme(): Extension {
     '.cm-active-line': { backgroundColor: 'var(--color-accent-soft)' },
     '.cm-formatting-inline': { display: 'inline-flex', maxWidth: '0', overflow: 'hidden', whiteSpace: 'nowrap', verticalAlign: 'baseline', opacity: '0', color: 'var(--color-ink-muted)', fontSize: '0.85em', pointerEvents: 'none' },
     '.cm-formatting-inline-visible': { maxWidth: '4ch', margin: '0 1px', opacity: '1', pointerEvents: 'auto' },
+    '.cm-selection-line .cm-formatting-inline': { maxWidth: '4ch', margin: '0 1px', opacity: '1', pointerEvents: 'auto' },
+    '.cm-selection-line .cm-formatting-block': { fontSize: '1em', opacity: '0.6' },
     '.cm-formatting-block': { display: 'inline', fontSize: '0', lineHeight: 'inherit', opacity: '0', color: 'var(--color-ink-muted)' },
     '.cm-formatting-block-visible': { fontSize: '1em', opacity: '0.6' },
     '.cm-header-1': { display: 'inline', fontSize: 'var(--document-heading-1-size)', fontWeight: 'var(--document-heading-weight)', lineHeight: '1.15', letterSpacing: '-0.02em' },

@@ -52,6 +52,13 @@ test('styles formatted Live content while preserving syntax access', async ({ pa
 
   await expect(page.locator('.cm-strong')).toHaveCSS('font-weight', '700')
 
+  const boldLine = page.locator('.cm-line').filter({ hasText: 'A **bold** line' }).first()
+  await boldLine.click({ position: { x: 8, y: 8 } })
+  await page.keyboard.press('Home')
+  await page.keyboard.press('Shift+End')
+  await expect(boldLine).toHaveClass(/cm-selection-line/u)
+  await expect(boldLine.locator('.cm-formatting-inline')).toHaveCount(2)
+
   await page.locator('.cm-line').last().click({ position: { x: 2, y: 8 } })
   await expect(page.locator('.cm-active-line .cm-formatting-inline')).toHaveCount(0)
 })
@@ -116,6 +123,18 @@ test('keeps the rendered view visible when Source is active in split view', asyn
   await expect(sourceButton).toHaveAttribute('aria-pressed', 'true')
   await expect(liveButton).toHaveAttribute('aria-pressed', 'false')
   await expect(splitButton).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('opens the source editor when a rendered block is clicked', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('button', { name: 'Live', exact: true }).click()
+  await page.locator('[data-preview] h1').first().click()
+
+  await expect(page.locator('[data-editor-label]')).toHaveText('Source')
+  await expect(page.getByRole('button', { name: 'Source', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('.cm-focused')).toBeVisible()
+  await expect(page.locator('.cm-activeLine')).toContainText('Common Markdown + GitHub-Flavored Markdown')
 })
 
 test('renders the initial document before the first edit', async ({ page }) => {

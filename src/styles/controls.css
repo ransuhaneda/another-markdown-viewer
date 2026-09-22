@@ -14,6 +14,11 @@
 .segmented-control { display: inline-flex; gap: var(--space-1); padding: var(--space-1); border: 1px solid var(--color-rule); border-radius: var(--radius-md); background: var(--color-surface); }
 .segment { background: transparent; color: var(--color-ink-muted); }
 .segment.is-active { border-color: var(--color-rule); background: var(--color-accent-soft); color: var(--color-accent); }
+.sync-scroll-control { align-self: center; }
+.toggle-control { display: grid; width: var(--control-size); height: var(--control-size); flex: 0 0 var(--control-size); place-items: center; margin: 0; padding: 0; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--color-ink-muted); cursor: pointer; line-height: 0; }
+.toggle-control svg { display: block; width: var(--icon-size); height: var(--icon-size); pointer-events: none; }
+.toggle-control[aria-pressed='true'] { border-color: var(--color-accent); background: var(--color-accent-soft); color: var(--color-accent); }
+.toggle-control:hover { border-color: var(--color-accent); color: var(--color-ink); }
 .toolbar-meta, .pane-hint, .app-footer { color: var(--color-ink-muted); font-size: 0.75rem; }
 .toolbar-meta { display: flex; align-items: center; gap: var(--space-3); font-variant-numeric: tabular-nums; }
 .recovery-warning { color: var(--color-warning); }

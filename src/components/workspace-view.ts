@@ -11,6 +11,7 @@ export interface WorkspaceElements {
   preview: HTMLElement
   redoButton: HTMLButtonElement
   splitHandle: HTMLElement
+  syncScrollButton: HTMLButtonElement
   undoButton: HTMLButtonElement
   workspace: HTMLElement
 }
@@ -23,6 +24,7 @@ export function getWorkspaceElements(app: HTMLElement): WorkspaceElements {
     preview: requiredElement(app, '[data-preview]'),
     redoButton: requiredElement(app, '[data-action="redo"]'),
     splitHandle: requiredElement(app, '.split-handle'),
+    syncScrollButton: requiredElement(app, '[data-action="sync-scroll"]'),
     undoButton: requiredElement(app, '[data-action="undo"]'),
     workspace: requiredElement(app, '.document-region'),
   }

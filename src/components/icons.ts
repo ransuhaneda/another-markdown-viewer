@@ -1,4 +1,5 @@
 import {
+  ArrowDownUp,
   CircleHelp,
   Code,
   Columns2,
@@ -17,6 +18,7 @@ import {
 } from 'lucide'
 
 const icons: Record<string, IconNode> = {
+  'arrow-down-up': ArrowDownUp,
   'circle-help': CircleHelp,
   code: Code,
   'columns-2': Columns2,

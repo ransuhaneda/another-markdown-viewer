@@ -2,6 +2,7 @@ import { connectHelpDialog } from '../components/help-dialog'
 import { renderAppShell } from '../components/app-shell'
 import { mountIcons } from '../components/icons'
 import { connectSplitPane } from '../components/split-pane'
+import { EditorView } from '@codemirror/view'
 import {
   getWorkspaceElements,
   readSourceRange,
@@ -35,6 +36,7 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     : createDocumentState(DEFAULT_MARKDOWN)
   let recoveryTimer: number | undefined
   let suppressRecovery = false
+  let syncingScroll = false
   const elements = getWorkspaceElements(app)
 
   const scheduleRecovery = (): void => {
@@ -55,6 +57,7 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
       state.markdown = markdown
       captureViewState()
       updateDocumentView(app, elements, state)
+      setScrollRatio(editor.scrollDOM, elements.preview)
       updateHistoryView(elements, editor)
       scheduleRecovery()
     },
@@ -69,6 +72,19 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     state.cursorPosition = snapshot.cursorPosition
     state.editorScrollTop = snapshot.scrollTop
     state.previewScrollTop = elements.preview.scrollTop
+  }
+  const setScrollRatio = (source: HTMLElement, target: HTMLElement): void => {
+    if (!state.syncScroll || syncingScroll) return
+    const sourceRange = source.scrollHeight - source.clientHeight
+    const targetRange = target.scrollHeight - target.clientHeight
+    if (sourceRange <= 0 || targetRange <= 0) return
+    syncingScroll = true
+    target.scrollTop = (source.scrollTop / sourceRange) * targetRange
+    syncingScroll = false
+  }
+  const updateSyncScrollButton = (): void => {
+    elements.syncScrollButton.setAttribute('aria-pressed', String(state.syncScroll))
+    elements.syncScrollButton.setAttribute('title', state.syncScroll ? 'Turn synchronized scrolling off' : 'Turn synchronized scrolling on')
   }
   const applyMode = (mode: ViewMode): void => {
     state.mode = mode
@@ -109,6 +125,7 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
   updateLayoutView(app, elements, state.layout)
   updateHistoryView(elements, editor)
   updateDocumentView(app, elements, state)
+  updateSyncScrollButton()
   if (recovered) setStatus(app, 'Draft restored locally')
 
   function connectWorkspaceEvents(): void {
@@ -125,13 +142,28 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
       if (!(target instanceof HTMLElement)) return
       const range = readSourceRange(target.closest<HTMLElement>('[data-source-start]') ?? target)
       if (!range) return
-      applyMode('live-preview')
+      applyMode('source')
       applyLayout('split')
       editor.focus()
-      editor.dispatch({ selection: { anchor: range.start } })
+      editor.dispatch({
+        selection: { anchor: range.start },
+        effects: EditorView.scrollIntoView(range.start, { y: 'center' }),
+      })
     })
     elements.preview.addEventListener('scroll', () => {
+      setScrollRatio(elements.preview, editor.scrollDOM)
       state.previewScrollTop = elements.preview.scrollTop
+      scheduleRecovery()
+    })
+    editor.scrollDOM.addEventListener('scroll', () => {
+      setScrollRatio(editor.scrollDOM, elements.preview)
+      state.editorScrollTop = editor.scrollDOM.scrollTop
+      scheduleRecovery()
+    })
+    elements.syncScrollButton.addEventListener('click', () => {
+      state.syncScroll = !state.syncScroll
+      updateSyncScrollButton()
+      if (state.syncScroll) setScrollRatio(editor.scrollDOM, elements.preview)
       scheduleRecovery()
     })
     app.querySelector<HTMLButtonElement>('[data-action="new"]')!.addEventListener('click', clearDraft)
@@ -149,10 +181,10 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     try {
       const result = await openMarkdownFile()
       if (!result) return setStatus(app, 'Open cancelled')
-      state = createDocumentState(result.markdown, { fileName: result.name ?? 'untitled.md', layout: state.layout })
+      state = createDocumentState(result.markdown, { fileName: result.name, layout: state.layout })
       replaceDocument(result.markdown)
       updateDocumentView(app, elements, state)
-      setStatus(app, `Opened ${result.name ?? 'Markdown file'}`)
+      setStatus(app, `Opened ${result.name}`)
     } catch {
       setStatus(app, 'Could not open file', true)
     }

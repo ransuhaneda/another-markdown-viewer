@@ -12,6 +12,7 @@ export function readRecovery(storage: Storage = localStorage): RecoveryState | n
     if (!isStoredRecoveryState(parsed)) return null
     return {
       ...parsed,
+      syncScroll: parsed.syncScroll ?? false,
       mode: parsed.mode === 'preview' ? 'live-preview' : parsed.mode,
     }
   } catch {
@@ -45,6 +46,7 @@ function isStoredRecoveryState(value: unknown): value is StoredRecoveryState {
     && (candidate.fileName === undefined || typeof candidate.fileName === 'string')
     && isStoredViewMode(candidate.mode)
     && isWorkspaceLayout(candidate.layout)
+    && (candidate.syncScroll === undefined || typeof candidate.syncScroll === 'boolean')
     && isNonNegativeInteger(candidate.cursorPosition)
     && isNonNegativeNumber(candidate.editorScrollTop)
     && isNonNegativeNumber(candidate.previewScrollTop)

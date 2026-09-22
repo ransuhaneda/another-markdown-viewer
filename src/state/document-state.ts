@@ -6,6 +6,7 @@ export interface DocumentState {
   fileName: string
   mode: ViewMode
   layout: WorkspaceLayout
+  syncScroll: boolean
   cursorPosition: number
   editorScrollTop: number
   previewScrollTop: number
@@ -20,6 +21,7 @@ export function createDocumentState(markdown: string, recovered?: Partial<Docume
     fileName: recovered?.fileName ?? 'untitled.md',
     mode: recovered?.mode ?? 'source',
     layout: recovered?.layout ?? DEFAULT_LAYOUT,
+    syncScroll: recovered?.syncScroll ?? false,
     cursorPosition: recovered?.cursorPosition ?? 0,
     editorScrollTop: recovered?.editorScrollTop ?? 0,
     previewScrollTop: recovered?.previewScrollTop ?? 0,

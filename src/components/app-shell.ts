@@ -37,6 +37,9 @@ function renderWorkspaceToolbar(): string {
           <button class="segment" data-layout="split" type="button" aria-label="Split view" title="Split view"><i data-lucide="columns-2"></i></button>
           <button class="segment" data-layout="preview" type="button" aria-label="Rendered view only" title="Rendered view only"><i data-lucide="panel-right"></i></button>
         </div>
+        <div class="segmented-control sync-scroll-control" role="group" aria-label="Scroll behavior">
+          <button class="toggle-control" data-action="sync-scroll" type="button" aria-label="Toggle synchronized scrolling" aria-pressed="true" title="Toggle synchronized scrolling"><i data-lucide="arrow-down-up"></i></button>
+        </div>
       </div>
     </section>`
 }

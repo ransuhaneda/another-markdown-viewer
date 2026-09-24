@@ -154,7 +154,7 @@ It must not force arbitrary page CSS or a copied composition into the product.
 
 Use a simple application frame:
 
-1. Compact utility header.
+1. Compact combined header and toolbar.
 2. Main editor or preview region.
 3. Optional split boundary.
 4. Small status area when needed.
@@ -180,9 +180,12 @@ Do not use pill-shaped controls except for compact status indicators when requir
 Keep the header compact.
 Place the product name and primary actions in a stable order.
 Do not let utility controls compete with the document.
-Use 16px icons inside 40px controls for familiar document actions.
+Use 14px icons inside 27px controls for compact toolbar actions.
+Combine identity, editing controls, and document actions into one horizontal toolbar.
+Separate control groups with quiet rules and restrained surface contrast.
+Use square corners on toolbar controls.
 Give every icon-only control an accessible name and a tooltip.
-Use only standard icon sizes: 16px, 24px, or 32px.
+Use 14px icons for compact toolbar actions.
 
 ### Mode and layout controls
 
@@ -208,6 +211,8 @@ Do not let long documents scroll the application frame.
 Use readable prose spacing.
 Keep headings distinct from body text.
 Keep links visibly interactive.
+Show frontmatter in a compact Obsidian-style property table.
+Keep metadata values plain, and use accent-colored chips only for tags.
 Keep code blocks scrollable without breaking the page.
 Keep images responsive.
 Use captions and figure spacing when the document provides them.

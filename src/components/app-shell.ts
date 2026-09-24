@@ -3,7 +3,8 @@ export function renderAppShell(): string {
     <div class="app-shell">
       <header class="app-header">
         <div class="brand-lockup"><span class="brand-mark" aria-hidden="true">M</span><h1>Markdown Preview</h1></div>
-        <nav class="header-actions" aria-label="Document actions">
+        ${renderWorkspaceToolbar()}
+        <nav class="header-toolbar" aria-label="Document actions">
           <button class="icon-button" data-action="new" type="button" aria-label="New document" title="New document"><i data-lucide="file-plus"></i></button>
           <button class="icon-button" data-action="open" type="button" aria-label="Open file" title="Open file"><i data-lucide="folder-open"></i></button>
           <button class="icon-button" data-action="save" type="button" aria-label="Save Markdown" title="Save Markdown"><i data-lucide="save"></i></button>
@@ -13,7 +14,6 @@ export function renderAppShell(): string {
         </nav>
       </header>
       <main class="workspace" aria-label="Markdown workspace">
-        ${renderWorkspaceToolbar()}
         ${renderDocumentRegion()}
       </main>
       ${renderFooter()}
@@ -30,15 +30,18 @@ function renderWorkspaceToolbar(): string {
           <button class="segment" data-action="undo" type="button" aria-label="Undo" title="Undo (Ctrl/Cmd+Z)" disabled><i data-lucide="undo-2"></i></button>
           <button class="segment" data-action="redo" type="button" aria-label="Redo" title="Redo (Ctrl/Cmd+Shift+Z)" disabled><i data-lucide="redo-2"></i></button>
         </div>
+        <span class="action-divider" aria-hidden="true"></span>
         <div class="segmented-control" role="group" aria-label="Editor mode">
-          <button class="segment" data-mode="live-preview" type="button" aria-label="Live" title="Live"><i data-lucide="eye"></i></button>
-          <button class="segment" data-mode="source" type="button" aria-label="Source" title="Source"><i data-lucide="code"></i></button>
+          <button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview"><i data-lucide="eye"></i></button>
+          <button class="segment" data-mode="source" type="button" aria-label="Source Markdown" title="Source Markdown"><i data-lucide="code"></i></button>
         </div>
+        <span class="action-divider" aria-hidden="true"></span>
         <div class="segmented-control layout-control" role="group" aria-label="Pane layout">
           <button class="segment" data-layout="editor" type="button" aria-label="Editor only" title="Editor only"><i data-lucide="panel-left"></i></button>
           <button class="segment" data-layout="split" type="button" aria-label="Split view" title="Split view"><i data-lucide="columns-2"></i></button>
           <button class="segment" data-layout="preview" type="button" aria-label="Rendered view only" title="Rendered view only"><i data-lucide="panel-right"></i></button>
         </div>
+        <span class="action-divider" aria-hidden="true"></span>
         <div class="segmented-control sync-scroll-control" role="group" aria-label="Scroll behavior">
           <button class="toggle-control" data-action="sync-scroll" type="button" aria-label="Toggle synchronized scrolling" aria-pressed="true" title="Toggle synchronized scrolling"><i data-lucide="arrow-down-up"></i></button>
         </div>

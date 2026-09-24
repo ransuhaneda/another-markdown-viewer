@@ -101,6 +101,7 @@ Use focused tests after each related change.
 Run the full check, test, and build commands before a delivery handoff.
 Verify changed behavior in a real browser when the change affects editing, persistence, rendering, file access, print export, or responsive layout.
 Do not claim a check passed without real command output.
+Dev server is open on http://127.0.0.1:5173/
 
 ## Git workflow
 

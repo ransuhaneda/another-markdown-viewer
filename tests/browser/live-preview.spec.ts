@@ -6,6 +6,91 @@ test.beforeEach(async ({ page }) => {
   })
 })
 
+test('Focus mode hides chrome and exits with Escape while restoring focus', async ({ page }) => {
+  await page.goto('/')
+  const entry = page.locator('nav [data-action="focus-mode"]')
+  await entry.click()
+
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-focus-mode', '')
+  await expect(page.locator('.app-header')).toBeHidden()
+  await expect(page.locator('.workspace-toolbar')).toBeHidden()
+  await expect(page.locator('.pane-header').first()).toBeHidden()
+  await expect(page.locator('.app-footer')).toBeHidden()
+  await expect(entry).toHaveAttribute('aria-label', 'Exit Focus mode')
+  await expect(entry).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-pane="editor"]')).toBeVisible()
+  await expect(page.locator('[data-pane="preview"]')).toBeVisible()
+  await expect(page.getByRole('textbox')).toBeFocused()
+
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.app-shell')).not.toHaveAttribute('data-focus-mode', '')
+  await expect(page.locator('.app-header')).toBeVisible()
+  await expect(entry).toBeFocused()
+})
+
+test('Focus mode keeps controls operable on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  await page.locator('[data-layout="preview"]').click()
+  await page.locator('nav [data-action="focus-mode"]').click()
+
+  const exit = page.locator('[data-action="focus-mode-unfocus"]')
+  await expect(exit).toBeVisible()
+  await expect(page.locator('[data-pane="preview"]')).toBeVisible()
+  const exitBox = await exit.boundingBox()
+  expect(exitBox).not.toBeNull()
+  await expect(page.locator('.app-header')).toBeHidden()
+  await expect(exit).toHaveAttribute('aria-pressed', 'true')
+  await exit.click()
+  await expect(page.locator('.app-header')).toBeVisible()
+  expect(exitBox!.x + exitBox!.width).toBeLessThanOrEqual(390)
+  await expect(exit).toBeHidden()
+})
+
+test('Focus mode preserves Source mode and editor-only layout through a full cycle', async ({ page }) => {
+  await page.goto('/')
+  const editor = page.getByRole('textbox')
+  await page.getByRole('button', { name: 'Source', exact: true }).click()
+  await editor.fill('# Preserve this source')
+  await page.locator('button[data-layout="editor"]').click()
+  const textBefore = await editor.textContent()
+  await editor.press('End')
+  const selectionBefore = await page.locator('.cm-content').evaluate(() => document.getSelection()?.toString() ?? '')
+
+  await page.getByRole('button', { name: 'Enter Focus mode' }).click()
+  await expect(page.locator('button[data-layout="editor"]')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-mode="source"]')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-pane="editor"]')).toBeVisible()
+  await expect(page.locator('[data-pane="preview"]')).toBeHidden()
+  expect(await editor.textContent()).toBe(textBefore)
+  expect(await page.locator('.cm-content').evaluate(() => document.getSelection()?.toString() ?? '')).toBe(selectionBefore)
+  await page.keyboard.press('Escape')
+  await expect(page.locator('button[data-layout="editor"]')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-mode="source"]')).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('Focus mode accepts explicit exit and does not write recovery state', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('nav [data-action="focus-mode"]').click()
+  const unfocus = page.locator('[data-action="focus-mode-unfocus"]')
+  await expect(unfocus).toBeVisible()
+  await unfocus.click()
+
+  await expect(page.locator('.app-header')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Enter Focus mode' })).toBeFocused()
+  expect(await page.evaluate(() => localStorage.getItem('markdown-preview:recovery'))).toBeNull()
+})
+
+test('Escape closes Help without exiting Focus mode', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Enter Focus mode' }).click()
+  await page.locator('#help-dialog').evaluate((dialog: HTMLDialogElement) => dialog.showModal())
+
+  await page.keyboard.press('Escape')
+  await expect(page.locator('#help-dialog')).not.toBeVisible()
+  await expect(page.locator('.app-shell')).not.toHaveAttribute('data-focus-mode')
+})
+
 test('opens with an editable CodeMirror Live Preview editor', async ({ page }) => {
   await page.goto('/')
   const editor = page.getByRole('textbox')
@@ -56,12 +141,12 @@ test('styles formatted Live content while preserving syntax access', async ({ pa
   await boldLine.click({ position: { x: 8, y: 8 } })
   await page.keyboard.press('Home')
   await page.keyboard.press('Shift+End')
-  await expect(boldLine).toHaveClass(/cm-selection-line/u)
-  await expect(boldLine.locator('.cm-formatting-inline')).toHaveCount(2)
+  await expect(boldLine.locator('.cm-formatting-inline-visible')).toHaveCount(2)
 
   await page.locator('.cm-line').last().click({ position: { x: 2, y: 8 } })
   await expect(page.locator('.cm-active-line .cm-formatting-inline')).toHaveCount(0)
 })
+
 
 test('places the Live Preview caret on the clicked line after scrolling', async ({ page }) => {
   await page.goto('/')

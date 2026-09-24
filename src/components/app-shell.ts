@@ -9,6 +9,7 @@ export function renderAppShell(): string {
           <button class="icon-button" data-action="save" type="button" aria-label="Save Markdown" title="Save Markdown"><i data-lucide="save"></i></button>
           <span class="action-divider" aria-hidden="true"></span>
           <button class="icon-button icon-button--primary" data-action="pdf" type="button" aria-label="Download PDF" title="Download PDF"><i data-lucide="file-down"></i></button>
+          <button class="icon-button" data-action="focus-mode" type="button" aria-label="Enter Focus mode" aria-pressed="false" title="Enter Focus mode"><i data-lucide="maximize-2"></i></button>
         </nav>
       </header>
       <main class="workspace" aria-label="Markdown workspace">
@@ -17,6 +18,7 @@ export function renderAppShell(): string {
       </main>
       ${renderFooter()}
       ${renderHelpDialog()}
+      <button class="icon-button focus-mode-unfocus" data-action="focus-mode-unfocus" type="button" aria-label="Exit Focus mode" aria-pressed="true" title="Exit Focus mode"><i data-lucide="minimize-2"></i></button>
     </div>`
 }
 
@@ -54,7 +56,7 @@ function renderDocumentRegion(): string {
       <div class="split-handle" role="separator" aria-label="Resize editor and rendered view panes" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"><span aria-hidden="true"></span></div>
       <article class="pane pane-preview" data-pane="preview" aria-label="Rendered view">
         <div class="pane-header"><span class="pane-label">Rendered View</span></div>
-        <div class="preview-content" data-preview></div>
+        <div class="preview-content" data-preview tabindex="-1"></div>
       </article>
     </section>`
 }

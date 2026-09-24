@@ -10,6 +10,7 @@ import {
   setStatus,
   updateActivePreviewBlock,
   updateDocumentView,
+  updateFocusModeView,
   updateHistoryView,
   updateLayoutView,
   updateModeView,
@@ -37,6 +38,7 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
   let recoveryTimer: number | undefined
   let suppressRecovery = false
   let syncingScroll = false
+  let focusMode = false
   const elements = getWorkspaceElements(app)
 
   const scheduleRecovery = (): void => {
@@ -129,6 +131,13 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
   if (recovered) setStatus(app, 'Draft restored locally')
 
   function connectWorkspaceEvents(): void {
+    const toggleFocusMode = (): void => {
+      if (focusMode) exitFocusMode()
+      else enterFocusMode()
+    }
+    elements.enterFocusModeButton.addEventListener('click', toggleFocusMode)
+    elements.focusModeUnfocusButton.addEventListener('click', exitFocusMode)
+    window.addEventListener('keydown', handleFocusModeKeydown)
     elements.undoButton.addEventListener('click', () => { editor.focus(); undoSourceEditor(editor) })
     elements.redoButton.addEventListener('click', () => { editor.focus(); redoSourceEditor(editor) })
     app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => {
@@ -174,6 +183,26 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
       setStatus(app, 'Preparing print preview…')
       window.setTimeout(() => window.print(), 0)
     })
+  }
+
+  function enterFocusMode(): void {
+    if (focusMode) return
+    focusMode = true
+    updateFocusModeView(elements, true)
+    if (state.layout === 'preview') elements.preview.focus()
+    else editor.focus()
+  }
+
+  function exitFocusMode(): void {
+    if (!focusMode) return
+    focusMode = false
+    updateFocusModeView(elements, false)
+    elements.enterFocusModeButton.focus()
+  }
+
+  function handleFocusModeKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape' || !focusMode || elements.helpDialog.open) return
+    exitFocusMode()
   }
 
   async function openDocument(): Promise<void> {

@@ -1,11 +1,15 @@
 import type { EditorView } from '@codemirror/view'
+import { Maximize2, Minimize2 } from 'lucide'
 import { canRedoSourceEditor, canUndoSourceEditor, setSourceEditorLivePreview } from '../editor/source-editor'
 import { findActiveBlock } from '../markdown/live-preview'
 import { prepareRenderedLinks, renderMarkdown } from '../markdown/render-markdown'
 import type { DocumentState, ViewMode, WorkspaceLayout } from '../state/document-state'
 
 export interface WorkspaceElements {
+  appShell: HTMLElement
   editorParent: HTMLElement
+  enterFocusModeButton: HTMLButtonElement
+  focusModeUnfocusButton: HTMLButtonElement
   helpDialog: HTMLDialogElement
   helpTrigger: HTMLButtonElement
   preview: HTMLElement
@@ -18,7 +22,10 @@ export interface WorkspaceElements {
 
 export function getWorkspaceElements(app: HTMLElement): WorkspaceElements {
   return {
+    appShell: requiredElement(app, '.app-shell'),
     editorParent: requiredElement(app, '[data-editor]'),
+    enterFocusModeButton: requiredElement(app, '[data-action="focus-mode"]'),
+    focusModeUnfocusButton: requiredElement(app, '[data-action="focus-mode-unfocus"]'),
     helpDialog: requiredElement(app, '#help-dialog'),
     helpTrigger: requiredElement(app, '[data-action="help"]'),
     preview: requiredElement(app, '[data-preview]'),
@@ -28,6 +35,40 @@ export function getWorkspaceElements(app: HTMLElement): WorkspaceElements {
     undoButton: requiredElement(app, '[data-action="undo"]'),
     workspace: requiredElement(app, '.document-region'),
   }
+}
+
+export function updateFocusModeView(elements: WorkspaceElements, active: boolean): void {
+  elements.appShell.toggleAttribute('data-focus-mode', active)
+  elements.enterFocusModeButton.setAttribute('aria-pressed', String(active))
+  elements.enterFocusModeButton.setAttribute('aria-label', active ? 'Exit Focus mode' : 'Enter Focus mode')
+  elements.enterFocusModeButton.setAttribute('title', active ? 'Exit Focus mode' : 'Enter Focus mode')
+  const previousIcon = elements.enterFocusModeButton.querySelector('svg')
+  if (previousIcon) previousIcon.replaceWith(createFocusModeIcon(active))
+  elements.enterFocusModeButton.classList.toggle('is-active', active)
+  elements.focusModeUnfocusButton.setAttribute('aria-label', 'Exit Focus mode')
+  elements.focusModeUnfocusButton.setAttribute('title', 'Exit Focus mode')
+  elements.focusModeUnfocusButton.setAttribute('aria-pressed', String(active))
+  const floatingIcon = elements.focusModeUnfocusButton.querySelector('svg')
+  if (floatingIcon) floatingIcon.replaceWith(createFocusModeIcon(true))
+  elements.focusModeUnfocusButton.classList.toggle('is-active', active)
+}
+
+function createFocusModeIcon(active: boolean): SVGSVGElement {
+  const icon = active ? Minimize2 : Maximize2
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  for (const [name, value] of Object.entries({
+    xmlns: 'http://www.w3.org/2000/svg', width: '16', height: '16', viewBox: '0 0 24 24',
+    fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round',
+    'stroke-linejoin': 'round', 'aria-hidden': 'true',
+  })) svg.setAttribute(name, value)
+  icon.forEach(([tag, attributes]) => {
+    const element = document.createElementNS('http://www.w3.org/2000/svg', tag)
+    Object.entries(attributes).forEach(([name, value]) => {
+      if (value !== undefined) element.setAttribute(name, String(value))
+    })
+    svg.append(element)
+  })
+  return svg
 }
 
 export function updateDocumentView(app: HTMLElement, elements: WorkspaceElements, state: DocumentState): void {

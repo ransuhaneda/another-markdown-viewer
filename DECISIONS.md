@@ -89,6 +89,11 @@ This file records decisions settled during the project discovery interview. Impl
 - Motion is subtle and limited to pane, panel, and mode transitions; it must respect reduced-motion preferences and never delay writing or cursor movement.
 - V1 UI includes: product name, new/clear document, open file, save/download, PDF export, mode/layout toggle, split-pane resize handle, word/character count, recovery status, keyboard-shortcut help, and Markdown syntax help.
 - Help is limited to the Markdown syntax reference and keyboard shortcuts.
+- Focus mode hides application chrome and pane headers while preserving the current editor mode and pane layout.
+- Focus mode keeps the document panes and split resize handle available. Users can exit with a floating control or `Escape`.
+- Focus mode is session-only. It resets after reload and is not part of document state or local recovery.
+- Entering Focus mode moves focus to the visible document pane. Exiting restores focus to the header control.
+- Focus mode follows the existing one-pane small-screen model and does not change print output.
 
 ## Technology
 

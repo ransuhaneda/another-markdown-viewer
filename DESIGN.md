@@ -237,6 +237,15 @@ Remove non-essential transitions when reduced motion is enabled.
 Keep focus visible on every interactive control.
 Use native browser behavior when it is clear and reliable.
 
+### Focus mode
+
+Hide the application header, workspace toolbar, pane headers, and footer in Focus mode.
+Keep the active document panes and split resize handle visible.
+Keep a compact floating `Exit Focus mode` control visible and keyboard-accessible.
+Return focus to the header Focus mode control when Focus mode ends.
+On small screens, preserve the existing single-pane behavior and keep the exit control reachable.
+Do not add motion for Focus mode. Respect reduced-motion preferences if a transition is added later.
+
 ## Accessibility
 
 Use semantic landmarks and labels.

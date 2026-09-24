@@ -1,6 +1,7 @@
 import createDOMPurify from 'dompurify'
 import hljs from 'highlight.js/lib/common'
 import { marked, Renderer } from 'marked'
+import { parseFrontmatter } from './frontmatter'
 import { sanitizeUrl } from './url-policy'
 
 const markdownRenderer = new Renderer()
@@ -10,7 +11,8 @@ markdownRenderer.code = ({ text, lang }) => {
   const highlighted = language && hljs.getLanguage(language)
     ? hljs.highlight(text, { language }).value
     : hljs.highlightAuto(text).value
-  return `<pre><code class="hljs${languageClass}">${highlighted}</code></pre>`
+  const label = language && /^[a-z0-9_+-]+$/u.test(language) ? escapeHtml(language) : 'Code'
+  return `<pre class="markdown-code-block"><div class="markdown-code-header"><span class="markdown-code-language">${label}</span><button class="markdown-code-copy" type="button" aria-label="Copy code" data-copy-code>Copy</button></div><code class="hljs${languageClass}">${highlighted}</code></pre>`
 }
 
 marked.use({ renderer: markdownRenderer })
@@ -22,17 +24,21 @@ DOMPurify.addHook('uponSanitizeAttribute', (_node, data) => {
 })
 
 export function renderMarkdown(source: string): string {
-  const html = marked.parse(source, { gfm: true, breaks: false, async: false })
-  return DOMPurify.sanitize(addSourceRanges(html, source), {
+  const frontmatter = parseFrontmatter(source)
+  const markdown = frontmatter?.markdown ?? source
+  const html = marked.parse(markdown, { gfm: true, breaks: false, async: false })
+  const rangedHtml = addSourceRanges(html, markdown, frontmatter?.sourceOffset ?? 0)
+  const metadataHtml = frontmatter ? renderFrontmatter(frontmatter.metadata) : ''
+  return DOMPurify.sanitize(`${metadataHtml}${rangedHtml}`, {
     USE_PROFILES: { html: true },
     FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'base', 'form'],
     FORBID_ATTR: ['style'],
     ALLOW_DATA_ATTR: true,
-    ADD_ATTR: ['data-source-start', 'data-source-end', 'target', 'rel', 'loading'],
+    ADD_ATTR: ['data-source-start', 'data-source-end', 'target', 'rel', 'loading', 'data-copy-code', 'aria-label'],
   })
 }
 
-function addSourceRanges(html: string, source: string): string {
+function addSourceRanges(html: string, source: string, sourceOffset = 0): string {
   const ranges = marked.lexer(source)
     .filter((token) => isRangeToken(token.type))
     .map((token) => ({ raw: token.raw.replace(/\n+$/u, ''), start: 0, end: 0 }))
@@ -41,9 +47,9 @@ function addSourceRanges(html: string, source: string): string {
   ranges.forEach((range) => {
     const start = source.indexOf(range.raw, cursor)
     if (start >= 0) {
-      range.start = start
-      range.end = start + range.raw.length
-      cursor = range.end
+      range.start = start + sourceOffset
+      range.end = start + range.raw.length + sourceOffset
+      cursor = start + range.raw.length
     }
   })
 
@@ -77,6 +83,36 @@ function addSourceRanges(html: string, source: string): string {
 
 function isRangeToken(type: string): boolean {
   return ['blockquote', 'code', 'heading', 'html', 'list', 'paragraph', 'table'].includes(type)
+}
+
+function renderFrontmatter(metadata: Record<string, unknown>): string {
+  const rows = Object.entries(metadata).map(([key, value]) => {
+    const renderedValue = key === 'tags'
+      ? (Array.isArray(value) ? value : [value])
+        .map((tag) => `<span class="markdown-frontmatter-tag">${escapeHtml(formatMetadataValue(tag))}</span>`)
+        .join(' ')
+      : escapeHtml(formatMetadataValue(value))
+    return `<tr><th scope="row">${escapeHtml(key)}</th><td>${renderedValue}</td></tr>`
+  }).join('')
+
+  return `<table class="markdown-frontmatter" aria-label="Document metadata"><tbody>${rows}</tbody></table>`
+}
+
+function formatMetadataValue(value: unknown): string {
+  if (value === null) return 'null'
+  if (Array.isArray(value)) return value.map(formatMetadataValue).join(', ')
+  if (typeof value === 'object') return JSON.stringify(value) ?? String(value)
+  return String(value)
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/gu, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  })[character] ?? character)
 }
 
 export function prepareRenderedLinks(container: HTMLElement): void {

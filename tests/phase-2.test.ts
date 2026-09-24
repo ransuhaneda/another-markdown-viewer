@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest'
 import { renderMarkdown } from '../src/markdown/render-markdown'
+import { parseFrontmatter } from '../src/markdown/frontmatter'
 import { clearRecovery, readRecovery, writeRecovery } from '../src/persistence/recovery'
 import { clampCursorPosition, createDocumentState } from '../src/state/document-state'
 import { sanitizeUrl } from '../src/markdown/url-policy'
@@ -21,6 +22,39 @@ describe('phase 2 markdown flow', () => {
     expect(html).toContain('<th align="center">Center</th>')
     expect(html).toContain('<th align="right">Right</th>')
     expect(html).toMatch(/<ol(?:\s[^>]*)?>[\s\S]*<li>First item<ul>[\s\S]*<\/ul>[\s\S]*<\/li>[\s\S]*<\/ol>/u)
+  })
+
+  it('parses YAML frontmatter and keeps its body and original source offset', () => {
+    const source = '---\ntitle: Welcome\ntags: [markdown, notes]\n---\n\n# Content'
+    expect(parseFrontmatter(source)).toEqual({
+      metadata: { title: 'Welcome', tags: ['markdown', 'notes'] },
+      markdown: '\n# Content',
+      sourceOffset: source.indexOf('\n\n# Content') + 1,
+    })
+  })
+
+  it('renders frontmatter metadata without changing the rendered Markdown body', () => {
+    const source = '---\ntitle: Welcome\ntags:\n  - markdown\n  - notes\n---\n# Content'
+    const html = renderMarkdown(source)
+    expect(html).toContain('<table class="markdown-frontmatter"')
+    expect(html).toContain('<th scope="row">title</th><td>Welcome</td>')
+    expect(html).toContain('<span class="markdown-frontmatter-tag">markdown</span> <span class="markdown-frontmatter-tag">notes</span>')
+    expect(html).toContain('>Content</h1>')
+    expect(html).toContain(`data-source-start="${source.indexOf('# Content')}"`)
+    expect(html).not.toContain('---')
+  })
+
+  it('escapes frontmatter values and leaves invalid or unterminated frontmatter visible', () => {
+    const html = renderMarkdown('---\ntitle: "<img src=x onerror=alert(1)>"\n---\nBody')
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;')
+    expect(html).not.toContain('<img src=x')
+    expect(renderMarkdown('---\ntitle: [broken\n---\nBody')).toContain('title: [broken')
+    expect(renderMarkdown('---\ntitle: Open\nBody')).toContain('title: Open')
+  })
+
+  it('does not treat a later horizontal rule as frontmatter', () => {
+    expect(parseFrontmatter('# Heading\n\n---\n')).toBeNull()
+    expect(parseFrontmatter('---\nnot: [valid\n---\n')).toBeNull()
   })
 
   it('round-trips the latest recovery draft', () => {

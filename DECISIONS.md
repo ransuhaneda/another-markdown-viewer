@@ -34,6 +34,10 @@ This file records decisions settled during the project discovery interview. Impl
 ## Markdown support
 
 - V1 targets GitHub Flavored Markdown.
+- Markdown files may start with YAML frontmatter enclosed by `---` delimiters. A closing `...` delimiter is also accepted.
+- Valid YAML frontmatter is parsed and shown as a key/value table above the rendered Markdown. Array values are shown as separate values.
+- Frontmatter remains part of the canonical Markdown source and is not rewritten.
+- Invalid or unterminated frontmatter remains visible as Markdown content.
 - CommonMark and Markdown Extra are future extensions, not v1 requirements.
 - Live Preview should support headings, emphasis, strikethrough, inline code, links, images, blockquotes, ordered and unordered lists, task-list markers, and fenced code blocks.
 - Tables may be rendered in v1 but are not required to receive complex Live Preview editing behavior initially.

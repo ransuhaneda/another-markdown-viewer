@@ -28,7 +28,7 @@ test('Focus mode hides chrome and exits with Escape while restoring focus', asyn
   await expect(entry).toBeFocused()
 })
 
-test('keyboard shortcuts enter Focus mode and appear in the help and control tooltips', async ({ page }) => {
+test('keyboard shortcuts enter Focus mode and appear in help and relevant tooltips', async ({ page }) => {
   await page.goto('/')
   const focusButton = page.locator('nav [data-action="focus-mode"]')
   const saveButton = page.locator('[data-action="save"]')
@@ -37,9 +37,6 @@ test('keyboard shortcuts enter Focus mode and appear in the help and control too
   await expect(saveButton).toHaveAttribute('title', 'Save Markdown (Ctrl/Cmd+S)')
   await expect(page.locator('[data-action="undo"]')).toHaveAttribute('title', 'Undo (Ctrl/Cmd+Z)')
   await expect(page.locator('[data-action="redo"]')).toHaveAttribute('title', 'Redo (Ctrl/Cmd+Shift+Z)')
-  await expect(page.locator('[data-mode="live-preview"]')).toHaveAttribute('title', /Bold Ctrl\/Cmd\+B.*Code block Ctrl\+Shift\+K \/ Cmd\+Option\+C/u)
-  await expect(page.locator('[data-mode="source"]')).toHaveAttribute('title', /Bold Ctrl\/Cmd\+B.*Code block Ctrl\+Shift\+K \/ Cmd\+Option\+C/u)
-
   await page.keyboard.press('Control+Shift+F')
   await expect(page.locator('.app-shell')).toHaveAttribute('data-focus-mode', '')
   await expect(focusButton).toHaveAttribute('title', 'Exit Focus mode (Escape)')

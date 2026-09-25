@@ -32,8 +32,8 @@ function renderWorkspaceToolbar(): string {
         </div>
         <span class="action-divider" aria-hidden="true"></span>
         <div class="segmented-control" role="group" aria-label="Editor mode">
-          <button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview · Bold Ctrl/Cmd+B · Italic Ctrl/Cmd+I · Strikethrough Alt+Shift+S · Link Ctrl/Cmd+K · Code block Ctrl+Shift+K / Cmd+Option+C"><i data-lucide="eye"></i></button>
-          <button class="segment" data-mode="source" type="button" aria-label="Source Markdown" title="Source Markdown · Bold Ctrl/Cmd+B · Italic Ctrl/Cmd+I · Strikethrough Alt+Shift+S · Link Ctrl/Cmd+K · Code block Ctrl+Shift+K / Cmd+Option+C"><i data-lucide="code"></i></button>
+          <button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview"><i data-lucide="eye"></i></button>
+          <button class="segment" data-mode="source" type="button" aria-label="Source Markdown" title="Source Markdown"><i data-lucide="code"></i></button>
         </div>
         <span class="action-divider" aria-hidden="true"></span>
         <div class="segmented-control layout-control" role="group" aria-label="Pane layout">

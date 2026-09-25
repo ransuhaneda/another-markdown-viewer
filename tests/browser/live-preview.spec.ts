@@ -172,6 +172,37 @@ test('styles formatted Live content while preserving syntax access', async ({ pa
   await expect(page.locator('.cm-active-line .cm-formatting-inline')).toHaveCount(0)
 })
 
+test('keeps wrapped Live Preview headings aligned with their first line', async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 900 })
+  await page.goto('/')
+
+  const editor = page.getByRole('textbox')
+  await page.locator('[data-mode="live-preview"]').click()
+  const heading = 'Common Markdown + GitHub-Flavored Markdown with a second line'
+  await editor.fill(`# ${heading}\n\nBody`)
+  await page.locator('.cm-line').filter({ hasText: /^Body$/u }).click()
+
+  const headingText = page.locator('.cm-header-1').filter({ hasText: heading }).last()
+  const lineStarts = await headingText.evaluate((element) => {
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
+    let textNode: Text | null = null
+    while (walker.nextNode()) {
+      if (walker.currentNode.textContent?.startsWith('Common')) {
+        textNode = walker.currentNode as Text
+        break
+      }
+    }
+    if (!textNode) throw new Error('Missing rendered heading text')
+
+    const range = document.createRange()
+    range.selectNodeContents(textNode)
+    return [...range.getClientRects()].map((rect) => ({ left: rect.left, top: rect.top }))
+  })
+
+  expect(lineStarts.length).toBeGreaterThan(1)
+  expect(lineStarts[1].left).toBeCloseTo(lineStarts[0].left, 1)
+})
+
 
 test('places the Live Preview caret on the clicked line after scrolling', async ({ page }) => {
   await page.goto('/')

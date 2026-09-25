@@ -76,7 +76,7 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     state.previewScrollTop = elements.preview.scrollTop
   }
   const setScrollRatio = (source: HTMLElement, target: HTMLElement): void => {
-    if (!state.syncScroll || syncingScroll) return
+    if (!state.syncScroll || state.layout !== 'split' || syncingScroll) return
     const sourceRange = source.scrollHeight - source.clientHeight
     const targetRange = target.scrollHeight - target.clientHeight
     if (sourceRange <= 0 || targetRange <= 0) return
@@ -85,8 +85,12 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     syncingScroll = false
   }
   const updateSyncScrollButton = (): void => {
-    elements.syncScrollButton.setAttribute('aria-pressed', String(state.syncScroll))
-    elements.syncScrollButton.setAttribute('title', state.syncScroll ? 'Turn synchronized scrolling off' : 'Turn synchronized scrolling on')
+    const available = state.layout === 'split'
+    elements.syncScrollButton.setAttribute('aria-pressed', String(available && state.syncScroll))
+    elements.syncScrollButton.setAttribute('title', available
+      ? state.syncScroll ? 'Turn synchronized scrolling off' : 'Turn synchronized scrolling on'
+      : 'Synchronized scrolling is available only in split view')
+    elements.syncScrollButton.disabled = !available
   }
   const applyMode = (mode: ViewMode): void => {
     state.mode = mode
@@ -96,6 +100,7 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
   const applyLayout = (layout: WorkspaceLayout): void => {
     state.layout = layout
     updateLayoutView(app, elements, layout)
+    updateSyncScrollButton()
     scheduleRecovery()
   }
   const replaceDocument = (markdown: string): void => {
@@ -149,6 +154,18 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     elements.preview.addEventListener('click', (event) => {
       const target = event.target
       if (!(target instanceof HTMLElement)) return
+      const copyButton = target.closest<HTMLButtonElement>('[data-copy-code]')
+      if (copyButton) {
+        const code = copyButton.closest('.markdown-code-block')?.querySelector('code')?.textContent ?? ''
+        void navigator.clipboard.writeText(code).then(() => {
+          copyButton.textContent = 'Copied'
+          window.setTimeout(() => { copyButton.textContent = 'Copy' }, 1500)
+        }).catch(() => {
+          copyButton.textContent = 'Copy failed'
+          window.setTimeout(() => { copyButton.textContent = 'Copy' }, 1500)
+        })
+        return
+      }
       const range = readSourceRange(target.closest<HTMLElement>('[data-source-start]') ?? target)
       if (!range) return
       applyMode('source')

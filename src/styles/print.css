@@ -6,6 +6,11 @@
 
   :root {
     color-scheme: light;
+    --color-alert-note: #0969da;
+    --color-alert-tip: #1a7f37;
+    --color-alert-important: #8250df;
+    --color-alert-warning: #9a6700;
+    --color-alert-caution: #cf222e;
   }
 
   body {
@@ -159,12 +164,26 @@
   .preview-content .markdown-frontmatter-tag {
     max-width: 100%;
     border-radius: var(--radius-pill);
-    background: var(--color-accent-soft);
-    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    background: transparent;
+    color: #111417;
+    -webkit-text-fill-color: #111417;
     white-space: nowrap;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+
+  .preview-content blockquote.markdown-alert {
+    border-inline-start: 3px solid var(--alert-color);
+    color: #5f6b73;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .preview-content blockquote.markdown-alert { background-color: color-mix(in srgb, var(--alert-color) 10%, transparent); }
+  .preview-content blockquote.markdown-alert.is-active-source-block { background-color: color-mix(in srgb, var(--alert-color) 10%, transparent) !important; }
+  .preview-content .markdown-alert-title { color: var(--alert-color); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .preview-content .markdown-alert-icon { width: 1rem; height: 1rem; flex: 0 0 auto; stroke: currentColor; }
 
   .preview-content .hljs-comment,
   .preview-content .hljs-quote { color: #5f6b73; }

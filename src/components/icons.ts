@@ -1,19 +1,24 @@
 import {
   ArrowDownUp,
+  CircleAlert,
   CircleHelp,
   Code,
   Columns2,
   Eye,
+  Info,
   FileDown,
   FilePlus,
   FolderOpen,
   Maximize2,
+  Lightbulb,
   Minimize2,
+  OctagonAlert,
   PanelLeft,
   PanelRight,
   Redo2,
   Save,
   Trash,
+  TriangleAlert,
   Undo2,
   X,
   type IconNode,
@@ -21,19 +26,24 @@ import {
 
 const icons: Record<string, IconNode> = {
   'arrow-down-up': ArrowDownUp,
+  'circle-alert': CircleAlert,
   'circle-help': CircleHelp,
   code: Code,
   'columns-2': Columns2,
   eye: Eye,
+  info: Info,
   'file-down': FileDown,
   'file-plus': FilePlus,
   'folder-open': FolderOpen,
+  lightbulb: Lightbulb,
   'maximize-2': Maximize2,
   'minimize-2': Minimize2,
+  'octagon-alert': OctagonAlert,
   'panel-left': PanelLeft,
   'panel-right': PanelRight,
   save: Save,
   trash: Trash,
+  'triangle-alert': TriangleAlert,
   'undo-2': Undo2,
   'redo-2': Redo2,
   x: X,
@@ -42,7 +52,10 @@ const icons: Record<string, IconNode> = {
 export function mountIcons(container: ParentNode): void {
   container.querySelectorAll<HTMLElement>('[data-lucide]').forEach((placeholder) => {
     const icon = icons[placeholder.dataset.lucide ?? '']
-    if (icon) placeholder.replaceWith(createIcon(icon))
+    if (!icon) return
+    const svg = createIcon(icon)
+    svg.classList.add(...placeholder.classList)
+    placeholder.replaceWith(svg)
   })
 }
 

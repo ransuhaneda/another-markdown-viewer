@@ -24,6 +24,36 @@ describe('phase 2 markdown flow', () => {
     expect(html).toMatch(/<ol(?:\s[^>]*)?>[\s\S]*<li>First item<ul>[\s\S]*<\/ul>[\s\S]*<\/li>[\s\S]*<\/ol>/u)
   })
 
+  it('renders GitHub alert blockquotes with typed titles and preserved content', () => {
+    const source = [
+      '> [!NOTE]\n> A note with **emphasis**.',
+      '> [!TIP]\n> A useful tip.',
+      '> [!IMPORTANT]\n> Important information.',
+      '> [!WARNING]\n> A warning.',
+      '> [!CAUTION]\n> A caution.',
+      '> [!UNKNOWN]\n> An ordinary blockquote.',
+    ].join('\n\n')
+    const html = renderMarkdown(source)
+
+    const icons = [
+      ['NOTE', 'info'],
+      ['TIP', 'lightbulb'],
+      ['IMPORTANT', 'circle-alert'],
+      ['WARNING', 'triangle-alert'],
+      ['CAUTION', 'octagon-alert'],
+    ] as const
+    for (const [type] of icons) {
+      expect(html).toContain(`class="markdown-alert markdown-alert-${type.toLowerCase()}"`)
+      expect(html).toContain(`${type}</p>`)
+    }
+    expect(html).toContain('<strong>emphasis</strong>')
+    expect(html).toContain('An ordinary blockquote.')
+    expect(html).toContain('[!UNKNOWN]')
+    expect(html).not.toContain('[!NOTE]')
+    expect(html).toContain('data-source-start="0"')
+    expect(html.match(/class="markdown-alert-icon"/gu)).toHaveLength(5)
+  })
+
   it('parses YAML frontmatter and keeps its body and original source offset', () => {
     const source = '---\ntitle: Welcome\ntags: [markdown, notes]\n---\n\n# Content'
     expect(parseFrontmatter(source)).toEqual({

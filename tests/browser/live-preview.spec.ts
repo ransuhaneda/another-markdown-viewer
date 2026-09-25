@@ -486,6 +486,49 @@ test('renders unsafe destinations as inert content', async ({ page }) => {
   await expect(page.locator('[data-preview]')).toContainText('Visible')
 })
 
+test('renders GitHub alerts in preview and print styles', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('textbox').fill('> [!NOTE]\n> Useful information.\n\n> [!TIP]\n> Helpful advice.\n\n> [!IMPORTANT]\n> Important information.\n\n> [!WARNING]\n> Take care.\n\n> [!CAUTION]\n> Potential consequences.\n')
+
+  const note = page.locator('[data-preview] .markdown-alert-note')
+  const warning = page.locator('[data-preview] .markdown-alert-warning')
+  await expect(note.locator('.markdown-alert-title')).toContainText('NOTE')
+  await expect(warning.locator('.markdown-alert-title')).toContainText('WARNING')
+  await expect(note.locator('.markdown-alert-icon')).toHaveAttribute('viewBox', '0 0 24 24')
+  await expect(note).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(note.locator('.markdown-alert-title')).toHaveCSS('color', 'rgb(68, 147, 248)')
+  await expect(note).not.toContainText('[!NOTE]')
+
+  const darkColors: Record<string, string> = {
+    note: 'rgb(68, 147, 248)',
+    tip: 'rgb(63, 185, 80)',
+    important: 'rgb(163, 113, 247)',
+    warning: 'rgb(210, 153, 34)',
+    caution: 'rgb(248, 81, 73)',
+  }
+  for (const [type, color] of Object.entries(darkColors)) {
+    const alert = page.locator(`[data-preview] .markdown-alert-${type}`)
+    await expect(alert).toHaveCSS('border-inline-start-color', color)
+    await expect(alert).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(alert.locator('.markdown-alert-title')).toHaveCSS('color', color)
+  }
+
+  await page.emulateMedia({ media: 'print' })
+  await expect(warning).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  const lightColors: Record<string, string> = {
+    note: 'rgb(9, 105, 218)',
+    tip: 'rgb(26, 127, 55)',
+    important: 'rgb(130, 80, 223)',
+    warning: 'rgb(154, 103, 0)',
+    caution: 'rgb(207, 34, 46)',
+  }
+  for (const [type, color] of Object.entries(lightColors)) {
+    const alert = page.locator(`[data-preview] .markdown-alert-${type}`)
+    await expect(alert).toHaveCSS('border-inline-start-color', color)
+    await expect(alert.locator('.markdown-alert-title')).toHaveCSS('color', color)
+  }
+})
+
 test('converts rich HTML paste into Markdown', async ({ page }) => {
   await page.goto('/')
   const editor = page.getByRole('textbox')

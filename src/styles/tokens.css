@@ -12,6 +12,13 @@
   --color-on-accent: #0b1016;
   --color-positive: #a7e3c1;
   --color-warning: #f2c879;
+
+  --color-alert-note: #4493f8;
+  --color-alert-tip: #3fb950;
+  --color-alert-important: #a371f7;
+  --color-alert-warning: #d29922;
+  --color-alert-caution: #f85149;
+
   --color-caret: #ffffff;
   --document-body-size: 1rem;
   --document-body-leading: 1.6;

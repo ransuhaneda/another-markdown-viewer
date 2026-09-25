@@ -44,6 +44,13 @@ describe('phase 2 markdown flow', () => {
     expect(html).not.toContain('---')
   })
 
+  it('renders nested frontmatter mappings as wrapped block YAML', () => {
+    const html = renderMarkdown('---\ncolors:\n  primary: "#8CB4FF"\n  surface:\n    raised: "#20262C"\n---\nBody')
+
+    expect(html).toContain('<pre class="markdown-frontmatter-block"><code>primary: "#8CB4FF"\nsurface:\n  raised: "#20262C"</code></pre>')
+    expect(html).not.toContain('{"primary"')
+  })
+
   it('escapes frontmatter values and leaves invalid or unterminated frontmatter visible', () => {
     const html = renderMarkdown('---\ntitle: "<img src=x onerror=alert(1)>"\n---\nBody')
     expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;')

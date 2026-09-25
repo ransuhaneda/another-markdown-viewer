@@ -1,6 +1,7 @@
 import createDOMPurify from 'dompurify'
 import hljs from 'highlight.js/lib/common'
 import { marked, Renderer } from 'marked'
+import { stringify as stringifyYaml } from 'yaml'
 import { parseFrontmatter } from './frontmatter'
 import { sanitizeUrl } from './url-policy'
 
@@ -91,11 +92,17 @@ function renderFrontmatter(metadata: Record<string, unknown>): string {
       ? (Array.isArray(value) ? value : [value])
         .map((tag) => `<span class="markdown-frontmatter-tag">${escapeHtml(formatMetadataValue(tag))}</span>`)
         .join(' ')
+      : isMetadataMapping(value)
+        ? `<pre class="markdown-frontmatter-block"><code>${escapeHtml(stringifyYaml(value, { collectionStyle: 'block', indent: 2, lineWidth: 0 }).trimEnd())}</code></pre>`
       : escapeHtml(formatMetadataValue(value))
     return `<tr><th scope="row">${escapeHtml(key)}</th><td>${renderedValue}</td></tr>`
   }).join('')
 
   return `<table class="markdown-frontmatter" aria-label="Document metadata"><tbody>${rows}</tbody></table>`
+}
+
+function isMetadataMapping(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
 function formatMetadataValue(value: unknown): string {

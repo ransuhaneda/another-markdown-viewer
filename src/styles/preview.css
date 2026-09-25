@@ -41,7 +41,9 @@
 .preview-content .markdown-frontmatter { margin: 0 0 var(--space-5); font-size: 0.875rem; }
 .preview-content .markdown-frontmatter th { width: 9rem; padding: var(--space-1) var(--space-2); background: transparent; color: var(--color-ink-soft); font-weight: 700; text-align: end; }
 .preview-content .markdown-frontmatter td { padding: var(--space-1) var(--space-2); }
-.preview-content .markdown-frontmatter-tag { display: inline-block; margin: 0 var(--space-1) var(--space-1) 0; padding: 0 var(--space-2); border-radius: var(--radius-sm); background: var(--color-accent-soft); color: var(--color-accent); }
+.preview-content .markdown-frontmatter-tag { display: inline-block; margin: 0 var(--space-1) var(--space-1) 0; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--color-accent-soft); color: var(--color-accent); white-space: nowrap; }
+.preview-content .markdown-frontmatter-block { max-width: 100%; margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.preview-content .markdown-frontmatter-block code { white-space: inherit; }
 .preview-content th[align='center'], .preview-content td[align='center'] { text-align: center; }
 .preview-content th[align='right'], .preview-content td[align='right'] { text-align: end; }
 .preview-content img { max-width: 100%; height: auto; }

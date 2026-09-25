@@ -56,6 +56,12 @@
     height: auto;
     overflow: visible;
     padding: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .preview-content > * {
+    max-width: 100%;
+    min-width: 0;
   }
 
   /* Layout state and the narrow-screen rules must not hide the print source. */
@@ -83,17 +89,81 @@
     page-break-inside: avoid;
   }
 
-  .preview-content pre {
+  .preview-content pre,
+  .preview-content pre.markdown-code-block,
+  .preview-content .markdown-frontmatter-block {
+    max-width: 100%;
+    min-width: 0;
     overflow: visible;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     border: 1px solid #d6dadd;
-    background: #f4f6f7;
+    background: #f4f6f7 !important;
     color: #111417;
   }
 
-  .preview-content pre code.hljs {
+  .preview-content pre code.hljs,
+  .preview-content pre.markdown-code-block code.hljs,
+  .preview-content .markdown-frontmatter-block code {
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     color: #263238;
+    background: transparent !important;
+  }
+
+  .preview-content .markdown-code-header {
+    flex-wrap: wrap;
+    overflow-wrap: anywhere;
+    color: #364149;
+  }
+
+  .preview-content .markdown-code-copy {
+    display: none !important;
+  }
+
+  .preview-content .markdown-frontmatter {
+    table-layout: fixed;
+    overflow-wrap: anywhere;
+  }
+
+  .preview-content .markdown-frontmatter th {
+    width: 9rem;
+    overflow-wrap: anywhere;
+    color: #364149;
+  }
+
+  .preview-content .markdown-frontmatter td,
+  .preview-content table:not(.markdown-frontmatter) td,
+  .preview-content table:not(.markdown-frontmatter) th {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .preview-content .markdown-frontmatter-block,
+  .preview-content .markdown-frontmatter-block code {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    color: #263238;
+    background: transparent !important;
+  }
+
+  .preview-content .markdown-frontmatter-tag {
+    max-width: 100%;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    white-space: nowrap;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .preview-content .hljs-comment,
@@ -135,6 +205,7 @@
   .preview-content table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
   }
 
   .preview-content th,

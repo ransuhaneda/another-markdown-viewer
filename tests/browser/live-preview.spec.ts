@@ -216,8 +216,9 @@ test('renders YAML frontmatter above the Markdown body without changing the sour
   await expect(metadata.locator('tr').nth(1).locator('td span')).toHaveCount(0)
   const tags = metadata.locator('.markdown-frontmatter-tag')
   await expect(tags).toHaveText(['markdown', 'live-preview', 'gfm'])
-  await expect(tags.first()).toHaveCSS('background-color', 'rgb(36, 53, 79)')
-  await expect(tags.first()).toHaveCSS('color', 'rgb(140, 180, 255)')
+  await expect(tags.first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(tags.first()).toHaveCSS('color', 'rgb(241, 244, 245)')
+  await expect(tags.first()).toHaveCSS('border-top-color', 'rgb(140, 180, 255)')
   await expect(metadata.locator('tr').nth(1).locator('td')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(metadata.locator('tr').nth(1).locator('th')).toHaveCSS('text-align', 'end')
   await expect(page.locator('[data-preview] h1')).toHaveText('Rendered body')
@@ -415,6 +416,28 @@ test('renders the initial document before the first edit', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('[data-preview]')).toContainText('Bold and italic text')
   await expect(page.locator('[data-preview] table')).toHaveCount(3)
+})
+
+test('uses the full available width for rendered content', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  await page.getByRole('textbox').fill('# Wide preview\n\nThis paragraph should use the available preview width.')
+  await page.locator('[data-layout="preview"]').click()
+
+  const paragraph = page.locator('[data-preview] p')
+  const widths = await paragraph.evaluate((element) => {
+    const preview = element.parentElement!
+    const style = getComputedStyle(preview)
+    return {
+      previewWidth: preview.getBoundingClientRect().width,
+      contentWidth: preview.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+      paragraphWidth: element.getBoundingClientRect().width,
+      maxWidth: getComputedStyle(element).maxWidth,
+    }
+  })
+
+  expect(widths.previewWidth).toBeGreaterThan(800)
+  expect(widths.paragraphWidth).toBeCloseTo(widths.contentWidth, 0)
 })
 
 test('keeps mobile editor and preview layouts usable', async ({ page }) => {

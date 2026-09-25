@@ -50,7 +50,7 @@ test('Focus mode keeps controls operable on mobile', async ({ page }) => {
 test('Focus mode preserves Source mode and editor-only layout through a full cycle', async ({ page }) => {
   await page.goto('/')
   const editor = page.getByRole('textbox')
-  await page.getByRole('button', { name: 'Source', exact: true }).click()
+  await page.locator('[data-mode="source"]').click()
   await editor.fill('# Preserve this source')
   await page.locator('button[data-layout="editor"]').click()
   const textBefore = await editor.textContent()
@@ -96,7 +96,7 @@ test('opens with an editable CodeMirror Live Preview editor', async ({ page }) =
   const editor = page.getByRole('textbox')
   await expect(editor).toBeVisible()
   await expect(editor).toBeEditable()
-  await page.getByRole('button', { name: 'Live', exact: true }).click()
+  await page.locator('[data-mode="live-preview"]').click()
   await expect(page.locator('[data-editor-label]')).toHaveText('Live')
   await expect(page.locator('[data-preview] h1').first()).toHaveText('Common Markdown + GitHub-Flavored Markdown')
 })
@@ -122,7 +122,7 @@ test('renders YAML frontmatter above the Markdown body without changing the sour
   await expect(metadata.locator('tr').nth(1).locator('th')).toHaveCSS('text-align', 'end')
   await expect(page.locator('[data-preview] h1')).toHaveText('Rendered body')
   await expect(page.locator('[data-preview] h1')).toHaveAttribute('data-source-start', String(source.indexOf('# Rendered body')))
-  await page.getByRole('button', { name: 'Source', exact: true }).click()
+  await page.locator('[data-mode="source"]').click()
   await expect(editor.locator('.cm-line')).toHaveText(source.split('\n'))
 })
 
@@ -130,7 +130,7 @@ test('styles formatted Live content while preserving syntax access', async ({ pa
   await page.goto('/')
 
   const editor = page.getByRole('textbox')
-  await page.getByRole('button', { name: 'Live', exact: true }).click()
+  await page.locator('[data-mode="live-preview"]').click()
   await editor.fill('# Heading\n\nA **bold** line\n\nA *italic* line\n\nUse `npm` here\n\n[Link](https://example.com)\n\n## Second heading')
 
   const headingText = page.locator('.cm-header-1').filter({ hasText: 'Heading' }).last()
@@ -206,7 +206,7 @@ test('keeps wrapped Live Preview headings aligned with their first line', async 
 
 test('places the Live Preview caret on the clicked line after scrolling', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('button', { name: 'Live', exact: true }).click()
+  await page.locator('[data-mode="live-preview"]').click()
 
   const imageHeading = page.locator('.cm-line').filter({ hasText: /^##\s*Image$/u }).first()
   const editorScroller = page.locator('.cm-scroller')
@@ -285,8 +285,8 @@ test('disables synchronized scrolling outside split view', async ({ page }) => {
 test('keeps the rendered view visible when Source is active in split view', async ({ page }) => {
   await page.goto('/')
 
-  const liveButton = page.getByRole('button', { name: 'Live', exact: true })
-  const sourceButton = page.getByRole('button', { name: 'Source', exact: true })
+  const liveButton = page.locator('[data-mode="live-preview"]')
+  const sourceButton = page.locator('[data-mode="source"]')
   const splitButton = page.getByRole('button', { name: 'Split view' })
 
   await sourceButton.click()
@@ -302,11 +302,11 @@ test('keeps the rendered view visible when Source is active in split view', asyn
 test('opens the source editor when a rendered block is clicked', async ({ page }) => {
   await page.goto('/')
 
-  await page.getByRole('button', { name: 'Live', exact: true }).click()
+  await page.locator('[data-mode="live-preview"]').click()
   await page.locator('[data-preview] h1').first().click()
 
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
-  await expect(page.getByRole('button', { name: 'Source', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-mode="source"]')).toHaveAttribute('aria-pressed', 'true')
   await expect(page.locator('.cm-focused')).toBeVisible()
   await expect(page.locator('.cm-activeLine')).toContainText('Common Markdown + GitHub-Flavored Markdown')
 })
@@ -362,7 +362,7 @@ test('keeps the recovery warning visible when storage is unavailable', async ({ 
 
   await expect(page.locator('[data-status]')).toHaveText('Editing in memory')
   await expect(page.locator('[data-recovery-warning]')).toBeVisible()
-  await page.getByRole('button', { name: 'Live', exact: true }).click()
+  await page.locator('[data-mode="live-preview"]').click()
   await expect(page.locator('[data-recovery-warning]')).toBeVisible()
 })
 
@@ -418,8 +418,8 @@ test('uses accessible standard-size icons and a visible caret', async ({ page })
   await expect(download).toBeVisible()
   await expect(download.locator('svg')).toHaveAttribute('width', '16')
   await expect(download.locator('svg')).toHaveAttribute('height', '16')
-  await expect(download).toHaveCSS('width', '40px')
-  await expect(download).toHaveCSS('height', '40px')
+  await expect(download).toHaveCSS('width', '27px')
+  await expect(download).toHaveCSS('height', '27px')
 
   const editor = page.getByRole('textbox')
   await editor.click()

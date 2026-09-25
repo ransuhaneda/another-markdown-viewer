@@ -26,6 +26,7 @@ Do not implement an item without an explicit product decision.
 - CommonMark as a separate selectable or extended compatibility target.
 - Markdown Extra.
 - Footnotes if they require special product behavior.
+- LaTeX math rendering for inline and display equations.
 
 ## Possible later improvements
 
@@ -40,6 +41,6 @@ Do not implement an item without an explicit product decision.
 - Additional browser and mobile verification tooling.
 - MD-Files came from obsidian, wich has a lot of yaml-Information in the header.
 - use highlight.js or a more broad syntax highlighting
-- Render mermaid diagrams (flowchart, sequence, gantt, ...) from mermaid fenced code blocks
+- Render Mermaid diagrams (flowcharts, sequence diagrams, Gantt charts, and other supported diagram types) from Mermaid fenced code blocks.
 - https://github.com/ezyuzin/NppAnotherMarkdown
 - https://medium.com/@LeeAbner/introduce-typora-why-another-markdown-editor-c86e679828d5

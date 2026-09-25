@@ -161,7 +161,7 @@ Use a simple application frame:
 
 Desktop split view uses two readable panes.
 The split handle must remain easy to discover and operate.
-Preview content uses a readable maximum width inside its pane.
+Preview content uses the available width inside its pane.
 Source content uses the available editor width without unnecessary decoration.
 
 On small screens, show one pane at a time.

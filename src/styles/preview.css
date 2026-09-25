@@ -1,5 +1,4 @@
 .preview-content { width: 100%; height: 100%; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: clamp(var(--space-3), 5vw, var(--space-5)); font-size: var(--document-body-size); line-height: var(--document-body-leading); scrollbar-color: var(--color-accent) transparent; scrollbar-width: thin; }
-.preview-content > * { max-width: 46rem; }
 .preview-content::-webkit-scrollbar { width: var(--scrollbar-size); height: var(--scrollbar-size); }
 .preview-content::-webkit-scrollbar-button,
 .preview-content::-webkit-scrollbar-button:single-button,
@@ -28,8 +27,9 @@
 .preview-content .markdown-code-copy { padding: var(--space-1) var(--space-2); border: 1px solid var(--color-rule); border-radius: var(--radius-sm); background: transparent; color: inherit; font: inherit; cursor: pointer; }
 .preview-content .markdown-code-copy:hover, .preview-content .markdown-code-copy:focus-visible { border-color: var(--color-accent); color: var(--color-ink); }
 .preview-content pre.markdown-code-block code.hljs { display: block; min-width: max-content; padding: var(--space-4); background: transparent; color: inherit; }
-.preview-content pre:not(.markdown-code-block) { overflow-x: auto; padding: var(--space-4); border: 1px solid var(--color-rule); border-radius: var(--radius-sm); background: #20262c; color: #e6edf3; }
+.preview-content pre:not(.markdown-code-block):not(.markdown-frontmatter-block) { overflow-x: auto; padding: var(--space-4); border: 1px solid var(--color-rule); border-radius: var(--radius-sm); background: #20262c; color: #e6edf3; }
 .preview-content pre:not(.markdown-code-block) code.hljs { display: block; overflow-x: auto; padding: 0; background: transparent; color: inherit; }
+.preview-content pre.markdown-frontmatter-block { padding: 0; border: 0; }
 .hljs-comment, .hljs-quote { color: #8b969e; }
 .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link { color: #c792ea; }
 .hljs-string, .hljs-title, .hljs-name, .hljs-type, .hljs-attribute, .hljs-symbol, .hljs-bullet, .hljs-addition { color: #a7e3c1; }

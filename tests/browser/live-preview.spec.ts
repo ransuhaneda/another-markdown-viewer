@@ -101,6 +101,31 @@ test('opens with an editable CodeMirror Live Preview editor', async ({ page }) =
   await expect(page.locator('[data-preview] h1').first()).toHaveText('Common Markdown + GitHub-Flavored Markdown')
 })
 
+test('renders YAML frontmatter above the Markdown body without changing the source', async ({ page }) => {
+  await page.goto('/')
+  const source = '---\ntitle: Welcome to Markdown Viewer\ndescription: Browser-based Markdown editor\nauthor: Example\ntags: [markdown, live-preview, gfm]\n---\n\n# Rendered body'
+  const editor = page.getByRole('textbox')
+  await editor.fill(source)
+
+  const metadata = page.locator('[data-preview] .markdown-frontmatter')
+  await expect(metadata).toBeVisible()
+  await expect(metadata.locator('tbody tr')).toHaveCount(4)
+  await expect(metadata.locator('tr').nth(0).locator('th')).toHaveText('title')
+  await expect(metadata.locator('tr').nth(0).locator('td')).toHaveText('Welcome to Markdown Viewer')
+  await expect(metadata.locator('tr').nth(1).locator('td')).toHaveText('Browser-based Markdown editor')
+  await expect(metadata.locator('tr').nth(1).locator('td span')).toHaveCount(0)
+  const tags = metadata.locator('.markdown-frontmatter-tag')
+  await expect(tags).toHaveText(['markdown', 'live-preview', 'gfm'])
+  await expect(tags.first()).toHaveCSS('background-color', 'rgb(36, 53, 79)')
+  await expect(tags.first()).toHaveCSS('color', 'rgb(140, 180, 255)')
+  await expect(metadata.locator('tr').nth(1).locator('td')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(metadata.locator('tr').nth(1).locator('th')).toHaveCSS('text-align', 'end')
+  await expect(page.locator('[data-preview] h1')).toHaveText('Rendered body')
+  await expect(page.locator('[data-preview] h1')).toHaveAttribute('data-source-start', String(source.indexOf('# Rendered body')))
+  await page.getByRole('button', { name: 'Source', exact: true }).click()
+  await expect(editor.locator('.cm-line')).toHaveText(source.split('\n'))
+})
+
 test('styles formatted Live content while preserving syntax access', async ({ page }) => {
   await page.goto('/')
 
@@ -191,6 +216,39 @@ test('keeps long documents inside independently scrolling panes', async ({ page 
   expect(await preview.evaluate((element) => element.offsetWidth)).toBe(previewPaneWidth)
   expect(await editorScroller.evaluate((element) => getComputedStyle(element, '::-webkit-scrollbar-button').display)).toBe('none')
   expect(await preview.evaluate((element) => getComputedStyle(element, '::-webkit-scrollbar-button').display)).toBe('none')
+})
+
+test('disables synchronized scrolling outside split view', async ({ page }) => {
+  await page.goto('/')
+
+  const editor = page.getByRole('textbox')
+  const longDocument = Array.from({ length: 180 }, (_, index) => `## Section ${index + 1}\n\nParagraph ${index + 1}.`).join('\n\n')
+  await editor.fill(longDocument)
+
+  const editorScroller = page.locator('.cm-scroller')
+  const preview = page.locator('[data-preview]')
+  const syncButton = page.locator('[data-action="sync-scroll"]')
+  await syncButton.click()
+  await page.locator('[data-layout="editor"]').click()
+
+  await expect(syncButton).toBeDisabled()
+  await expect(syncButton).toHaveAttribute('aria-pressed', 'false')
+  await editorScroller.evaluate((element) => { element.scrollTop = 1200 })
+
+  expect(await editorScroller.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
+  expect(await preview.evaluate((element) => element.scrollTop)).toBe(0)
+
+  await page.locator('[data-layout="preview"]').click()
+  await expect(syncButton).toBeDisabled()
+  const editorScrollTop = await editorScroller.evaluate((element) => element.scrollTop)
+  await preview.evaluate((element) => { element.scrollTop = 1200 })
+  expect(await preview.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
+  expect(await editorScroller.evaluate((element) => element.scrollTop)).toBe(editorScrollTop)
+
+  await page.locator('[data-layout="split"]').click()
+  await expect(syncButton).toBeEnabled()
+  await editorScroller.evaluate((element) => { element.scrollTop = 1600 })
+  await expect.poll(() => preview.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
 })
 
 test('keeps the rendered view visible when Source is active in split view', async ({ page }) => {

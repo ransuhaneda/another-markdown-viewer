@@ -1,6 +1,6 @@
 import { Compartment, EditorSelection, EditorState, type Extension, type Range } from '@codemirror/state'
 import { syntaxTree } from '@codemirror/language'
-import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate, highlightActiveLine, keymap } from '@codemirror/view'
+import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate, highlightActiveLine, keymap, lineNumbers } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { history, historyKeymap, redo, redoDepth, undo, undoDepth } from '@codemirror/commands'
 import {
@@ -23,6 +23,7 @@ export interface SourceEditorSnapshot {
 }
 
 const livePreviewMode = new Compartment()
+const sourceLineNumbers = new Compartment()
 
 const collapseHeadingSeparator = ViewPlugin.fromClass(class {
   decorations: DecorationSet
@@ -155,7 +156,10 @@ function headingSeparatorDecorations(view: EditorView): DecorationSet {
 function configureLivePreview(editor: EditorView, enabled: boolean): void {
   editor.dom.classList.toggle('cm-live-preview', enabled)
   editor.dom.classList.toggle('cm-source', !enabled)
-  editor.dispatch({ effects: livePreviewMode.reconfigure(enabled ? livePreviewExtensions : []) })
+  editor.dispatch({ effects: [
+    livePreviewMode.reconfigure(enabled ? livePreviewExtensions : []),
+    sourceLineNumbers.reconfigure(enabled ? [] : lineNumbers()),
+  ] })
 }
 
 function createEditorTheme(): Extension {
@@ -163,7 +167,8 @@ function createEditorTheme(): Extension {
     '&': { height: '100%', backgroundColor: 'transparent', color: 'var(--color-ink)' },
     '.cm-scroller': { overflow: 'auto', fontFamily: 'var(--font-body)' },
     '.cm-content': { minHeight: '100%', padding: 'var(--space-6)', caretColor: 'var(--color-caret)', fontFamily: 'var(--font-body)', fontSize: 'var(--document-body-size)', lineHeight: 'var(--document-body-leading)' },
-    '.cm-gutters': { display: 'none' },
+    '.cm-gutters': { backgroundColor: 'transparent', borderRight: '1px solid var(--color-rule)', color: 'var(--color-ink-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.875em' },
+    '.cm-lineNumbers .cm-gutterElement': { minWidth: '2ch', padding: '0 var(--space-3)' },
     '.cm-line': { padding: '0' },
     '.cm-focused': { outline: 'none' },
     '&.cm-focused .cm-cursor': { borderLeft: '2px solid var(--color-caret)' },
@@ -203,6 +208,7 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
       keymap.of(historyKeymap),
       highlightActiveLine(),
       livePreviewMode.of(livePreviewExtensions),
+      sourceLineNumbers.of([]),
       EditorView.lineWrapping,
       EditorView.domEventHandlers({
         paste: (event, view) => {

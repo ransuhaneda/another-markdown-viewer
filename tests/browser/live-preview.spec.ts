@@ -115,6 +115,22 @@ test('Markdown formatting shortcuts edit selected text in Live and Source modes'
   await expect(page.locator('[data-preview] strong')).toHaveText('bold text')
 })
 
+test('shows logical line numbers in Source mode only', async ({ page }) => {
+  await page.goto('/')
+  const editor = page.getByRole('textbox')
+  const lineNumbers = page.locator('.cm-lineNumbers .cm-gutterElement:visible')
+
+  await editor.fill('first\n\nthird')
+  await expect(lineNumbers).toHaveText(['1', '2', '3'])
+
+  await editor.press('Control+End')
+  await editor.press('Enter')
+  await expect(lineNumbers).toHaveText(['1', '2', '3', '4'])
+
+  await page.locator('[data-mode="live-preview"]').click()
+  await expect(lineNumbers).toHaveCount(0)
+})
+
 test('Focus mode keeps controls operable on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')

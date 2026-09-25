@@ -45,6 +45,8 @@ This file records decisions settled during the project discovery interview. Impl
 - Rich-text paste should preserve Markdown when present and convert common formatting to Markdown when needed.
 - Pasted HTML should convert common safe elements to Markdown and preserve unsupported HTML in the source.
 - Raw HTML blocks are supported subject to sanitization.
+- The `<kbd>` HTML element is supported in Markdown and uses a dark keycap style in Preview.
+- Print output uses a light keycap style.
 
 ## Rendering and security
 

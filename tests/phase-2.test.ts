@@ -16,6 +16,12 @@ describe('phase 2 markdown flow', () => {
     expect(html).not.toContain('<script>')
   })
 
+  it('preserves safe keyboard key markup', () => {
+    const html = renderMarkdown('Press <kbd>Ctrl</kbd> + <kbd>B</kbd> for bold text.')
+
+    expect(html).toContain('<kbd>Ctrl</kbd> + <kbd>B</kbd>')
+  })
+
   it('renders GFM table alignment and preserves nested list structure', () => {
     const html = renderMarkdown('| Left | Center | Right |\n| :--- | :----: | ----: |\n| Text | Text | 100 |\n\n1. First item\n   - Sub-item\n2. Second item')
     expect(html).toContain('<th align="left">Left</th>')

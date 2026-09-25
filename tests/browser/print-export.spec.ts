@@ -13,12 +13,23 @@ test('print layout wraps metadata and code without copy controls', async ({ page
     '    surface: "#20262C"',
     '---',
     '',
+    'Run `npm install` first.',
+    '',
     '```typescript',
     `const longLine = '${'long-code-value-'.repeat(14)}'`,
     '```',
   ].join('\n')
   await page.getByRole('textbox').fill(source)
   await expect(page.locator('.markdown-frontmatter-block')).toBeVisible()
+
+  const inlineCode = await page.locator('.preview-content p code').evaluate((element) => {
+    const style = getComputedStyle(element)
+    return { color: style.color, background: style.backgroundColor, fontFamily: style.fontFamily }
+  })
+  const mappingBlock = await page.locator('.markdown-frontmatter-block').evaluate((element) => {
+    const style = getComputedStyle(element)
+    return { padding: style.padding, borderWidth: style.borderWidth }
+  })
 
   await page.emulateMedia({ media: 'print' })
 

@@ -211,8 +211,9 @@ Do not let long documents scroll the application frame.
 Use readable prose spacing.
 Keep headings distinct from body text.
 Keep links visibly interactive.
+Render `<kbd>` elements as compact, dark, bordered keycaps. Use a light keycap style in print output.
 Show frontmatter in a compact Obsidian-style property table.
-Keep metadata values plain, and use accent-colored chips only for tags.
+Keep metadata values plain, and use transparent tag chips with white text and accent borders.
 Keep code blocks scrollable without breaking the page.
 Keep images responsive.
 Use captions and figure spacing when the document provides them.

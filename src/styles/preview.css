@@ -21,6 +21,7 @@
 .preview-content li > ul, .preview-content li > ol { margin-block: var(--space-2); }
 .preview-content a { color: var(--color-accent); }
 .preview-content code, .preview-content pre { font-family: var(--font-mono); }
+.preview-content :not(pre) > code { padding: 0.1em 0.3em; border-radius: var(--radius-sm); background: var(--color-raised); color: var(--color-accent); font-size: 0.9em; }
 .preview-content kbd { display: inline-block; padding: 0.1em 0.4em; border: 1px solid var(--color-rule); border-radius: var(--radius-sm); background: var(--color-raised); color: var(--color-ink); font: 0.85em var(--font-mono); line-height: 1.4; white-space: nowrap; }
 .preview-content pre.markdown-code-block { overflow-x: auto; overflow-y: hidden; margin-block: 0 var(--space-5); padding: 0; border: 1px solid var(--color-rule); border-radius: var(--radius-sm); background: #20262c; color: #e6edf3; }
 .preview-content .markdown-code-header { display: flex; align-items: center; justify-content: space-between; min-height: 2.25rem; padding-inline: var(--space-3); border-bottom: 1px solid var(--color-rule); color: var(--color-ink-muted); font: 0.75rem var(--font-mono); }

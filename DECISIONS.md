@@ -29,7 +29,7 @@ This file records decisions settled during the project discovery interview. Impl
 - Both editor modes support split view. The rendered pane stays visible when Source is active.
 - On small screens, show one pane at a time with a clear editor/preview toggle.
 - Keep the application frame fixed for long documents. The editor and Rendered View scroll independently.
-- The initial keyboard scope is standard text editing only; no command palette or custom shortcut system in v1.
+- Keyboard shortcuts support standard text editing, Markdown formatting, explicit Markdown save, and Focus mode. Bold uses `Ctrl/Cmd+B`, italic uses `Ctrl/Cmd+I`, strikethrough uses `Alt+Shift+S`, links use `Ctrl/Cmd+K`, and code blocks use `Ctrl+Shift+K` or `Cmd+Option+C` on macOS. No command palette is included in v1.
 
 ## Markdown support
 

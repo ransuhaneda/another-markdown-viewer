@@ -33,7 +33,6 @@ Do not implement an item without an explicit product decision.
 - More recovery history.
 - IndexedDB recovery for larger documents.
 - A configurable command palette.
-- Additional keyboard shortcuts.
 - Expanded code-language support.
 - More advanced image layout helpers.
 - A dedicated PDF generation path if browser print styles cannot meet the quality contract.

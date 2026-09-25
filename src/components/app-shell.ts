@@ -7,10 +7,10 @@ export function renderAppShell(): string {
         <nav class="header-toolbar" aria-label="Document actions">
           <button class="icon-button" data-action="new" type="button" aria-label="New document" title="New document"><i data-lucide="file-plus"></i></button>
           <button class="icon-button" data-action="open" type="button" aria-label="Open file" title="Open file"><i data-lucide="folder-open"></i></button>
-          <button class="icon-button" data-action="save" type="button" aria-label="Save Markdown" title="Save Markdown"><i data-lucide="save"></i></button>
+          <button class="icon-button" data-action="save" type="button" aria-label="Save Markdown" title="Save Markdown (Ctrl/Cmd+S)"><i data-lucide="save"></i></button>
           <span class="action-divider" aria-hidden="true"></span>
           <button class="icon-button icon-button--primary" data-action="pdf" type="button" aria-label="Download PDF" title="Download PDF"><i data-lucide="file-down"></i></button>
-          <button class="icon-button" data-action="focus-mode" type="button" aria-label="Enter Focus mode" aria-pressed="false" title="Enter Focus mode"><i data-lucide="maximize-2"></i></button>
+          <button class="icon-button" data-action="focus-mode" type="button" aria-label="Enter Focus mode" aria-pressed="false" title="Enter Focus mode (Ctrl/Cmd+Shift+F)"><i data-lucide="maximize-2"></i></button>
         </nav>
       </header>
       <main class="workspace" aria-label="Markdown workspace">
@@ -32,8 +32,8 @@ function renderWorkspaceToolbar(): string {
         </div>
         <span class="action-divider" aria-hidden="true"></span>
         <div class="segmented-control" role="group" aria-label="Editor mode">
-          <button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview"><i data-lucide="eye"></i></button>
-          <button class="segment" data-mode="source" type="button" aria-label="Source Markdown" title="Source Markdown"><i data-lucide="code"></i></button>
+          <button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview · Bold Ctrl/Cmd+B · Italic Ctrl/Cmd+I · Strikethrough Alt+Shift+S · Link Ctrl/Cmd+K · Code block Ctrl+Shift+K / Cmd+Option+C"><i data-lucide="eye"></i></button>
+          <button class="segment" data-mode="source" type="button" aria-label="Source Markdown" title="Source Markdown · Bold Ctrl/Cmd+B · Italic Ctrl/Cmd+I · Strikethrough Alt+Shift+S · Link Ctrl/Cmd+K · Code block Ctrl+Shift+K / Cmd+Option+C"><i data-lucide="code"></i></button>
         </div>
         <span class="action-divider" aria-hidden="true"></span>
         <div class="segmented-control layout-control" role="group" aria-label="Pane layout">
@@ -79,10 +79,10 @@ function renderHelpDialog(): string {
   return `
     <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title">
       <form method="dialog" class="help-dialog__surface">
-        <button class="help-dialog__close icon-button icon-button--quiet" value="cancel" aria-label="Close help" title="Close help"><i data-lucide="x"></i></button>
+        <button class="help-dialog__close icon-button icon-button--quiet" value="cancel" aria-label="Close help" title="Close help (Escape)"><i data-lucide="x"></i></button>
         <h2 id="help-title">Markdown help</h2>
-        <section><h3>Syntax reference</h3><dl><dt><code># Heading</code></dt><dd>Creates a heading.</dd><dt><code>**bold**</code></dt><dd>Creates bold text.</dd><dt><code>[label](url)</code></dt><dd>Creates a link.</dd><dt><code>- item</code></dt><dd>Creates a list.</dd><dt><code>fenced code</code></dt><dd>Creates a code block.</dd></dl></section>
-        <section><h3>Keyboard shortcuts</h3><p><kbd>Escape</kbd> closes this help dialog. Use standard text-editing shortcuts in the editor.</p></section>
+        <section><h3>Syntax reference</h3><dl><dt><code># Heading</code></dt><dd>Creates a heading.</dd><dt><code>**bold**</code></dt><dd>Creates bold text.</dd><dt><code>[label](url)</code></dt><dd>Creates a link.</dd><dt><code>- item</code></dt><dd>Creates a list.</dd><dt><code>&#96;&#96;&#96;code &#96;&#96;&#96;</code></dt><dd>Creates a code block.</dd></dl></section>
+        <section><h3>Keyboard shortcuts</h3><dl><dt><kbd>Ctrl/Cmd+B</kbd></dt><dd>Toggle bold on the selection.</dd><dt><kbd>Ctrl/Cmd+I</kbd></dt><dd>Toggle italic on the selection.</dd><dt><kbd>Alt+Shift+S</kbd></dt><dd>Toggle strikethrough on the selection.</dd><dt><kbd>Ctrl/Cmd+K</kbd></dt><dd>Insert a link around the selection.</dd><dt><kbd>Ctrl+Shift+K</kbd> / <kbd>Cmd+Option+C</kbd></dt><dd>Wrap the selection in a code block.</dd><dt><kbd>Ctrl/Cmd+S</kbd></dt><dd>Saves the Markdown file.</dd><dt><kbd>Ctrl/Cmd+Shift+F</kbd></dt><dd>Enters Focus mode.</dd><dt><kbd>Escape</kbd></dt><dd>Closes this dialog or exits Focus mode.</dd><dt><kbd>Ctrl/Cmd+Z</kbd></dt><dd>Undo.</dd><dt><kbd>Ctrl/Cmd+Shift+Z</kbd></dt><dd>Redo.</dd></dl></section>
       </form>
     </dialog>`
 }

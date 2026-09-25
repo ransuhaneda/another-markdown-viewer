@@ -1,4 +1,4 @@
-import { Compartment, EditorState, type Extension, type Range } from '@codemirror/state'
+import { Compartment, EditorSelection, EditorState, type Extension, type Range } from '@codemirror/state'
 import { syntaxTree } from '@codemirror/language'
 import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate, highlightActiveLine, keymap } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
@@ -43,6 +43,92 @@ const livePreviewExtensions = [
   livePreviewPlugin,
   markdownStylePlugin,
   collapseHeadingSeparator,
+]
+
+function toggleMarkdownMarkers(open: string, close: string) {
+  return (view: EditorView): boolean => {
+    const transaction = view.state.changeByRange((range) => {
+      const selected = view.state.sliceDoc(range.from, range.to)
+      const hasSelection = range.from !== range.to
+      const openBefore = range.from >= open.length
+        && view.state.sliceDoc(range.from - open.length, range.from) === open
+      const closeAfter = view.state.sliceDoc(range.to, range.to + close.length) === close
+      if (openBefore && closeAfter) {
+        return {
+          changes: [
+            { from: range.from - open.length, to: range.from, insert: '' },
+            { from: range.to, to: range.to + close.length, insert: '' },
+          ],
+          range: hasSelection
+            ? EditorSelection.range(range.from - open.length, range.to - open.length)
+            : EditorSelection.cursor(range.from - open.length),
+        }
+      }
+
+      return {
+        changes: { from: range.from, to: range.to, insert: `${open}${selected}${close}` },
+        range: hasSelection
+          ? EditorSelection.range(range.from + open.length, range.from + open.length + selected.length)
+          : EditorSelection.cursor(range.from + open.length),
+      }
+    })
+    view.dispatch(transaction)
+    return true
+  }
+}
+
+function createMarkdownLink(view: EditorView): boolean {
+  const transaction = view.state.changeByRange((range) => {
+    const selected = view.state.sliceDoc(range.from, range.to)
+    const label = selected || 'link text'
+    const insert = `[${label}](url)`
+    const urlStart = range.from + label.length + 3
+
+    return {
+      changes: { from: range.from, to: range.to, insert },
+      range: selected
+        ? EditorSelection.range(urlStart, urlStart + 3)
+        : EditorSelection.range(range.from + 1, range.from + 1 + label.length),
+    }
+  })
+  view.dispatch(transaction)
+  return true
+}
+
+function createMarkdownCodeBlock(view: EditorView): boolean {
+  const transaction = view.state.changeByRange((range) => {
+    const selected = view.state.sliceDoc(range.from, range.to)
+    const line = view.state.doc.lineAt(range.from)
+    const longestBacktickRun = Math.max(0, ...Array.from(selected.matchAll(/`+/gu), (match) => match[0].length))
+    const fence = String.fromCharCode(96).repeat(Math.max(3, longestBacktickRun + 1))
+    const hasContent = selected.length > 0
+    const leadingNewline = range.from === line.from || !hasContent ? '' : '\n'
+    const trailingNewline = range.to < view.state.doc.length
+      && view.state.sliceDoc(range.to, range.to + 1) !== '\n'
+      ? '\n'
+      : ''
+    const opening = `${leadingNewline}${fence}\n`
+    const closing = `\n${fence}${trailingNewline}`
+    const insert = `${opening}${selected}${closing}`
+    const contentStart = range.from + opening.length
+
+    return {
+      changes: { from: range.from, to: range.to, insert },
+      range: hasContent
+        ? EditorSelection.range(contentStart, contentStart + selected.length)
+        : EditorSelection.cursor(contentStart),
+    }
+  })
+  view.dispatch(transaction)
+  return true
+}
+
+const markdownFormattingKeymap = [
+  { key: 'Mod-b', run: toggleMarkdownMarkers('**', '**'), preventDefault: true },
+  { key: 'Mod-i', run: toggleMarkdownMarkers('*', '*'), preventDefault: true },
+  { key: 'Alt-Shift-s', run: toggleMarkdownMarkers('~~', '~~'), preventDefault: true },
+  { key: 'Mod-k', run: createMarkdownLink, preventDefault: true },
+  { key: 'Ctrl-Shift-k', mac: 'Mod-Alt-c', run: createMarkdownCodeBlock, preventDefault: true },
 ]
 
 function headingSeparatorDecorations(view: EditorView): DecorationSet {
@@ -113,6 +199,7 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
     extensions: [
       markdown(),
       history(),
+      keymap.of(markdownFormattingKeymap),
       keymap.of(historyKeymap),
       highlightActiveLine(),
       livePreviewMode.of(livePreviewExtensions),

@@ -142,7 +142,7 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     }
     elements.enterFocusModeButton.addEventListener('click', toggleFocusMode)
     elements.focusModeUnfocusButton.addEventListener('click', exitFocusMode)
-    window.addEventListener('keydown', handleFocusModeKeydown)
+    window.addEventListener('keydown', handleGlobalShortcuts)
     elements.undoButton.addEventListener('click', () => { editor.focus(); undoSourceEditor(editor) })
     elements.redoButton.addEventListener('click', () => { editor.focus(); redoSourceEditor(editor) })
     app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => {
@@ -217,9 +217,24 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     elements.enterFocusModeButton.focus()
   }
 
-  function handleFocusModeKeydown(event: KeyboardEvent): void {
-    if (event.key !== 'Escape' || !focusMode || elements.helpDialog.open) return
-    exitFocusMode()
+  function handleGlobalShortcuts(event: KeyboardEvent): void {
+    if (event.defaultPrevented || event.altKey || elements.helpDialog.open || event.composedPath().includes(elements.helpDialog)) return
+
+    if (isPrimaryShortcut(event, 's')) {
+      event.preventDefault()
+      void saveDocument()
+      return
+    }
+
+    if (isPrimaryShortcut(event, 'f', true)) {
+      event.preventDefault()
+      if (!focusMode) {
+        enterFocusMode()
+      }
+      return
+    }
+
+    if (event.key === 'Escape' && focusMode) exitFocusMode()
   }
 
   async function openDocument(): Promise<void> {
@@ -245,6 +260,12 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
       setStatus(app, 'Could not save Markdown', true)
     }
   }
+}
+
+function isPrimaryShortcut(event: KeyboardEvent, key: string, shift = false): boolean {
+  const isMac = navigator.platform.toLowerCase().includes('mac')
+  const primaryModifier = isMac ? event.metaKey : event.ctrlKey
+  return primaryModifier && !event.altKey && event.shiftKey === shift && event.key.toLowerCase() === key
 }
 
 function isViewMode(value: string | undefined): value is ViewMode {

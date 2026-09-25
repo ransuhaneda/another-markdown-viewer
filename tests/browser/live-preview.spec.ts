@@ -28,6 +28,93 @@ test('Focus mode hides chrome and exits with Escape while restoring focus', asyn
   await expect(entry).toBeFocused()
 })
 
+test('keyboard shortcuts enter Focus mode and appear in the help and control tooltips', async ({ page }) => {
+  await page.goto('/')
+  const focusButton = page.locator('nav [data-action="focus-mode"]')
+  const saveButton = page.locator('[data-action="save"]')
+
+  await expect(focusButton).toHaveAttribute('title', 'Enter Focus mode (Ctrl/Cmd+Shift+F)')
+  await expect(saveButton).toHaveAttribute('title', 'Save Markdown (Ctrl/Cmd+S)')
+  await expect(page.locator('[data-action="undo"]')).toHaveAttribute('title', 'Undo (Ctrl/Cmd+Z)')
+  await expect(page.locator('[data-action="redo"]')).toHaveAttribute('title', 'Redo (Ctrl/Cmd+Shift+Z)')
+  await expect(page.locator('[data-mode="live-preview"]')).toHaveAttribute('title', /Bold Ctrl\/Cmd\+B.*Code block Ctrl\+Shift\+K \/ Cmd\+Option\+C/u)
+  await expect(page.locator('[data-mode="source"]')).toHaveAttribute('title', /Bold Ctrl\/Cmd\+B.*Code block Ctrl\+Shift\+K \/ Cmd\+Option\+C/u)
+
+  await page.keyboard.press('Control+Shift+F')
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-focus-mode', '')
+  await expect(focusButton).toHaveAttribute('title', 'Exit Focus mode (Escape)')
+  await expect(page.locator('[data-action="focus-mode-unfocus"]')).toHaveAttribute('title', 'Exit Focus mode (Escape)')
+
+  await page.keyboard.press('Escape')
+  await page.locator('[data-action="help"]').click()
+  const shortcuts = page.locator('#help-dialog section').filter({ has: page.getByRole('heading', { name: 'Keyboard shortcuts' }) })
+  await expect(shortcuts).toContainText('Ctrl/Cmd+S')
+  await expect(shortcuts).toContainText('Ctrl/Cmd+Shift+F')
+  await expect(shortcuts).toContainText('Escape')
+  await expect(shortcuts).toContainText('Ctrl/Cmd+Z')
+  await expect(shortcuts).toContainText('Ctrl/Cmd+Shift+Z')
+  await expect(shortcuts).toContainText('Ctrl/Cmd+B')
+  await expect(shortcuts).toContainText('Ctrl/Cmd+I')
+  await expect(shortcuts).toContainText('Alt+Shift+S')
+  await expect(shortcuts).toContainText('Ctrl/Cmd+K')
+  await expect(shortcuts).toContainText('Ctrl+Shift+K')
+  await expect(shortcuts).toContainText('Cmd+Option+C')
+})
+
+test('Markdown formatting shortcuts edit selected text in Live and Source modes', async ({ page }) => {
+  await page.goto('/')
+  const editor = page.getByRole('textbox')
+  const formatSelection = async (source: string, shortcut: string): Promise<void> => {
+    await editor.fill(source)
+    await editor.press('Control+Home')
+    await editor.press('Shift+End')
+    await page.keyboard.press(shortcut)
+  }
+
+  await formatSelection('bold text', 'Control+B')
+  await expect(page.locator('[data-preview] strong')).toHaveText('bold text')
+  await formatSelection('italic text', 'Control+I')
+  await expect(page.locator('[data-preview] em')).toHaveText('italic text')
+  await formatSelection('strike text', 'Alt+Shift+S')
+  await expect(page.locator('[data-preview] del')).toHaveText('strike text')
+  await formatSelection('linked text', 'Control+K')
+  await expect(page.locator('[data-preview] a')).toHaveAttribute('href', 'url')
+  await editor.fill('one\ntwo')
+  await editor.press('Control+Home')
+  await editor.press('Shift+ArrowDown')
+  await editor.press('Shift+End')
+  await page.keyboard.press('Control+Shift+K')
+  await expect(page.locator('[data-preview] pre code')).toContainText('one')
+  await expect(page.locator('[data-preview] pre code')).toContainText('two')
+
+  await page.locator('[data-mode="source"]').click()
+  await formatSelection('source text', 'Control+B')
+  await expect(editor).toContainText('**source text**')
+
+  await editor.fill('**toggle bold**')
+  await editor.press('Control+Home')
+  await editor.press('ArrowRight')
+  await editor.press('ArrowRight')
+  await editor.press('Shift+End')
+  await editor.press('Shift+ArrowLeft')
+  await editor.press('Shift+ArrowLeft')
+  await page.keyboard.press('Control+B')
+  await expect(editor).toContainText('toggle bold')
+  await expect(editor).not.toContainText('**toggle bold**')
+
+  await editor.fill('one\ntwo')
+  await editor.press('Control+Home')
+  await editor.press('Shift+ArrowDown')
+  await editor.press('Shift+End')
+  await page.keyboard.press('Control+Shift+K')
+  await expect(page.locator('[data-preview] pre code')).toContainText('one')
+  await expect(page.locator('[data-preview] pre code')).toContainText('two')
+
+  await page.locator('[data-mode="live-preview"]').click()
+  await formatSelection('bold text', 'Control+B')
+  await expect(page.locator('[data-preview] strong')).toHaveText('bold text')
+})
+
 test('Focus mode keeps controls operable on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
@@ -88,7 +175,7 @@ test('Escape closes Help without exiting Focus mode', async ({ page }) => {
 
   await page.keyboard.press('Escape')
   await expect(page.locator('#help-dialog')).not.toBeVisible()
-  await expect(page.locator('.app-shell')).not.toHaveAttribute('data-focus-mode')
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-focus-mode', '')
 })
 
 test('opens with an editable CodeMirror Live Preview editor', async ({ page }) => {

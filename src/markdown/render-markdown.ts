@@ -36,19 +36,7 @@ function inertUnsafeDestinations(html: string): string {
 
 export async function renderMarkdown(source: string): Promise<string> {
   const html = await marked.parse(source, { gfm: true, breaks: false })
-  return sanitizeHtml(inertUnsafeDestinations(addSourceRanges(html, source)))
-}
-
-function addSourceRanges(html: string, source: string): string {
-  const blocks = source.split('\n\n')
-  let cursor = 0
-  return html.replace(/<(h[1-6]|p|blockquote|pre|ul|ol|table)([ >])/giu, (match, tag: string, suffix: string) => {
-    const block = blocks.find((candidate) => source.indexOf(candidate, cursor) >= cursor) ?? ''
-    const start = source.indexOf(block, cursor)
-    const end = start + block.length
-    cursor = end
-    return `<${tag} data-source-start="${Math.max(0, start)}" data-source-end="${Math.max(0, end)}"${suffix}`
-  })
+  return sanitizeHtml(inertUnsafeDestinations(html))
 }
 
 export function prepareRenderedLinks(container: HTMLElement): void {

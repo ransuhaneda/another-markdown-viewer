@@ -6,7 +6,6 @@ import { renderMarkdown, prepareRenderedLinks } from './markdown/render-markdown
 import { clearRecovery, readRecovery, writeRecovery } from './persistence/recovery'
 import { createDocumentState, type DocumentState, type ViewMode, type WorkspaceLayout } from './state/document-state'
 import { openMarkdownFile, saveMarkdownFile } from './files/markdown-files'
-import { findActiveBlock } from './markdown/live-preview'
 
 const welcomeMarkdown = `# Markdown Preview
 
@@ -14,7 +13,7 @@ A calm place to inspect and export Markdown.
 
 - Paste Markdown into the source pane.
 - Keep the raw document as your source of truth.
-- Use Live Preview to inspect the rendered result.
+- Use Preview to inspect the rendered result.
 
 > Phase 3 adds explicit document state, layouts, and complete recovery metadata.
 `
@@ -27,8 +26,8 @@ const app = document.querySelector<HTMLDivElement>('#app')!
 app.innerHTML = `
   <div class="app-shell">
     <header class="app-header"><div class="brand-lockup"><span class="brand-mark" aria-hidden="true">M</span><div><p class="eyebrow">Writing surface</p><h1>Markdown Preview</h1></div></div><nav class="header-actions" aria-label="Document actions"><button class="button button-secondary" data-action="new" type="button">New document</button><button class="button button-secondary" data-action="open" type="button">Open file</button><button class="button button-secondary" data-action="save" type="button">Save Markdown</button><button class="button button-primary" data-action="pdf" type="button">Download PDF</button></nav></header>
-    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="View mode"><button class="segment" data-mode="live-preview" type="button">Live Preview</button><button class="segment" data-mode="source" type="button">Source</button><button class="segment" data-mode="preview" type="button">Preview</button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button">Editor</button><button class="segment" data-layout="split" type="button">Split</button><button class="segment" data-layout="preview" type="button">Preview</button></div></div><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div></section>
-      <section class="document-region" data-layout="split" aria-label="Document panes"><article class="pane pane-editor" data-pane="editor" aria-label="Source editor"><div class="pane-header"><span class="pane-label">Source</span><span class="pane-hint">Markdown</span></div><div class="editor-container" data-editor></div></article><div class="split-handle" aria-hidden="true"><span></span></div><article class="pane pane-preview" data-pane="preview" aria-label="Rendered preview"><div class="pane-header"><span class="pane-label">Live Preview</span><span class="pane-hint">Rendered document</span></div><div class="preview-content" data-preview></div></article></section></main>
+    <main class="workspace" aria-label="Markdown workspace"><section class="workspace-toolbar" aria-label="Workspace controls"><div class="toolbar-groups"><div class="segmented-control" role="group" aria-label="View mode"><button class="segment" data-mode="source" type="button">Source</button><button class="segment" data-mode="preview" type="button">Preview</button></div><div class="segmented-control layout-control" role="group" aria-label="Pane layout"><button class="segment" data-layout="editor" type="button">Editor</button><button class="segment" data-layout="split" type="button">Split</button><button class="segment" data-layout="preview" type="button">Preview</button></div></div><div class="toolbar-meta"><span class="status-dot" aria-hidden="true"></span><span data-status>Draft ready</span><span class="toolbar-divider" aria-hidden="true"></span><span data-count>0 words</span></div></section>
+      <section class="document-region" data-layout="split" aria-label="Document panes"><article class="pane pane-editor" data-pane="editor" aria-label="Source editor"><div class="pane-header"><span class="pane-label">Source</span><span class="pane-hint">Markdown</span></div><div class="editor-container" data-editor></div></article><div class="split-handle" aria-hidden="true"><span></span></div><article class="pane pane-preview" data-pane="preview" aria-label="Rendered preview"><div class="pane-header"><span class="pane-label">Preview</span><span class="pane-hint">Rendered document</span></div><div class="preview-content" data-preview></div></article></section></main>
     <footer class="app-footer"><span data-recovery-note>Local recovery protects your latest draft.</span><div class="footer-actions"><button class="text-button" data-action="help" type="button" aria-haspopup="dialog" aria-controls="help-dialog">Markdown help</button><button class="text-button" data-action="clear" type="button">Clear draft</button></div></footer>
     <dialog class="help-dialog" id="help-dialog" aria-labelledby="help-title"><form method="dialog" class="help-dialog__surface"><button class="help-dialog__close" value="cancel" aria-label="Close help">×</button><h2 id="help-title">Markdown help</h2><section><h3>Syntax reference</h3><dl><dt><code># Heading</code></dt><dd>Creates a heading.</dd><dt><code>**bold**</code></dt><dd>Creates bold text.</dd><dt><code>[label](url)</code></dt><dd>Creates a link.</dd><dt><code>- item</code></dt><dd>Creates a list.</dd><dt><code>fenced code</code></dt><dd>Creates a code block.</dd></dl></section><section><h3>Keyboard shortcuts</h3><p><kbd>Escape</kbd> closes this help dialog. Use standard text-editing shortcuts in the editor.</p></section></form></dialog>
   </div>`
@@ -124,16 +123,6 @@ function applyLayout(layout: WorkspaceLayout): void {
   scheduleRecovery()
 }
 
-function updateLivePreviewFocus(cursorPosition: number): void {
-  const preview = app.querySelector<HTMLElement>('[data-preview]')!
-  const block = findActiveBlock(documentState.markdown, cursorPosition)
-  preview.querySelectorAll<HTMLElement>('[data-source-start]').forEach((element) => {
-    const start = Number(element.dataset.sourceStart)
-    const end = Number(element.dataset.sourceEnd)
-    element.classList.toggle('is-active-source-block', start <= block.range.end && end >= block.range.start)
-  })
-}
-
 const editor = createSourceEditor({
   parent: app.querySelector<HTMLElement>('[data-editor]')!,
   initialValue: documentState.markdown,
@@ -143,10 +132,6 @@ const editor = createSourceEditor({
     updateCount()
     scheduleRecovery()
     void updatePreview()
-  },
-  onSelectionChange: (position) => {
-    documentState.cursorPosition = position
-    updateLivePreviewFocus(position)
   },
 })
 
@@ -160,7 +145,7 @@ function clearDraft(): void {
   documentState = createDocumentState('')
   clearRecovery()
   updateCount()
-  applyMode('live-preview')
+  applyMode('source')
   applyLayout('split')
   void updatePreview()
   setStatus('Blank draft')

@@ -11,6 +11,8 @@ describe('phase 2 markdown flow', () => {
     expect(html).toContain('>Title</h1>')
     expect(html).toContain('<strong>bold</strong>')
     expect(html).not.toContain('<script>')
+    expect(html).not.toContain('data-source-start')
+    expect(html).not.toContain('data-source-end')
   })
 
   it('round-trips the latest recovery draft', () => {

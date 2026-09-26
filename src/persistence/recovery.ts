@@ -1,6 +1,7 @@
 import type { DocumentState, ViewMode, WorkspaceLayout } from '../state/document-state'
 
 export type RecoveryState = DocumentState
+type StoredRecoveryState = Omit<RecoveryState, 'mode'> & { mode: ViewMode | 'live-preview' }
 
 export const RECOVERY_KEY = 'markdown-preview:recovery'
 
@@ -10,7 +11,8 @@ export function readRecovery(storage: Storage = localStorage): RecoveryState | n
     if (!value) return null
     const parsed: unknown = JSON.parse(value)
     if (!isRecoveryState(parsed)) return null
-    return parsed
+    const { mode, ...state } = parsed
+    return { ...state, mode: mode === 'live-preview' ? 'source' : mode }
   } catch {
     return null
   }
@@ -33,9 +35,9 @@ export function clearRecovery(storage: Storage = localStorage): void {
   }
 }
 
-function isRecoveryState(value: unknown): value is RecoveryState {
+function isRecoveryState(value: unknown): value is StoredRecoveryState {
   if (!value || typeof value !== 'object') return false
-  const candidate = value as Partial<RecoveryState>
+  const candidate = value as Partial<StoredRecoveryState>
   return typeof candidate.markdown === 'string'
     && isViewMode(candidate.mode)
     && isWorkspaceLayout(candidate.layout)

@@ -1,4 +1,4 @@
-# Markdown Preview Implementation Roadmap
+# Another Markdown Viewer Implementation Roadmap
 
 This roadmap breaks the product contract into focused phases. Each phase should use a separate `feat/*` branch and focused commits. Use `fix/*` branches for defects discovered after integration.
 

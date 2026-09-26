@@ -1,4 +1,4 @@
-const BASE_ORIGIN = 'https://markdown-preview.invalid'
+const BASE_ORIGIN = 'https://another-markdown-viewer.invalid'
 const SAFE_SCHEMES = new Set(['http:', 'https:', 'mailto:'])
 
 export function sanitizeUrl(value: string): string | null {

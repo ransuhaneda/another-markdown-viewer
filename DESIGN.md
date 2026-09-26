@@ -1,6 +1,6 @@
 ---
 version: alpha
-name: Markdown Preview
+name: Another Markdown Viewer
 description: Calm dark writing surface for inspecting and exporting Markdown.
 colors:
   primary: "#8CB4FF"
@@ -100,7 +100,7 @@ components:
 
 ## Overview
 
-Markdown Preview is a focused browser tool.
+Another Markdown Viewer is a focused browser tool.
 
 The main flow is simple:
 

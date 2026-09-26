@@ -1,4 +1,4 @@
-# Markdown Preview v0.1.0
+# Another Markdown Viewer v0.1.0
 
 ## Release scope
 

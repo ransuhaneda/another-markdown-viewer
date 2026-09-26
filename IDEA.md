@@ -1,7 +1,12 @@
-Build a lightweight Markdown editor with real-time, side-by-side preview and export tools.
+# Another Markdown Viewer
 
-- Create a responsive editor with syntax highlighting and customizable pane layout.
-- Render CommonMark Markdown instantly, including headings, lists, links, tables, code blocks, and images.
-- Add file open/save support with `.md` and `.markdown` extensions.
-- Provide PDF export with consistent styling.
-- Persist drafts, theme preferences, and preview settings locally.
+Another Markdown Viewer is a focused, client-side Markdown workspace built with Vite and TypeScript.
+
+- Edit Markdown in CodeMirror 6 with Live Preview or Source mode.
+- Render GitHub-Flavored Markdown and sanitize rendered HTML.
+- Open and download Markdown files in the browser.
+- Export a print-ready PDF through the browser print flow.
+- Recover the latest working draft locally without treating recovery as explicit file saving.
+- Deploy the static browser app to Cloudflare Pages.
+
+The main flow is to paste or open Markdown, make small edits, inspect the preview, and download a polished PDF.

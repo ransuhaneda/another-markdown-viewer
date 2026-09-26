@@ -1,10 +1,10 @@
-# Markdown Preview — Product Decisions
+# Another Markdown Viewer — Product Decisions
 
 This file records decisions settled during the project discovery interview. Implementation details not listed here remain open and must not conflict with this contract.
 
 ## Product
 
-- Product name: **Markdown Preview**.
+- Product name: **Another Markdown Viewer**.
 - Primary goal: a polished writing tool with a low-friction Markdown workflow.
 - Target platform: browser web app.
 - Initial deployment: Cloudflare Pages.
@@ -152,7 +152,7 @@ This file records decisions settled during the project discovery interview. Impl
 
 ## Welcome and help
 
-- A short editable welcome example is available as an optional built-in sample; it is not a permanent recovery template.
+- A product-specific editable welcome document is the first-load default when no recovered draft exists. It uses local project illustrations and is not a permanent recovery template.
 - Help is minimal and modal; it does not navigate to another page.
 - Help v1 contains a Markdown syntax reference and keyboard shortcuts.
 - The syntax reference is the main help content and should not become a long documentation wall.
@@ -211,7 +211,7 @@ This file records decisions settled during the project discovery interview. Impl
 - Browser print styles and the system print-to-PDF flow are the preferred v1 implementation path, subject to verification that they meet the flowing-document quality requirement.
 - If local storage is unavailable or full, editing continues in memory and the user sees a persistent recovery warning. This is secondary to the primary copy, inspect, and PDF-download flow.
 - The v1 document-size target is approximately 5 MB.
-- The built-in welcome example is optional and separate from the help modal. It is not a permanent recovery template.
+- The product-specific first-load document is separate from the help modal. It is not a permanent recovery template.
 - Help is a minimal modal and does not navigate away from the editor.
 - Help v1 contains only a Markdown syntax reference and keyboard shortcuts. It must not become a long documentation page.
 - Motion is subtle, limited to pane, panel, and mode transitions, and disabled or reduced according to the user's reduced-motion preference. It must never delay writing or cursor movement.
@@ -229,6 +229,6 @@ Q54–Q68 are resolved by the sections above. Remaining implementation details m
 - The raw HTML allowlist is documented and includes only safe elements and attributes. It may include common structural elements, `figure`, `figcaption`, images, links, tables, and code-related elements.
 - The browser print-to-PDF path is acceptable only if real flowing content and intentional pagination are verified. Screenshot stitching is not acceptable.
 - Local-storage failure must not block the primary copy, inspect, and PDF-download flow.
-- The built-in welcome sample is optional. The help experience is a minimal in-editor modal focused on Markdown syntax and keyboard shortcuts.
+- The product-specific welcome document is the first-load default when no recovered draft exists. The help experience is a minimal in-editor modal focused on Markdown syntax and keyboard shortcuts.
 - Future features are recorded as an unestimated parking lot.
 - The user owns final accessibility, performance, and browser verification.

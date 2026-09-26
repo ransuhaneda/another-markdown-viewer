@@ -32,7 +32,7 @@ Do not invent a decision when a document is unclear.
 
 ## Product boundaries
 
-- Build a client-side browser web app for the Markdown Preview product.
+- Build a client-side browser web app for Another Markdown Viewer.
 - Use Cloudflare Pages as the initial deployment target.
 - Do not add server infrastructure or a Cloudflare Worker without a product requirement.
 - Treat raw Markdown as the canonical document state.

@@ -9,7 +9,7 @@ const responsiveStyles = readFileSync(new URL('../src/styles/responsive.css', im
 
 describe('phase 1 application shell', () => {
   it('exposes the product flow and semantic workspace regions', () => {
-    expect(shell).toContain('Markdown Preview')
+    expect(shell).toContain('Another Markdown Viewer')
     expect(shell).toContain('aria-label="Markdown editor"')
     expect(shell).toContain('aria-label="Rendered view"')
     expect(shell).toContain('aria-label="Workspace controls"')
@@ -21,13 +21,16 @@ describe('phase 1 application shell', () => {
     expect(responsiveStyles).toContain('@media (max-width: 760px)')
   })
 
-  it('uses the GFM showcase as the first-load document', () => {
+  it('uses the product welcome document as the first-load default', () => {
     expect(application).toContain('createDocumentState(DEFAULT_MARKDOWN)')
     expect(application).toContain('createDocumentState(recovered.markdown, recovered)')
-    expect(DEFAULT_MARKDOWN).toContain('# Common Markdown + GitHub-Flavored Markdown')
-    expect(DEFAULT_MARKDOWN).toContain('```javascript')
-    expect(DEFAULT_MARKDOWN).toContain('| :--- | :---: | ---: |')
+    expect(DEFAULT_MARKDOWN).toContain('title: Another Markdown Viewer')
+    expect(DEFAULT_MARKDOWN).toContain('# Another Markdown Viewer')
+    expect(DEFAULT_MARKDOWN).toContain('```typescript')
+    expect(DEFAULT_MARKDOWN).toContain('| :--- | :---: |')
     expect(DEFAULT_MARKDOWN).toContain('> [!NOTE]')
-    expect(DEFAULT_MARKDOWN).toContain('\\*Not italic\\*')
+    expect(DEFAULT_MARKDOWN).toContain('\\*This text keeps its asterisks.\\*')
+    expect(DEFAULT_MARKDOWN).toContain('![Another Markdown Viewer workspace](/images/another-markdown-viewer-workspace.svg)')
+    expect(DEFAULT_MARKDOWN).not.toContain('Lorem ipsum')
   })
 })

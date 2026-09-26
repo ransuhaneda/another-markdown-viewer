@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520" role="img" aria-labelledby="title description">
+  <title id="title">Editor and rendered preview</title>
+  <desc id="description">An original illustration of Markdown source on the left and the formatted result on the right.</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#202b38"/><stop offset="1" stop-color="#11171d"/></linearGradient><filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#06090e" flood-opacity=".35"/></filter></defs>
+  <rect width="1000" height="520" rx="22" fill="url(#bg)"/>
+  <rect x="36" y="32" width="928" height="456" rx="12" fill="#151b21" stroke="#3b4958" filter="url(#shadow)"/>
+  <path d="M48 32h904a12 12 0 0 1 12 12v50H36V44a12 12 0 0 1 12-12Z" fill="#25303b"/>
+  <rect x="59" y="52" width="20" height="23" rx="4" fill="#8cb4ff"/><text x="89" y="69" fill="#edf2f5" font-family="system-ui, sans-serif" font-size="14" font-weight="650">Another Markdown Viewer</text>
+  <text x="449" y="68" fill="#b5c3d0" font-family="system-ui, sans-serif" font-size="11">SOURCE</text><text x="748" y="68" fill="#b5c3d0" font-family="system-ui, sans-serif" font-size="11">RENDERED VIEW</text>
+  <rect x="500" y="94" width="1" height="394" fill="#394653"/>
+  <rect x="62" y="125" width="250" height="11" rx="5" fill="#9bbaf0"/><rect x="67" y="160" width="128" height="9" rx="4" fill="#d7aa70"/><rect x="203" y="160" width="205" height="9" rx="4" fill="#c2ced9" opacity=".85"/>
+  <rect x="67" y="189" width="186" height="9" rx="4" fill="#8dbca6"/><rect x="261" y="189" width="141" height="9" rx="4" fill="#cad4dc" opacity=".75"/>
+  <rect x="67" y="218" width="300" height="9" rx="4" fill="#9bbaf0"/><rect x="375" y="218" width="81" height="9" rx="4" fill="#cad4dc" opacity=".75"/>
+  <rect x="67" y="247" width="154" height="9" rx="4" fill="#be9cda"/><rect x="229" y="247" width="195" height="9" rx="4" fill="#cad4dc" opacity=".75"/>
+  <rect x="67" y="276" width="342" height="9" rx="4" fill="#d7aa70" opacity=".9"/><rect x="67" y="305" width="287" height="9" rx="4" fill="#8dbca6"/><rect x="362" y="305" width="84" height="9" rx="4" fill="#cad4dc" opacity=".75"/>
+  <rect x="67" y="350" width="346" height="81" rx="6" fill="#202a33" stroke="#394653"/><rect x="83" y="369" width="152" height="8" rx="4" fill="#8dbca6"/><rect x="83" y="388" width="295" height="8" rx="4" fill="#c4d0da" opacity=".75"/><rect x="83" y="407" width="229" height="8" rx="4" fill="#c4d0da" opacity=".55"/>
+  <rect x="537" y="119" width="390" height="342" rx="7" fill="#f5f7fa"/>
+  <text x="568" y="160" fill="#17212b" font-family="system-ui, sans-serif" font-size="21" font-weight="700">Another Markdown Viewer</text>
+  <rect x="568" y="176" width="278" height="6" rx="3" fill="#718090" opacity=".6"/><rect x="568" y="190" width="322" height="6" rx="3" fill="#718090" opacity=".38"/>
+  <rect x="568" y="218" width="330" height="75" rx="6" fill="#e5edf7"/><rect x="584" y="236" width="104" height="9" rx="4" fill="#5685c6"/><rect x="584" y="254" width="281" height="6" rx="3" fill="#718090" opacity=".56"/><rect x="584" y="269" width="243" height="6" rx="3" fill="#718090" opacity=".38"/>
+  <text x="568" y="326" fill="#253240" font-family="system-ui, sans-serif" font-size="15" font-weight="650">Write, preview, and export</text><rect x="568" y="342" width="326" height="6" rx="3" fill="#718090" opacity=".53"/><rect x="568" y="356" width="284" height="6" rx="3" fill="#718090" opacity=".36"/>
+  <circle cx="576" cy="387" r="3" fill="#5685c6"/><rect x="589" y="384" width="254" height="6" rx="3" fill="#718090" opacity=".5"/><circle cx="576" cy="407" r="3" fill="#5685c6"/><rect x="589" y="404" width="225" height="6" rx="3" fill="#718090" opacity=".5"/>
+  <rect x="568" y="432" width="118" height="1" fill="#cad3dd"/><rect x="568" y="443" width="186" height="5" rx="2" fill="#718090" opacity=".38"/>
+</svg>

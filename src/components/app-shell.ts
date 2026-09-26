@@ -2,7 +2,7 @@ export function renderAppShell(): string {
   return `
     <div class="app-shell">
       <header class="app-header">
-        <div class="brand-lockup"><span class="brand-mark" aria-hidden="true">M</span><h1>Markdown Preview</h1></div>
+        <div class="brand-lockup"><span class="brand-mark" aria-hidden="true">A</span><h1>Another Markdown Viewer</h1></div>
         ${renderWorkspaceToolbar()}
         <nav class="header-toolbar" aria-label="Document actions">
           <button class="icon-button" data-action="new" type="button" aria-label="New document" title="New document"><i data-lucide="file-plus"></i></button>

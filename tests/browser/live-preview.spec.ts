@@ -193,17 +193,22 @@ test('Escape closes Help without exiting Focus mode', async ({ page }) => {
 
 test('opens with an editable CodeMirror Live Preview editor', async ({ page }) => {
   await page.goto('/')
+  await expect(page).toHaveTitle('Another Markdown Viewer')
+  await expect(page.locator('.brand-lockup h1')).toHaveText('Another Markdown Viewer')
   const editor = page.getByRole('textbox')
   await expect(editor).toBeVisible()
   await expect(editor).toBeEditable()
   await page.locator('[data-mode="live-preview"]').click()
   await expect(page.locator('[data-editor-label]')).toHaveText('Live')
-  await expect(page.locator('[data-preview] h1').first()).toHaveText('Common Markdown + GitHub-Flavored Markdown')
+  await expect(page.locator('[data-preview] h1').first()).toHaveText('Another Markdown Viewer')
+  await expect(page.locator('[data-preview] .markdown-frontmatter')).toBeVisible()
+  await expect(page.locator('[data-preview] img').first()).toHaveAttribute('src', '/images/another-markdown-viewer-workspace.svg')
+  await expect(page.locator('[data-preview] img').nth(1)).toHaveAttribute('src', '/images/another-markdown-viewer-preview.svg')
 })
 
 test('renders YAML frontmatter above the Markdown body without changing the source', async ({ page }) => {
   await page.goto('/')
-  const source = '---\ntitle: Welcome to Markdown Viewer\ndescription: Browser-based Markdown editor\nauthor: Example\ntags: [markdown, live-preview, gfm]\n---\n\n# Rendered body'
+  const source = '---\ntitle: Another Markdown Viewer\ndescription: Browser Markdown editor with live preview and PDF export\nauthor: ransuhaneda\ntags: [markdown, typescript, vite]\n---\n\n# Rendered body'
   const editor = page.getByRole('textbox')
   await editor.fill(source)
 
@@ -211,11 +216,11 @@ test('renders YAML frontmatter above the Markdown body without changing the sour
   await expect(metadata).toBeVisible()
   await expect(metadata.locator('tbody tr')).toHaveCount(4)
   await expect(metadata.locator('tr').nth(0).locator('th')).toHaveText('title')
-  await expect(metadata.locator('tr').nth(0).locator('td')).toHaveText('Welcome to Markdown Viewer')
-  await expect(metadata.locator('tr').nth(1).locator('td')).toHaveText('Browser-based Markdown editor')
+  await expect(metadata.locator('tr').nth(0).locator('td')).toHaveText('Another Markdown Viewer')
+  await expect(metadata.locator('tr').nth(1).locator('td')).toHaveText('Browser Markdown editor with live preview and PDF export')
   await expect(metadata.locator('tr').nth(1).locator('td span')).toHaveCount(0)
   const tags = metadata.locator('.markdown-frontmatter-tag')
-  await expect(tags).toHaveText(['markdown', 'live-preview', 'gfm'])
+  await expect(tags).toHaveText(['markdown', 'typescript', 'vite'])
   await expect(tags.first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(tags.first()).toHaveCSS('color', 'rgb(241, 244, 245)')
   await expect(tags.first()).toHaveCSS('border-top-color', 'rgb(140, 180, 255)')
@@ -309,7 +314,7 @@ test('places the Live Preview caret on the clicked line after scrolling', async 
   await page.goto('/')
   await page.locator('[data-mode="live-preview"]').click()
 
-  const imageHeading = page.locator('.cm-line').filter({ hasText: /^##\s*Image$/u }).first()
+  const imageHeading = page.locator('.cm-line').filter({ hasText: /^###\s*Links and images$/u }).first()
   const editorScroller = page.locator('.cm-scroller')
   for (let scrollTop = 0; await imageHeading.count() === 0 && scrollTop < 6000; scrollTop += 200) {
     await editorScroller.evaluate((element, top) => { element.scrollTop = top }, scrollTop)
@@ -322,7 +327,7 @@ test('places the Live Preview caret on the clicked line after scrolling', async 
 
   await page.mouse.click(headingBox.x + headingBox.width - 40, headingBox.y + headingBox.height / 2)
 
-  await expect(page.locator('.cm-line.cm-activeLine')).toContainText('Image')
+  await expect(page.locator('.cm-line.cm-activeLine')).toContainText('Links and images')
 })
 
 test('keeps long documents inside independently scrolling panes', async ({ page }) => {
@@ -394,7 +399,7 @@ test('keeps the rendered view visible when Source is active in split view', asyn
 
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
   await expect(page.getByRole('article', { name: 'Rendered view' })).toBeVisible()
-  await expect(page.locator('[data-preview] h1').first()).toHaveText('Common Markdown + GitHub-Flavored Markdown')
+  await expect(page.locator('[data-preview] h1').first()).toHaveText('Another Markdown Viewer')
   await expect(sourceButton).toHaveAttribute('aria-pressed', 'true')
   await expect(liveButton).toHaveAttribute('aria-pressed', 'false')
   await expect(splitButton).toHaveAttribute('aria-pressed', 'true')
@@ -409,13 +414,25 @@ test('opens the source editor when a rendered block is clicked', async ({ page }
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
   await expect(page.locator('[data-mode="source"]')).toHaveAttribute('aria-pressed', 'true')
   await expect(page.locator('.cm-focused')).toBeVisible()
-  await expect(page.locator('.cm-activeLine')).toContainText('Common Markdown + GitHub-Flavored Markdown')
+  await expect(page.locator('.cm-activeLine')).toContainText('Another Markdown Viewer')
 })
 
 test('renders the initial document before the first edit', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('[data-preview]')).toContainText('Bold and italic text')
+  await expect(page.locator('[data-preview] .markdown-frontmatter')).toBeVisible()
+  await expect(page.locator('[data-preview] img')).toHaveCount(3)
+  await expect(page.locator('[data-preview] img').nth(0)).toHaveAttribute('src', '/images/another-markdown-viewer-workspace.svg')
+  await expect(page.locator('[data-preview] img').nth(1)).toHaveAttribute('src', '/images/another-markdown-viewer-preview.svg')
+  await expect(page.locator('[data-preview] img').nth(2)).toHaveAttribute('src', '/images/another-markdown-viewer-workspace.svg')
   await expect(page.locator('[data-preview] table')).toHaveCount(3)
+  for (const image of await page.locator('[data-preview] img').all()) {
+    await image.scrollIntoViewIfNeeded()
+    expect(await image.evaluate(async (element: HTMLImageElement) => {
+      await element.decode()
+      return element.naturalWidth > 0 && element.naturalHeight > 0
+    })).toBe(true)
+  }
 })
 
 test('uses the full available width for rendered content', async ({ page }) => {

@@ -14,15 +14,14 @@ This file records decisions settled during the project discovery interview. Impl
 ## Editing model
 
 - The canonical document state is the raw Markdown string.
-- Source editing and Live Preview editing operate on the same underlying Markdown document.
+- Source editing operates on the canonical Markdown document.
 - Source structure and whitespace should be preserved as much as possible.
 - The editor should not normalize or rewrite Markdown automatically.
-- The intended editing experience is similar to Obsidian Live Preview: formatted text is shown without unnecessary Markdown markers, and the relevant Markdown syntax is revealed while editing.
-- The editor should prioritize accurate cursor placement and reveal the active block.
-- When a selection spans formatted regions, the relevant Markdown syntax should become visible so the selected content remains predictable to edit.
-- If reliable Live Preview cursor mapping cannot be achieved, the safe fallback is Source plus Preview rather than a fragile approximation.
+- Live Preview editing is disabled for the production v0.1.0 baseline until it passes further testing.
+- The editor shows raw Markdown in Source mode.
+- The rendered Preview pane remains available beside the Source editor.
 - Plain/source editing remains available for users who need to see the actual Markdown.
-- Planned editor modes: Live Preview and Source.
+- Planned editor mode: Source.
 - Planned layouts: editor-only, preview-only, and split view.
 - On small screens, show one pane at a time with a clear editor/preview toggle.
 - The initial keyboard scope is standard text editing only; no command palette or custom shortcut system in v1.
@@ -31,8 +30,7 @@ This file records decisions settled during the project discovery interview. Impl
 
 - V1 targets GitHub Flavored Markdown.
 - CommonMark and Markdown Extra are future extensions, not v1 requirements.
-- Live Preview should support headings, emphasis, strikethrough, inline code, links, images, blockquotes, ordered and unordered lists, task-list markers, and fenced code blocks.
-- Tables may be rendered in v1 but are not required to receive complex Live Preview editing behavior initially.
+- The rendered Preview supports headings, emphasis, strikethrough, inline code, links, images, blockquotes, ordered and unordered lists, task-list markers, fenced code blocks, and tables.
 - Incomplete Markdown should remain ordinary text while the user is typing; it must not block editing or preview rendering.
 - Rich-text paste should preserve Markdown when present and convert common formatting to Markdown when needed.
 - Pasted HTML should convert common safe elements to Markdown and preserve unsupported HTML in the source.
@@ -102,7 +100,7 @@ This file records decisions settled during the project discovery interview. Impl
 
 ## Product flow
 
-- The primary user flow is: copy Markdown into the editor, make small edits, inspect it in Live Preview, and download a polished PDF.
+- The primary user flow is: copy Markdown into the Source editor, make small edits, inspect it in Preview, and download a polished PDF.
 - The product does not need to encourage users to complete an entire long-form writing workflow inside the app.
 - Local recovery protects copied and lightly edited content, but it is secondary to the inspect-and-download flow.
 

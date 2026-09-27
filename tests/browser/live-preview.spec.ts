@@ -10,6 +10,7 @@ test('shows only Source editing and the Rendered View', async ({ page }) => {
   await page.goto('/')
 
   await expect(page.locator('[data-mode]')).toHaveCount(0)
+  await expect(page.locator('.workspace-toolbar')).not.toContainText('Source Markdown')
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
   await expect(page.locator('[data-pane="preview"] .pane-label')).toHaveText('Rendered View')
 

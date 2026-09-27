@@ -31,8 +31,6 @@ function renderWorkspaceToolbar(): string {
           <button class="segment" data-action="redo" type="button" aria-label="Redo" title="Redo (Ctrl/Cmd+Shift+Z)" disabled><i data-lucide="redo-2"></i></button>
         </div>
         <span class="action-divider" aria-hidden="true"></span>
-        <span class="toolbar-label" aria-label="Editor mode">Source Markdown</span>
-        <span class="action-divider" aria-hidden="true"></span>
         <div class="segmented-control layout-control" role="group" aria-label="Pane layout">
           <button class="segment" data-layout="editor" type="button" aria-label="Editor only" title="Editor only"><i data-lucide="panel-left"></i></button>
           <button class="segment" data-layout="split" type="button" aria-label="Split view" title="Split view"><i data-lucide="columns-2"></i></button>

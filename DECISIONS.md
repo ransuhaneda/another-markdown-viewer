@@ -17,13 +17,11 @@ This file records the accepted product contract. Implementation must follow it.
 - Source editing operates on the canonical Markdown document.
 - Preserve source structure and whitespace as much as possible.
 - Do not normalize or rewrite Markdown automatically.
-- Live Preview editing is disabled in production until it passes further testing.
-- Keep Live Preview available only in development until its behavior is verified.
-- The editor shows raw Markdown in Source mode.
-- Keep the rendered Preview pane available beside the Source editor.
-- Keep Source as the only production editor mode.
-- Keep Rendered View separate and read-only.
-- Support editor-only, rendered-view-only, and split pane layouts.
+- The editor shows raw Markdown.
+- The rendered document is a separate pane and updates as the source changes.
+- The editor has no alternate Live Preview mode.
+- Pane layouts are editor-only, rendered-view-only, and split view.
+- Split view shows raw Markdown beside the rendered document.
 - On small screens, show one pane at a time with a clear editor/preview toggle.
 - Keep the application frame fixed for long documents. Let the editor and Rendered View scroll independently.
 - Use the available pane width for rendered Markdown.
@@ -31,18 +29,20 @@ This file records the accepted product contract. Implementation must follow it.
 
 ## Markdown support
 
-- Target GitHub Flavored Markdown in v1.
-- Accept YAML frontmatter enclosed by `---` delimiters. Also accept a closing `...` delimiter.
-- Parse valid YAML frontmatter and show it as a key/value table above the rendered Markdown. Show array values separately.
-- Keep frontmatter in the canonical Markdown source. Do not rewrite it.
-- Keep invalid or unterminated frontmatter visible as Markdown content.
-- Defer CommonMark and Markdown Extra extensions.
-- Support headings, emphasis, strikethrough, inline code, links, images, blockquotes, ordered and unordered lists, task-list markers, fenced code blocks, and tables.
-- Keep incomplete Markdown editable and render it as ordinary text.
-- Preserve Markdown when rich-text paste contains Markdown. Convert common formatting to Markdown when needed.
-- Convert common safe pasted HTML elements to Markdown. Preserve unsupported HTML in the source.
-- Support raw HTML blocks subject to sanitization.
-- Support the `<kbd>` HTML element with a dark keycap style in Preview and a light keycap style in print.
+- V1 targets GitHub Flavored Markdown.
+- Markdown files may start with YAML frontmatter enclosed by `---` delimiters. A closing `...` delimiter is also accepted.
+- Valid YAML frontmatter is parsed and shown as a key/value table above the rendered Markdown. Array values are shown as separate values.
+- Frontmatter remains part of the canonical Markdown source and is not rewritten.
+- Invalid or unterminated frontmatter remains visible as Markdown content.
+- CommonMark and Markdown Extra are future extensions, not v1 requirements.
+- The Rendered View updates as source Markdown changes.
+- Tables are supported in the Rendered View.
+- Incomplete Markdown remains ordinary text while the user types and must not block editing or preview rendering.
+- Rich-text paste should preserve Markdown when present and convert common formatting to Markdown when needed.
+- Pasted HTML should convert common safe elements to Markdown and preserve unsupported HTML in the source.
+- Raw HTML blocks are supported subject to sanitization.
+- The `<kbd>` HTML element is supported in Markdown and uses a dark keycap style in Preview.
+- Print output uses a light keycap style.
 
 ## Rendering and security
 
@@ -108,9 +108,8 @@ This file records the accepted product contract. Implementation must follow it.
 
 ## Acceptance and ownership
 
-- Make the product production-ready for document/recovery, Source editing, GFM rendering/sanitization, file handling/PDF export, and responsive behavior.
-- Keep Live Preview editing out of production until it passes further testing.
-- The user owns final accessibility, performance, and browser verification.
+- Acceptance is production-ready through the first six phases: document/recovery, source editing, rendered preview, GFM rendering/sanitization, file handling/PDF export, and responsive behavior.
+- The user owns the final phase: accessibility, performance, and browser verification.
 
 ## Product flow
 

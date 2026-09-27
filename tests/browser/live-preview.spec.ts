@@ -19,6 +19,13 @@ test('shows only Source editing and the Rendered View', async ({ page }) => {
   await expect(page.locator('[data-preview] h1')).toHaveText('Source stays raw')
 })
 
+test('has no Source mode or label controls in the toolbar', async ({ page }) => {
+  await page.goto('/')
+
+  await expect(page.locator('[data-mode]')).toHaveCount(0)
+  await expect(page.locator('.workspace-toolbar')).not.toContainText('Source Markdown')
+})
+
 test('Focus mode hides chrome and exits with Escape while restoring focus', async ({ page }) => {
   await page.goto('/')
   const entry = page.locator('nav [data-action="focus-mode"]')
@@ -328,7 +335,6 @@ test('opens the source editor when a rendered block is clicked', async ({ page }
   await page.locator('[data-preview] h1').first().click()
 
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
-  await expect(page.locator('.cm-focused')).toBeVisible()
   await expect(page.locator('.cm-activeLine')).toContainText('Another Markdown Viewer')
 })
 

@@ -1,4 +1,4 @@
-# Another Markdown Viewer v0.1.2
+# Another Markdown Viewer v0.1.3
 
 ## Release scope
 

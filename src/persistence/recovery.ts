@@ -1,4 +1,4 @@
-import type { DocumentState, ViewMode, WorkspaceLayout } from '../state/document-state'
+import type { DocumentState, WorkspaceLayout } from '../state/document-state'
 
 export type RecoveryState = DocumentState
 
@@ -10,10 +10,10 @@ export function readRecovery(storage: Storage = localStorage): RecoveryState | n
     if (!value) return null
     const parsed: unknown = JSON.parse(value)
     if (!isStoredRecoveryState(parsed)) return null
+    const { mode: _removedMode, ...recovered } = parsed
     return {
-      ...parsed,
+      ...recovered,
       syncScroll: parsed.syncScroll ?? false,
-      mode: parsed.mode === 'preview' ? 'live-preview' : parsed.mode,
     }
   } catch {
     return null
@@ -37,7 +37,7 @@ export function clearRecovery(storage: Storage = localStorage): void {
   }
 }
 
-type StoredRecoveryState = Omit<RecoveryState, 'mode'> & { mode: ViewMode | 'preview' }
+type StoredRecoveryState = RecoveryState & { mode?: 'source' | 'live-preview' | 'preview' }
 
 function isStoredRecoveryState(value: unknown): value is StoredRecoveryState {
   if (!value || typeof value !== 'object') return false
@@ -54,7 +54,7 @@ function isStoredRecoveryState(value: unknown): value is StoredRecoveryState {
 }
 
 function isStoredViewMode(value: unknown): value is StoredRecoveryState['mode'] {
-  return value === 'live-preview' || value === 'source' || value === 'preview'
+  return value === undefined || value === 'source' || value === 'live-preview' || value === 'preview'
 }
 
 function isWorkspaceLayout(value: unknown): value is WorkspaceLayout {

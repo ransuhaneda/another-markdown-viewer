@@ -14,19 +14,14 @@ This file records decisions settled during the project discovery interview. Impl
 ## Editing model
 
 - The canonical document state is the raw Markdown string.
-- Source editing and Live Preview editing operate on the same underlying Markdown document.
+- Source editing operates on the raw Markdown document.
 - Source structure and whitespace should be preserved as much as possible.
 - The editor should not normalize or rewrite Markdown automatically.
-- The intended editing experience is similar to Obsidian Live Preview: formatted text is shown without unnecessary Markdown markers, and the relevant Markdown syntax is revealed while editing.
-- The editor should prioritize accurate cursor placement and reveal the active block.
-- When a selection spans formatted regions, the relevant Markdown syntax should become visible so the selected content remains predictable to edit.
-- If reliable Live Preview cursor mapping cannot be achieved, the safe fallback is Source plus Preview rather than a fragile approximation.
-- Plain/source editing remains available for users who need to see the actual Markdown.
-- Editor modes are Live and Source.
-- Live shows formatted Markdown in the editable pane. Source shows raw Markdown.
-- Rendered View is a pane, not an editor mode.
+- The editor shows raw Markdown.
+- The rendered document is a separate pane and updates as the source changes.
+- The editor has no alternate Live Preview mode.
 - Pane layouts are editor-only, rendered-view-only, and split view.
-- Both editor modes support split view. The rendered pane stays visible when Source is active.
+- Split view shows raw Markdown beside the rendered document.
 - On small screens, show one pane at a time with a clear editor/preview toggle.
 - Keep the application frame fixed for long documents. The editor and Rendered View scroll independently.
 - Rendered Markdown content uses the available width of its pane.
@@ -40,9 +35,9 @@ This file records decisions settled during the project discovery interview. Impl
 - Frontmatter remains part of the canonical Markdown source and is not rewritten.
 - Invalid or unterminated frontmatter remains visible as Markdown content.
 - CommonMark and Markdown Extra are future extensions, not v1 requirements.
-- Live Preview should support headings, emphasis, strikethrough, inline code, links, images, blockquotes, ordered and unordered lists, task-list markers, and fenced code blocks.
-- Tables may be rendered in v1 but are not required to receive complex Live Preview editing behavior initially.
-- Incomplete Markdown should remain ordinary text while the user is typing; it must not block editing or preview rendering.
+- The Rendered View updates as source Markdown changes.
+- Tables are supported in the Rendered View.
+- Incomplete Markdown remains ordinary text while the user types and must not block editing or preview rendering.
 - Rich-text paste should preserve Markdown when present and convert common formatting to Markdown when needed.
 - Pasted HTML should convert common safe elements to Markdown and preserve unsupported HTML in the source.
 - Raw HTML blocks are supported subject to sanitization.
@@ -114,12 +109,12 @@ This file records decisions settled during the project discovery interview. Impl
 
 ## Acceptance and ownership
 
-- Acceptance is production-ready through the first six phases: document/recovery, source editing, Live Preview, GFM rendering/sanitization, file handling/PDF export, and responsive behavior.
+- Acceptance is production-ready through the first six phases: document/recovery, source editing, rendered preview, GFM rendering/sanitization, file handling/PDF export, and responsive behavior.
 - The user owns the final phase: accessibility, performance, and browser verification.
 
 ## Product flow
 
-- The primary user flow is: copy Markdown into the editor, make small edits, inspect it in Live Preview, and download a polished PDF.
+- The primary user flow is: copy Markdown into the source editor, make small edits, inspect the Rendered View, and download a polished PDF.
 - The product does not need to encourage users to complete an entire long-form writing workflow inside the app.
 - Local recovery protects copied and lightly edited content, but it is secondary to the inspect-and-download flow.
 

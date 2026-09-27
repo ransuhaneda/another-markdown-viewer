@@ -114,12 +114,17 @@ describe('phase 2 markdown flow', () => {
     expect(readRecovery(fakeStorage)).toBeNull()
   })
 
-  it('migrates the removed rendered-preview mode without losing the draft', () => {
+  it('ignores saved editor and rendered-preview modes without losing the draft', () => {
     const state = createDocumentState('# Draft', { updatedAt: 1 })
     const storage = fakeStorageForState()
-    storage.setItem('markdown-preview:recovery', JSON.stringify({ ...state, mode: 'preview' }))
 
-    expect(readRecovery(storage)).toEqual({ ...state, mode: 'live-preview' })
+    for (const mode of ['preview', 'live-preview', 'source', undefined]) {
+      const storedState = mode === undefined
+        ? Object.fromEntries(Object.entries(state).filter(([key]) => key !== 'mode'))
+        : { ...state, mode }
+      storage.setItem('markdown-preview:recovery', JSON.stringify(storedState))
+      expect(readRecovery(storage)).toEqual(state)
+    }
   })
 
   it('rejects malformed recovery data', () => {

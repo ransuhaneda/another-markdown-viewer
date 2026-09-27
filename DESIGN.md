@@ -187,11 +187,11 @@ Use square corners on toolbar controls.
 Give every icon-only control an accessible name and a tooltip.
 Use 14px icons for compact toolbar actions.
 
-### Mode and layout controls
+### Source and layout controls
 
-Expose Live and Source as editor modes.
+Show Source Markdown as the only editor mode.
 Expose editor-only, rendered-view-only, and split behavior as pane layouts.
-Keep Rendered View visible in split layout for both editor modes.
+Keep Rendered View visible in split layout beside the source editor.
 Use text labels where an icon could be unclear.
 Show the active state with accent color, a visible boundary, and an accessible state.
 Use consistent spacing tokens between control groups.
@@ -200,7 +200,7 @@ Use consistent spacing tokens between control groups.
 
 Use CodeMirror for source and editor behavior.
 Keep the editing surface visually quiet.
-Reveal Markdown syntax for the active Live Preview block.
+Show Markdown syntax directly in the editor.
 Do not add decorative editor chrome.
 Keep the editor and rendered document on independent scroll surfaces.
 Use narrow accent scrollbars with transparent tracks.
@@ -236,8 +236,8 @@ Do not interrupt the main copy, inspect, and PDF-download flow.
 
 ## Interaction and motion
 
-Use short transitions for pane, panel, and mode changes.
-Do not animate document text, cursor movement, or live-preview mapping.
+Use short transitions for pane and panel changes.
+Do not animate document text or cursor movement.
 Respect `prefers-reduced-motion`.
 Remove non-essential transitions when reduced motion is enabled.
 Keep focus visible on every interactive control.

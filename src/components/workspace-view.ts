@@ -1,9 +1,8 @@
 import type { EditorView } from '@codemirror/view'
 import { Maximize2, Minimize2 } from 'lucide'
-import { canRedoSourceEditor, canUndoSourceEditor, setSourceEditorLivePreview } from '../editor/source-editor'
-import { findActiveBlock } from '../markdown/live-preview'
+import { canRedoSourceEditor, canUndoSourceEditor } from '../editor/source-editor'
 import { prepareRenderedLinks, renderMarkdown } from '../markdown/render-markdown'
-import type { DocumentState, ViewMode, WorkspaceLayout } from '../state/document-state'
+import type { DocumentState, WorkspaceLayout } from '../state/document-state'
 
 export interface WorkspaceElements {
   appShell: HTMLElement
@@ -80,12 +79,6 @@ export function updateDocumentView(app: HTMLElement, elements: WorkspaceElements
   requiredElement<HTMLElement>(app, '[data-count]').textContent = `${words} ${words === 1 ? 'word' : 'words'} · ${characters} ${characters === 1 ? 'character' : 'characters'}`
 }
 
-export function updateModeView(app: HTMLElement, editor: EditorView, mode: ViewMode): void {
-  setSourceEditorLivePreview(editor, mode === 'live-preview')
-  requiredElement<HTMLElement>(app, '[data-editor-label]').textContent = mode === 'live-preview' ? 'Live' : 'Source'
-  updatePressedButtons(app, '[data-mode]', mode)
-}
-
 export function updateLayoutView(app: HTMLElement, elements: WorkspaceElements, layout: WorkspaceLayout): void {
   elements.workspace.dataset.layout = layout
   updatePressedButtons(app, '[data-layout]', layout)
@@ -94,14 +87,6 @@ export function updateLayoutView(app: HTMLElement, elements: WorkspaceElements, 
 export function updateHistoryView(elements: WorkspaceElements, editor: EditorView): void {
   elements.undoButton.disabled = !canUndoSourceEditor(editor)
   elements.redoButton.disabled = !canRedoSourceEditor(editor)
-}
-
-export function updateActivePreviewBlock(preview: HTMLElement, markdown: string, cursorPosition: number): void {
-  const block = findActiveBlock(markdown, cursorPosition)
-  preview.querySelectorAll<HTMLElement>('[data-source-start]').forEach((element) => {
-    const range = readSourceRange(element)
-    element.classList.toggle('is-active-source-block', range !== null && range.start <= block.range.end && range.end >= block.range.start)
-  })
 }
 
 export function readSourceRange(element: HTMLElement): { start: number; end: number } | null {
@@ -123,7 +108,7 @@ export function setRecoveryWarning(app: HTMLElement, unavailable: boolean): void
 
 function updatePressedButtons(app: HTMLElement, selector: string, value: string): void {
   app.querySelectorAll<HTMLButtonElement>(selector).forEach((button) => {
-    const active = button.dataset.mode === value || button.dataset.layout === value
+    const active = button.dataset.layout === value
     button.classList.toggle('is-active', active)
     button.setAttribute('aria-pressed', String(active))
   })

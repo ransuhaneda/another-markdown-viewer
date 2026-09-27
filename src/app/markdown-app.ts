@@ -8,12 +8,10 @@ import {
   readSourceRange,
   setRecoveryWarning,
   setStatus,
-  updateActivePreviewBlock,
   updateDocumentView,
   updateFocusModeView,
   updateHistoryView,
   updateLayoutView,
-  updateModeView,
 } from '../components/workspace-view'
 import { DEFAULT_MARKDOWN } from '../default-markdown'
 import {
@@ -25,7 +23,7 @@ import {
 } from '../editor/source-editor'
 import { openMarkdownFile, saveMarkdownFile } from '../files/markdown-files'
 import { clearRecovery, readRecovery, writeRecovery } from '../persistence/recovery'
-import { createDocumentState, type DocumentState, type ViewMode, type WorkspaceLayout } from '../state/document-state'
+import { createDocumentState, type DocumentState, type WorkspaceLayout } from '../state/document-state'
 
 export function mountMarkdownApp(app: HTMLDivElement): void {
   app.innerHTML = renderAppShell()
@@ -63,10 +61,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
       updateHistoryView(elements, editor)
       scheduleRecovery()
     },
-    onSelectionChange: (position) => {
-      state.cursorPosition = position
-      updateActivePreviewBlock(elements.preview, state.markdown, position)
-    },
   })
 
   const captureViewState = (): void => {
@@ -92,11 +86,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
       : 'Synchronized scrolling is available only in split view')
     elements.syncScrollButton.disabled = !available
   }
-  const applyMode = (mode: ViewMode): void => {
-    state.mode = mode
-    updateModeView(app, editor, mode)
-    scheduleRecovery()
-  }
   const applyLayout = (layout: WorkspaceLayout): void => {
     state.layout = layout
     updateLayoutView(app, elements, layout)
@@ -114,7 +103,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     replaceDocument('')
     clearRecovery()
     setRecoveryWarning(app, false)
-    applyMode('live-preview')
     applyLayout('split')
     updateDocumentView(app, elements, state)
     suppressRecovery = false
@@ -128,7 +116,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
   connectHelpDialog(elements.helpDialog, elements.helpTrigger)
   connectSplitPane(elements.workspace, elements.splitHandle, () => state.layout === 'split')
   connectWorkspaceEvents()
-  updateModeView(app, editor, state.mode)
   updateLayoutView(app, elements, state.layout)
   updateHistoryView(elements, editor)
   updateDocumentView(app, elements, state)
@@ -145,9 +132,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     window.addEventListener('keydown', handleGlobalShortcuts)
     elements.undoButton.addEventListener('click', () => { editor.focus(); undoSourceEditor(editor) })
     elements.redoButton.addEventListener('click', () => { editor.focus(); redoSourceEditor(editor) })
-    app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', () => {
-      if (isViewMode(button.dataset.mode)) applyMode(button.dataset.mode)
-    }))
     app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => button.addEventListener('click', () => {
       if (isWorkspaceLayout(button.dataset.layout)) applyLayout(button.dataset.layout)
     }))
@@ -168,7 +152,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
       }
       const range = readSourceRange(target.closest<HTMLElement>('[data-source-start]') ?? target)
       if (!range) return
-      applyMode('source')
       applyLayout('split')
       editor.focus()
       editor.dispatch({
@@ -266,10 +249,6 @@ function isPrimaryShortcut(event: KeyboardEvent, key: string, shift = false): bo
   const isMac = navigator.platform.toLowerCase().includes('mac')
   const primaryModifier = isMac ? event.metaKey : event.ctrlKey
   return primaryModifier && !event.altKey && event.shiftKey === shift && event.key.toLowerCase() === key
-}
-
-function isViewMode(value: string | undefined): value is ViewMode {
-  return value === 'live-preview' || value === 'source'
 }
 
 function isWorkspaceLayout(value: string | undefined): value is WorkspaceLayout {

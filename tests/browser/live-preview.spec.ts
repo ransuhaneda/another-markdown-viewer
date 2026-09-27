@@ -6,6 +6,19 @@ test.beforeEach(async ({ page }) => {
   })
 })
 
+test('shows only Source editing and the Rendered View', async ({ page }) => {
+  await page.goto('/')
+
+  await expect(page.locator('[data-mode]')).toHaveCount(0)
+  await expect(page.locator('[data-editor-label]')).toHaveText('Source')
+  await expect(page.locator('[data-pane="preview"] .pane-label')).toHaveText('Rendered View')
+
+  const editor = page.getByRole('textbox')
+  await editor.fill('# Source **stays raw**')
+  await expect(editor).toContainText('# Source **stays raw**')
+  await expect(page.locator('[data-preview] h1')).toHaveText('Source stays raw')
+})
+
 test('Focus mode hides chrome and exits with Escape while restoring focus', async ({ page }) => {
   await page.goto('/')
   const entry = page.locator('nav [data-action="focus-mode"]')
@@ -58,7 +71,7 @@ test('keyboard shortcuts enter Focus mode and appear in help and relevant toolti
   await expect(shortcuts).toContainText('Cmd+Option+C')
 })
 
-test('Markdown formatting shortcuts edit selected text in Live and Source modes', async ({ page }) => {
+test('Markdown formatting shortcuts edit selected source text', async ({ page }) => {
   await page.goto('/')
   const editor = page.getByRole('textbox')
   const formatSelection = async (source: string, shortcut: string): Promise<void> => {
@@ -84,10 +97,6 @@ test('Markdown formatting shortcuts edit selected text in Live and Source modes'
   await expect(page.locator('[data-preview] pre code')).toContainText('one')
   await expect(page.locator('[data-preview] pre code')).toContainText('two')
 
-  await page.locator('[data-mode="source"]').click()
-  await formatSelection('source text', 'Control+B')
-  await expect(editor).toContainText('**source text**')
-
   await editor.fill('**toggle bold**')
   await editor.press('Control+Home')
   await editor.press('ArrowRight')
@@ -107,12 +116,9 @@ test('Markdown formatting shortcuts edit selected text in Live and Source modes'
   await expect(page.locator('[data-preview] pre code')).toContainText('one')
   await expect(page.locator('[data-preview] pre code')).toContainText('two')
 
-  await page.locator('[data-mode="live-preview"]').click()
-  await formatSelection('bold text', 'Control+B')
-  await expect(page.locator('[data-preview] strong')).toHaveText('bold text')
 })
 
-test('shows logical line numbers in Source mode only', async ({ page }) => {
+test('shows logical line numbers in the source editor', async ({ page }) => {
   await page.goto('/')
   const editor = page.getByRole('textbox')
   const lineNumbers = page.locator('.cm-lineNumbers .cm-gutterElement:visible')
@@ -124,8 +130,7 @@ test('shows logical line numbers in Source mode only', async ({ page }) => {
   await editor.press('Enter')
   await expect(lineNumbers).toHaveText(['1', '2', '3', '4'])
 
-  await page.locator('[data-mode="live-preview"]').click()
-  await expect(lineNumbers).toHaveCount(0)
+  await expect(lineNumbers).toHaveText(['1', '2', '3', '4'])
 })
 
 test('Focus mode keeps controls operable on mobile', async ({ page }) => {
@@ -147,10 +152,9 @@ test('Focus mode keeps controls operable on mobile', async ({ page }) => {
   await expect(exit).toBeHidden()
 })
 
-test('Focus mode preserves Source mode and editor-only layout through a full cycle', async ({ page }) => {
+test('Focus mode preserves Source editing and editor-only layout through a full cycle', async ({ page }) => {
   await page.goto('/')
   const editor = page.getByRole('textbox')
-  await page.locator('[data-mode="source"]').click()
   await editor.fill('# Preserve this source')
   await page.locator('button[data-layout="editor"]').click()
   const textBefore = await editor.textContent()
@@ -159,14 +163,14 @@ test('Focus mode preserves Source mode and editor-only layout through a full cyc
 
   await page.getByRole('button', { name: 'Enter Focus mode' }).click()
   await expect(page.locator('button[data-layout="editor"]')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.locator('[data-mode="source"]')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-editor-label]')).toHaveText('Source')
   await expect(page.locator('[data-pane="editor"]')).toBeVisible()
   await expect(page.locator('[data-pane="preview"]')).toBeHidden()
   expect(await editor.textContent()).toBe(textBefore)
   expect(await page.locator('.cm-content').evaluate(() => document.getSelection()?.toString() ?? '')).toBe(selectionBefore)
   await page.keyboard.press('Escape')
   await expect(page.locator('button[data-layout="editor"]')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.locator('[data-mode="source"]')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-editor-label]')).toHaveText('Source')
 })
 
 test('Focus mode accepts explicit exit and does not write recovery state', async ({ page }) => {
@@ -191,15 +195,14 @@ test('Escape closes Help without exiting Focus mode', async ({ page }) => {
   await expect(page.locator('.app-shell')).toHaveAttribute('data-focus-mode', '')
 })
 
-test('opens with an editable CodeMirror Live Preview editor', async ({ page }) => {
+test('opens with an editable Source editor and a rendered document', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle('Another Markdown Viewer')
   await expect(page.locator('.brand-lockup h1')).toHaveText('Another Markdown Viewer')
   const editor = page.getByRole('textbox')
   await expect(editor).toBeVisible()
   await expect(editor).toBeEditable()
-  await page.locator('[data-mode="live-preview"]').click()
-  await expect(page.locator('[data-editor-label]')).toHaveText('Live')
+  await expect(page.locator('[data-editor-label]')).toHaveText('Source')
   await expect(page.locator('[data-preview] h1').first()).toHaveText('Another Markdown Viewer')
   await expect(page.locator('[data-preview] .markdown-frontmatter')).toBeVisible()
   await expect(page.locator('[data-preview] img').first()).toHaveAttribute('src', '/images/another-markdown-viewer-workspace.svg')
@@ -228,91 +231,11 @@ test('renders YAML frontmatter above the Markdown body without changing the sour
   await expect(metadata.locator('tr').nth(1).locator('th')).toHaveCSS('text-align', 'end')
   await expect(page.locator('[data-preview] h1')).toHaveText('Rendered body')
   await expect(page.locator('[data-preview] h1')).toHaveAttribute('data-source-start', String(source.indexOf('# Rendered body')))
-  await page.locator('[data-mode="source"]').click()
   await expect(editor.locator('.cm-line')).toHaveText(source.split('\n'))
 })
 
-test('styles formatted Live content while preserving syntax access', async ({ page }) => {
+test('places the source caret on the clicked rendered block after scrolling', async ({ page }) => {
   await page.goto('/')
-
-  const editor = page.getByRole('textbox')
-  await page.locator('[data-mode="live-preview"]').click()
-  await editor.fill('# Heading\n\nA **bold** line\n\nA *italic* line\n\nUse `npm` here\n\n[Link](https://example.com)\n\n## Second heading')
-
-  const headingText = page.locator('.cm-header-1').filter({ hasText: 'Heading' }).last()
-  await expect(headingText).toHaveCSS('font-size', '36px')
-  await expect(headingText).toHaveCSS('line-height', '41.4px')
-  await expect(headingText).toHaveCSS('font-weight', '650')
-  await expect(page.locator('.preview-content h1').first()).toHaveCSS('font-size', '36px')
-  await expect(page.locator('.preview-content h1').first()).toHaveCSS('line-height', '41.4px')
-  await expect(page.locator('.preview-content h1').first()).toHaveCSS('font-weight', '650')
-  await expect(page.locator('.cm-content')).toHaveCSS('font-family', 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif')
-  await expect(page.locator('.preview-content')).toHaveCSS('font-family', 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif')
-  await expect(page.locator('.cm-content')).toHaveCSS('line-height', '25.6px')
-  await expect(page.locator('.preview-content')).toHaveCSS('line-height', '25.6px')
-  await expect(page.locator('.cm-emphasis')).toHaveCSS('font-style', 'italic')
-  await expect(page.locator('.cm-code')).toHaveCSS('background-color', 'rgb(32, 38, 44)')
-  await expect(page.locator('.cm-link')).toHaveCSS('color', 'rgb(140, 180, 255)')
-
-  await page.locator('.cm-line').nth(2).click({ position: { x: 400, y: 8 } })
-  const headingStart = await headingText.evaluate((element) => element.getBoundingClientRect().left)
-  const paragraphStart = await page.locator('.cm-line').nth(2).evaluate((element) => {
-    const text = [...element.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.startsWith('A '))
-    if (!text) throw new Error('Missing paragraph text')
-    const range = document.createRange()
-    range.setStart(text, 0)
-    range.setEnd(text, 1)
-    return range.getBoundingClientRect().left
-  })
-  expect(headingStart).toBeCloseTo(paragraphStart, 1)
-
-  await expect(page.locator('.cm-strong')).toHaveCSS('font-weight', '700')
-
-  const boldLine = page.locator('.cm-line').filter({ hasText: 'A **bold** line' }).first()
-  await boldLine.click({ position: { x: 8, y: 8 } })
-  await page.keyboard.press('Home')
-  await page.keyboard.press('Shift+End')
-  await expect(boldLine.locator('.cm-formatting-inline-visible')).toHaveCount(2)
-
-  await page.locator('.cm-line').last().click({ position: { x: 2, y: 8 } })
-  await expect(page.locator('.cm-active-line .cm-formatting-inline')).toHaveCount(0)
-})
-
-test('keeps wrapped Live Preview headings aligned with their first line', async ({ page }) => {
-  await page.setViewportSize({ width: 800, height: 900 })
-  await page.goto('/')
-
-  const editor = page.getByRole('textbox')
-  await page.locator('[data-mode="live-preview"]').click()
-  const heading = 'Common Markdown + GitHub-Flavored Markdown with a second line'
-  await editor.fill(`# ${heading}\n\nBody`)
-  await page.locator('.cm-line').filter({ hasText: /^Body$/u }).click()
-
-  const headingText = page.locator('.cm-header-1').filter({ hasText: heading }).last()
-  const lineStarts = await headingText.evaluate((element) => {
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
-    let textNode: Text | null = null
-    while (walker.nextNode()) {
-      if (walker.currentNode.textContent?.startsWith('Common')) {
-        textNode = walker.currentNode as Text
-        break
-      }
-    }
-    if (!textNode) throw new Error('Missing rendered heading text')
-
-    const range = document.createRange()
-    range.selectNodeContents(textNode)
-    return [...range.getClientRects()].map((rect) => ({ left: rect.left, top: rect.top }))
-  })
-
-  expect(lineStarts.length).toBeGreaterThan(1)
-  expect(lineStarts[1].left).toBeCloseTo(lineStarts[0].left, 1)
-})
-
-
-test('places the Live Preview caret on the clicked line after scrolling', async ({ page }) => {
-  await page.goto('/')
-  await page.locator('[data-mode="live-preview"]').click()
 
   const imageHeading = page.locator('.cm-line').filter({ hasText: /^###\s*Links and images$/u }).first()
   const editorScroller = page.locator('.cm-scroller')
@@ -388,31 +311,24 @@ test('disables synchronized scrolling outside split view', async ({ page }) => {
   await expect.poll(() => preview.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
 })
 
-test('keeps the rendered view visible when Source is active in split view', async ({ page }) => {
+test('keeps the rendered view visible beside Source Markdown in split view', async ({ page }) => {
   await page.goto('/')
 
-  const liveButton = page.locator('[data-mode="live-preview"]')
-  const sourceButton = page.locator('[data-mode="source"]')
   const splitButton = page.getByRole('button', { name: 'Split view' })
-
-  await sourceButton.click()
 
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
   await expect(page.getByRole('article', { name: 'Rendered view' })).toBeVisible()
   await expect(page.locator('[data-preview] h1').first()).toHaveText('Another Markdown Viewer')
-  await expect(sourceButton).toHaveAttribute('aria-pressed', 'true')
-  await expect(liveButton).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.locator('[data-mode]')).toHaveCount(0)
   await expect(splitButton).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('opens the source editor when a rendered block is clicked', async ({ page }) => {
   await page.goto('/')
 
-  await page.locator('[data-mode="live-preview"]').click()
   await page.locator('[data-preview] h1').first().click()
 
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
-  await expect(page.locator('[data-mode="source"]')).toHaveAttribute('aria-pressed', 'true')
   await expect(page.locator('.cm-focused')).toBeVisible()
   await expect(page.locator('.cm-activeLine')).toContainText('Another Markdown Viewer')
 })
@@ -473,7 +389,7 @@ test('restores a recovered draft and its view state', async ({ page }) => {
     localStorage.setItem('markdown-preview:recovery', JSON.stringify({
       markdown: '# Recovered',
       fileName: 'notes.md',
-      mode: 'live-preview',
+      mode: 'source',
       layout: 'preview',
       cursorPosition: 4,
       editorScrollTop: 0,
@@ -486,7 +402,7 @@ test('restores a recovered draft and its view state', async ({ page }) => {
   await expect(page.locator('[data-status]')).toHaveText('Draft restored locally')
   await expect(page.locator('[data-preview] h1')).toHaveText('Recovered')
   await expect(page.locator('button[data-layout="preview"]')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.locator('[data-mode="live-preview"]')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-editor-label]')).toHaveText('Source')
 })
 
 test('keeps the recovery warning visible when storage is unavailable', async ({ page }) => {
@@ -502,7 +418,7 @@ test('keeps the recovery warning visible when storage is unavailable', async ({ 
 
   await expect(page.locator('[data-status]')).toHaveText('Editing in memory')
   await expect(page.locator('[data-recovery-warning]')).toBeVisible()
-  await page.locator('[data-mode="live-preview"]').click()
+  await expect(page.locator('[data-editor-label]')).toHaveText('Source')
   await expect(page.locator('[data-recovery-warning]')).toBeVisible()
 })
 

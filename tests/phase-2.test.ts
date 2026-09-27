@@ -18,7 +18,6 @@ describe('phase 2 markdown flow', () => {
 
   it('preserves safe keyboard key markup', () => {
     const html = renderMarkdown('Press <kbd>Ctrl</kbd> + <kbd>B</kbd> for bold text.')
-
     expect(html).toContain('<kbd>Ctrl</kbd> + <kbd>B</kbd>')
   })
 
@@ -30,7 +29,7 @@ describe('phase 2 markdown flow', () => {
     expect(html).toMatch(/<ol(?:\s[^>]*)?>[\s\S]*<li>First item<ul>[\s\S]*<\/ul>[\s\S]*<\/li>[\s\S]*<\/ol>/u)
   })
 
-  it('renders GitHub alert blockquotes with typed titles and preserved content', () => {
+  it('renders GitHub alert blockquotes without source-position attributes', () => {
     const source = [
       '> [!NOTE]\n> A note with **emphasis**.',
       '> [!TIP]\n> A useful tip.',
@@ -40,15 +39,7 @@ describe('phase 2 markdown flow', () => {
       '> [!UNKNOWN]\n> An ordinary blockquote.',
     ].join('\n\n')
     const html = renderMarkdown(source)
-
-    const icons = [
-      ['NOTE', 'info'],
-      ['TIP', 'lightbulb'],
-      ['IMPORTANT', 'circle-alert'],
-      ['WARNING', 'triangle-alert'],
-      ['CAUTION', 'octagon-alert'],
-    ] as const
-    for (const [type] of icons) {
+    for (const type of ['NOTE', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION']) {
       expect(html).toContain(`class="markdown-alert markdown-alert-${type.toLowerCase()}"`)
       expect(html).toContain(`${type}</p>`)
     }
@@ -56,7 +47,8 @@ describe('phase 2 markdown flow', () => {
     expect(html).toContain('An ordinary blockquote.')
     expect(html).toContain('[!UNKNOWN]')
     expect(html).not.toContain('[!NOTE]')
-    expect(html).toContain('data-source-start="0"')
+    expect(html).not.toContain('data-source-start=')
+    expect(html).not.toContain('data-source-end=')
     expect(html.match(/class="markdown-alert-icon"/gu)).toHaveLength(5)
   })
 
@@ -76,13 +68,12 @@ describe('phase 2 markdown flow', () => {
     expect(html).toContain('<th scope="row">title</th><td>Welcome</td>')
     expect(html).toContain('<span class="markdown-frontmatter-tag">markdown</span> <span class="markdown-frontmatter-tag">notes</span>')
     expect(html).toContain('>Content</h1>')
-    expect(html).toContain(`data-source-start="${source.indexOf('# Content')}"`)
+    expect(html).not.toContain('data-source-start')
     expect(html).not.toContain('---')
   })
 
   it('renders nested frontmatter mappings as wrapped block YAML', () => {
     const html = renderMarkdown('---\ncolors:\n  primary: "#8CB4FF"\n  surface:\n    raised: "#20262C"\n---\nBody')
-
     expect(html).toContain('<pre class="markdown-frontmatter-block"><code>primary: "#8CB4FF"\nsurface:\n  raised: "#20262C"</code></pre>')
     expect(html).not.toContain('{"primary"')
   })
@@ -114,12 +105,13 @@ describe('phase 2 markdown flow', () => {
     expect(readRecovery(fakeStorage)).toBeNull()
   })
 
-  it('migrates the removed rendered-preview mode without losing the draft', () => {
+  it('migrates older recovery modes to Source without losing the draft', () => {
     const state = createDocumentState('# Draft', { updatedAt: 1 })
     const storage = fakeStorageForState()
     storage.setItem('markdown-preview:recovery', JSON.stringify({ ...state, mode: 'preview' }))
-
-    expect(readRecovery(storage)).toEqual({ ...state, mode: 'live-preview' })
+    expect(readRecovery(storage)).toEqual({ ...state, mode: 'source' })
+    storage.setItem('markdown-preview:recovery', JSON.stringify({ ...state, mode: 'live-preview' }))
+    expect(readRecovery(storage)).toEqual({ ...state, mode: 'source' })
   })
 
   it('rejects malformed recovery data', () => {
@@ -171,30 +163,6 @@ describe('phase 2 markdown flow', () => {
     expect(convertPastedContent('', '<h2>Title</h2><p><strong>Bold</strong> text</p>')).toBe('## Title\n\n**Bold** text')
     expect(convertPastedContent('', '<ol><li>One</li><li><em>Two</em></li></ol><pre><code>const x = 1</code></pre>')).toBe('1. One\n2. *Two*\n\n```\nconst x = 1\n```')
     expect(convertPastedContent('**already Markdown**', '<strong>ignored</strong>')).toBe('**already Markdown**')
-  })
-
-  it('maps repeated Markdown blocks in source order', () => {
-    const source = 'Same\n\nSame'
-    const html = renderMarkdown(source)
-    expect(html).toContain('data-source-start="0" data-source-end="4"')
-    expect(html).toContain('data-source-start="6" data-source-end="10"')
-  })
-
-  it('keeps source ranges aligned after nested block content', () => {
-    const source = '## Blockquote\n\n> This is a blockquote.\n\n## Mixed List\n\n1. First item\n- Sub-item\n\n## Task List — GFM\n\n- [x] Completed'
-    const html = renderMarkdown(source)
-    const ranges = [...html.matchAll(/data-source-start="(\d+)" data-source-end="(\d+)"/gu)]
-      .map((match) => [Number(match[1]), Number(match[2])] as const)
-
-    expect(ranges).toEqual([
-      [0, 13],
-      [15, 38],
-      [40, 53],
-      [55, 68],
-      [69, 79],
-      [81, 99],
-      [101, 116],
-    ])
   })
 })
 

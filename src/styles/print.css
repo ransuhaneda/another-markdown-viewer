@@ -184,7 +184,7 @@
   }
 
   .preview-content blockquote.markdown-alert { background-color: color-mix(in srgb, var(--alert-color) 10%, transparent); }
-  .preview-content blockquote.markdown-alert.is-active-source-block { background-color: color-mix(in srgb, var(--alert-color) 10%, transparent) !important; }
+
   .preview-content .markdown-alert-title { color: var(--alert-color); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .preview-content .markdown-alert-icon { width: 1rem; height: 1rem; flex: 0 0 auto; stroke: currentColor; }
 

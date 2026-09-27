@@ -1,4 +1,4 @@
-export type ViewMode = 'live-preview' | 'source'
+export type ViewMode = 'source'
 export type WorkspaceLayout = 'editor' | 'split' | 'preview'
 
 export interface DocumentState {

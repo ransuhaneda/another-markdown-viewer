@@ -1,7 +1,6 @@
 import type { EditorView } from '@codemirror/view'
 import { Maximize2, Minimize2 } from 'lucide'
-import { canRedoSourceEditor, canUndoSourceEditor, setSourceEditorLivePreview } from '../editor/source-editor'
-import { findActiveBlock } from '../markdown/live-preview'
+import { canRedoSourceEditor, canUndoSourceEditor } from '../editor/source-editor'
 import { prepareRenderedLinks, renderMarkdown } from '../markdown/render-markdown'
 import type { DocumentState, ViewMode, WorkspaceLayout } from '../state/document-state'
 
@@ -80,9 +79,8 @@ export function updateDocumentView(app: HTMLElement, elements: WorkspaceElements
   requiredElement<HTMLElement>(app, '[data-count]').textContent = `${words} ${words === 1 ? 'word' : 'words'} · ${characters} ${characters === 1 ? 'character' : 'characters'}`
 }
 
-export function updateModeView(app: HTMLElement, editor: EditorView, mode: ViewMode): void {
-  setSourceEditorLivePreview(editor, mode === 'live-preview')
-  requiredElement<HTMLElement>(app, '[data-editor-label]').textContent = mode === 'live-preview' ? 'Live' : 'Source'
+export function updateModeView(app: HTMLElement, mode: ViewMode): void {
+  requiredElement<HTMLElement>(app, '[data-editor-label]').textContent = 'Source'
   updatePressedButtons(app, '[data-mode]', mode)
 }
 
@@ -96,19 +94,6 @@ export function updateHistoryView(elements: WorkspaceElements, editor: EditorVie
   elements.redoButton.disabled = !canRedoSourceEditor(editor)
 }
 
-export function updateActivePreviewBlock(preview: HTMLElement, markdown: string, cursorPosition: number): void {
-  const block = findActiveBlock(markdown, cursorPosition)
-  preview.querySelectorAll<HTMLElement>('[data-source-start]').forEach((element) => {
-    const range = readSourceRange(element)
-    element.classList.toggle('is-active-source-block', range !== null && range.start <= block.range.end && range.end >= block.range.start)
-  })
-}
-
-export function readSourceRange(element: HTMLElement): { start: number; end: number } | null {
-  const start = Number(element.dataset.sourceStart)
-  const end = Number(element.dataset.sourceEnd)
-  return Number.isFinite(start) && Number.isFinite(end) ? { start, end } : null
-}
 
 export function setStatus(app: HTMLElement, message: string, failed = false): void {
   const status = requiredElement<HTMLElement>(app, '[data-status]')

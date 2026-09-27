@@ -32,7 +32,6 @@ function renderWorkspaceToolbar(): string {
         </div>
         <span class="action-divider" aria-hidden="true"></span>
         <div class="segmented-control" role="group" aria-label="Editor mode">
-          <button class="segment" data-mode="live-preview" type="button" aria-label="Live Preview" title="Live Preview"><i data-lucide="eye"></i></button>
           <button class="segment" data-mode="source" type="button" aria-label="Source Markdown" title="Source Markdown"><i data-lucide="code"></i></button>
         </div>
         <span class="action-divider" aria-hidden="true"></span>
@@ -53,7 +52,7 @@ function renderDocumentRegion(): string {
   return `
     <section class="document-region" data-layout="split" aria-label="Document panes">
       <article class="pane pane-editor" data-pane="editor" aria-label="Markdown editor">
-        <div class="pane-header"><span class="pane-label" data-editor-label>Live</span></div>
+        <div class="pane-header"><span class="pane-label" data-editor-label>Source</span></div>
         <div class="editor-container" data-editor></div>
       </article>
       <div class="split-handle" role="separator" aria-label="Resize editor and rendered view panes" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"><span aria-hidden="true"></span></div>

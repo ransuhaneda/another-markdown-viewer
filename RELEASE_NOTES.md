@@ -1,26 +1,18 @@
-# Another Markdown Viewer v0.1.0
+# Another Markdown Viewer v0.1.1
 
 ## Release scope
 
-This release completes the documented v1 implementation phases:
+This release integrates the latest `feat/general-changes` work while keeping Live Preview editing disabled in production until it passes further testing.
 
-- Application shell and visual foundation.
-- Source editing, GFM preview, and local draft recovery.
-- Document state, layouts, cursor recovery, and scroll recovery.
-- Markdown sanitization, URL policy, and rich-text paste conversion.
-- Markdown file open and save operations.
-- Browser print-to-PDF export with dedicated print styles.
-- Live Preview active-block mapping.
-- Help dialog, keyboard behavior, responsive layout, and reduced-motion handling.
+- Keeps Source editing and the separate rendered Preview pane available.
+- Restores older Live Preview recovery drafts safely in Source mode.
+- Includes the documented v1 implementation phases for file handling, recovery, Markdown rendering, and PDF export.
 
 ## Verification
 
-- `pnpm check` passes.
-- `pnpm test` passes with 17 tests.
-- `pnpm build` passes.
-- `git diff --check` passes.
-- The production build has a known non-blocking Vite warning because the main JavaScript bundle is larger than 500 kB after minification.
+- `pnpm run check`
+- `pnpm run test`
+- `pnpm run test:browser`
+- `pnpm run build`
 
-## Known release limitation
-
-The final manual browser, accessibility, performance, and print-preview review remains a product-owner responsibility. The application uses browser print-to-PDF for v1 as documented.
+The production build may report a non-blocking Vite warning because the main JavaScript bundle is larger than 500 kB after minification.

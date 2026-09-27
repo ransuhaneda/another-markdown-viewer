@@ -13,7 +13,7 @@ export function readRecovery(storage: Storage = localStorage): RecoveryState | n
     return {
       ...parsed,
       syncScroll: parsed.syncScroll ?? false,
-      mode: parsed.mode === 'preview' ? 'live-preview' : parsed.mode,
+      mode: 'source',
     }
   } catch {
     return null
@@ -37,7 +37,7 @@ export function clearRecovery(storage: Storage = localStorage): void {
   }
 }
 
-type StoredRecoveryState = Omit<RecoveryState, 'mode'> & { mode: ViewMode | 'preview' }
+type StoredRecoveryState = Omit<RecoveryState, 'mode'> & { mode: ViewMode | 'preview' | 'live-preview' }
 
 function isStoredRecoveryState(value: unknown): value is StoredRecoveryState {
   if (!value || typeof value !== 'object') return false

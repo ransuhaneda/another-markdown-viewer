@@ -1,13 +1,7 @@
-import { Compartment, EditorSelection, EditorState, type Extension, type Range } from '@codemirror/state'
-import { syntaxTree } from '@codemirror/language'
-import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate, highlightActiveLine, keymap, lineNumbers } from '@codemirror/view'
+import { EditorSelection, EditorState, type Extension } from '@codemirror/state'
+import { EditorView, highlightActiveLine, keymap, lineNumbers } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { history, historyKeymap, redo, redoDepth, undo, undoDepth } from '@codemirror/commands'
-import {
-  collapseOnSelectionFacet,
-  livePreviewPlugin,
-  markdownStylePlugin,
-} from 'codemirror-live-markdown'
 import { convertPastedContent } from '../markdown/paste-markdown'
 
 export interface SourceEditorOptions {
@@ -22,29 +16,7 @@ export interface SourceEditorSnapshot {
   scrollTop: number
 }
 
-const livePreviewMode = new Compartment()
-const sourceLineNumbers = new Compartment()
-
-const collapseHeadingSeparator = ViewPlugin.fromClass(class {
-  decorations: DecorationSet
-
-  constructor(view: EditorView) {
-    this.decorations = headingSeparatorDecorations(view)
-  }
-
-  update(update: ViewUpdate): void {
-    if (update.docChanged || update.selectionSet || update.viewportChanged) {
-      this.decorations = headingSeparatorDecorations(update.view)
-    }
-  }
-}, { decorations: (value) => value.decorations })
-
-const livePreviewExtensions = [
-  collapseOnSelectionFacet.of(true),
-  livePreviewPlugin,
-  markdownStylePlugin,
-  collapseHeadingSeparator,
-]
+const sourceLineNumbers = lineNumbers()
 
 function toggleMarkdownMarkers(open: string, close: string) {
   return (view: EditorView): boolean => {
@@ -131,37 +103,6 @@ const markdownFormattingKeymap = [
   { key: 'Mod-k', run: createMarkdownLink, preventDefault: true },
   { key: 'Ctrl-Shift-k', mac: 'Mod-Alt-c', run: createMarkdownCodeBlock, preventDefault: true },
 ]
-
-function headingSeparatorDecorations(view: EditorView): DecorationSet {
-  const decorations: Range<Decoration>[] = []
-  const selection = view.state.selection
-
-  syntaxTree(view.state).iterate({
-    from: view.viewport.from,
-    to: view.viewport.to,
-    enter: (node) => {
-      if (node.name !== 'HeaderMark') return
-      const line = view.state.doc.lineAt(node.from)
-      const isActive = selection.ranges.some((range) => range.from <= line.to && range.to >= line.from)
-      if (isActive) return
-
-      const separator = view.state.doc.sliceString(node.to, line.to).match(/^[\t ]+/u)?.[0]
-      if (separator) decorations.push(Decoration.replace({}).range(node.to, node.to + separator.length))
-    },
-  })
-
-  return Decoration.set(decorations)
-}
-
-function configureLivePreview(editor: EditorView, enabled: boolean): void {
-  editor.dom.classList.toggle('cm-live-preview', enabled)
-  editor.dom.classList.toggle('cm-source', !enabled)
-  editor.dispatch({ effects: [
-    livePreviewMode.reconfigure(enabled ? livePreviewExtensions : []),
-    sourceLineNumbers.reconfigure(enabled ? [] : lineNumbers()),
-  ] })
-}
-
 function createEditorTheme(): Extension {
   return EditorView.theme({
     '&': { height: '100%', backgroundColor: 'transparent', color: 'var(--color-ink)' },
@@ -207,8 +148,7 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
       keymap.of(markdownFormattingKeymap),
       keymap.of(historyKeymap),
       highlightActiveLine(),
-      livePreviewMode.of(livePreviewExtensions),
-      sourceLineNumbers.of([]),
+      sourceLineNumbers,
       EditorView.lineWrapping,
       EditorView.domEventHandlers({
         paste: (event, view) => {
@@ -233,11 +173,6 @@ export function createSourceEditor({ parent, initialValue, onChange, onSelection
   parent.classList.add('editor-container--ready')
   return view
 }
-
-export function setSourceEditorLivePreview(editor: EditorView, enabled: boolean): void {
-  configureLivePreview(editor, enabled)
-}
-
 export function undoSourceEditor(editor: EditorView): void {
   undo(editor)
 }

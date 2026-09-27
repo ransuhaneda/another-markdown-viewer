@@ -1,10 +1,8 @@
-export type ViewMode = 'source'
 export type WorkspaceLayout = 'editor' | 'split' | 'preview'
 
 export interface DocumentState {
   markdown: string
   fileName: string
-  mode: ViewMode
   layout: WorkspaceLayout
   syncScroll: boolean
   cursorPosition: number
@@ -19,7 +17,6 @@ export function createDocumentState(markdown: string, recovered?: Partial<Docume
   return {
     markdown,
     fileName: recovered?.fileName ?? 'untitled.md',
-    mode: recovered?.mode ?? 'source',
     layout: recovered?.layout ?? DEFAULT_LAYOUT,
     syncScroll: recovered?.syncScroll ?? false,
     cursorPosition: recovered?.cursorPosition ?? 0,

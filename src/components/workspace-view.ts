@@ -2,7 +2,7 @@ import type { EditorView } from '@codemirror/view'
 import { Maximize2, Minimize2 } from 'lucide'
 import { canRedoSourceEditor, canUndoSourceEditor } from '../editor/source-editor'
 import { prepareRenderedLinks, renderMarkdown } from '../markdown/render-markdown'
-import type { DocumentState, ViewMode, WorkspaceLayout } from '../state/document-state'
+import type { DocumentState, WorkspaceLayout } from '../state/document-state'
 
 export interface WorkspaceElements {
   appShell: HTMLElement
@@ -79,11 +79,6 @@ export function updateDocumentView(app: HTMLElement, elements: WorkspaceElements
   requiredElement<HTMLElement>(app, '[data-count]').textContent = `${words} ${words === 1 ? 'word' : 'words'} · ${characters} ${characters === 1 ? 'character' : 'characters'}`
 }
 
-export function updateModeView(app: HTMLElement, mode: ViewMode): void {
-  requiredElement<HTMLElement>(app, '[data-editor-label]').textContent = 'Source'
-  updatePressedButtons(app, '[data-mode]', mode)
-}
-
 export function updateLayoutView(app: HTMLElement, elements: WorkspaceElements, layout: WorkspaceLayout): void {
   elements.workspace.dataset.layout = layout
   updatePressedButtons(app, '[data-layout]', layout)
@@ -94,6 +89,11 @@ export function updateHistoryView(elements: WorkspaceElements, editor: EditorVie
   elements.redoButton.disabled = !canRedoSourceEditor(editor)
 }
 
+export function readSourceRange(element: HTMLElement): { start: number; end: number } | null {
+  const start = Number(element.dataset.sourceStart)
+  const end = Number(element.dataset.sourceEnd)
+  return Number.isFinite(start) && Number.isFinite(end) ? { start, end } : null
+}
 
 export function setStatus(app: HTMLElement, message: string, failed = false): void {
   const status = requiredElement<HTMLElement>(app, '[data-status]')
@@ -108,7 +108,7 @@ export function setRecoveryWarning(app: HTMLElement, unavailable: boolean): void
 
 function updatePressedButtons(app: HTMLElement, selector: string, value: string): void {
   app.querySelectorAll<HTMLButtonElement>(selector).forEach((button) => {
-    const active = button.dataset.mode === value || button.dataset.layout === value
+    const active = button.dataset.layout === value
     button.classList.toggle('is-active', active)
     button.setAttribute('aria-pressed', String(active))
   })

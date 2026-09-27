@@ -18,6 +18,7 @@ describe('phase 2 markdown flow', () => {
 
   it('preserves safe keyboard key markup', () => {
     const html = renderMarkdown('Press <kbd>Ctrl</kbd> + <kbd>B</kbd> for bold text.')
+
     expect(html).toContain('<kbd>Ctrl</kbd> + <kbd>B</kbd>')
   })
 
@@ -39,7 +40,15 @@ describe('phase 2 markdown flow', () => {
       '> [!UNKNOWN]\n> An ordinary blockquote.',
     ].join('\n\n')
     const html = renderMarkdown(source)
-    for (const type of ['NOTE', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION']) {
+
+    const icons = [
+      ['NOTE', 'info'],
+      ['TIP', 'lightbulb'],
+      ['IMPORTANT', 'circle-alert'],
+      ['WARNING', 'triangle-alert'],
+      ['CAUTION', 'octagon-alert'],
+    ] as const
+    for (const [type] of icons) {
       expect(html).toContain(`class="markdown-alert markdown-alert-${type.toLowerCase()}"`)
       expect(html).toContain(`${type}</p>`)
     }
@@ -74,6 +83,7 @@ describe('phase 2 markdown flow', () => {
 
   it('renders nested frontmatter mappings as wrapped block YAML', () => {
     const html = renderMarkdown('---\ncolors:\n  primary: "#8CB4FF"\n  surface:\n    raised: "#20262C"\n---\nBody')
+
     expect(html).toContain('<pre class="markdown-frontmatter-block"><code>primary: "#8CB4FF"\nsurface:\n  raised: "#20262C"</code></pre>')
     expect(html).not.toContain('{"primary"')
   })
@@ -105,13 +115,17 @@ describe('phase 2 markdown flow', () => {
     expect(readRecovery(fakeStorage)).toBeNull()
   })
 
-  it('migrates older recovery modes to Source without losing the draft', () => {
+  it('ignores saved editor and rendered-preview modes without losing the draft', () => {
     const state = createDocumentState('# Draft', { updatedAt: 1 })
     const storage = fakeStorageForState()
-    storage.setItem('markdown-preview:recovery', JSON.stringify({ ...state, mode: 'preview' }))
-    expect(readRecovery(storage)).toEqual({ ...state, mode: 'source' })
-    storage.setItem('markdown-preview:recovery', JSON.stringify({ ...state, mode: 'live-preview' }))
-    expect(readRecovery(storage)).toEqual({ ...state, mode: 'source' })
+
+    for (const mode of ['preview', 'live-preview', 'source', undefined]) {
+      const storedState = mode === undefined
+        ? Object.fromEntries(Object.entries(state).filter(([key]) => key !== 'mode'))
+        : { ...state, mode }
+      storage.setItem('markdown-preview:recovery', JSON.stringify(storedState))
+      expect(readRecovery(storage)).toEqual(state)
+    }
   })
 
   it('rejects malformed recovery data', () => {
@@ -164,6 +178,8 @@ describe('phase 2 markdown flow', () => {
     expect(convertPastedContent('', '<ol><li>One</li><li><em>Two</em></li></ol><pre><code>const x = 1</code></pre>')).toBe('1. One\n2. *Two*\n\n```\nconst x = 1\n```')
     expect(convertPastedContent('**already Markdown**', '<strong>ignored</strong>')).toBe('**already Markdown**')
   })
+
+
 })
 
 function fakeStorageForState(): Storage {

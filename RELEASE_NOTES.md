@@ -1,12 +1,13 @@
-# Another Markdown Viewer v0.1.1
+# Another Markdown Viewer v0.1.2
 
 ## Release scope
 
-This release integrates the latest `feat/general-changes` work while keeping Live Preview editing disabled in production until it passes further testing.
+This release removes the Live Preview editor mode. The editor uses raw Markdown, and the Rendered View remains separate and updates as the source changes.
 
-- Keeps Source editing and the separate rendered Preview pane available.
-- Restores older Live Preview recovery drafts safely in Source mode.
-- Includes the documented v1 implementation phases for file handling, recovery, Markdown rendering, and PDF export.
+- Removes Live Preview controls and editor behavior.
+- Keeps editor-only, rendered-only, and split layouts.
+- Restores legacy recovery drafts in Source without losing Markdown or layout state.
+- Removes the unused Live Preview dependency.
 
 ## Verification
 

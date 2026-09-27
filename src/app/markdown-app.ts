@@ -2,15 +2,16 @@ import { connectHelpDialog } from '../components/help-dialog'
 import { renderAppShell } from '../components/app-shell'
 import { mountIcons } from '../components/icons'
 import { connectSplitPane } from '../components/split-pane'
+import { EditorView } from '@codemirror/view'
 import {
   getWorkspaceElements,
+  readSourceRange,
   setRecoveryWarning,
   setStatus,
   updateDocumentView,
   updateFocusModeView,
   updateHistoryView,
   updateLayoutView,
-  updateModeView,
 } from '../components/workspace-view'
 import { DEFAULT_MARKDOWN } from '../default-markdown'
 import {
@@ -60,9 +61,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
       updateHistoryView(elements, editor)
       scheduleRecovery()
     },
-    onSelectionChange: (position) => {
-      state.cursorPosition = position
-    },
   })
 
   const captureViewState = (): void => {
@@ -88,11 +86,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
       : 'Synchronized scrolling is available only in split view')
     elements.syncScrollButton.disabled = !available
   }
-  const applyMode = (): void => {
-    state.mode = 'source'
-    updateModeView(app, state.mode)
-    scheduleRecovery()
-  }
   const applyLayout = (layout: WorkspaceLayout): void => {
     state.layout = layout
     updateLayoutView(app, elements, layout)
@@ -110,7 +103,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     replaceDocument('')
     clearRecovery()
     setRecoveryWarning(app, false)
-    applyMode()
     applyLayout('split')
     updateDocumentView(app, elements, state)
     suppressRecovery = false
@@ -124,7 +116,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
   connectHelpDialog(elements.helpDialog, elements.helpTrigger)
   connectSplitPane(elements.workspace, elements.splitHandle, () => state.layout === 'split')
   connectWorkspaceEvents()
-  updateModeView(app, state.mode)
   updateLayoutView(app, elements, state.layout)
   updateHistoryView(elements, editor)
   updateDocumentView(app, elements, state)
@@ -141,7 +132,6 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
     window.addEventListener('keydown', handleGlobalShortcuts)
     elements.undoButton.addEventListener('click', () => { editor.focus(); undoSourceEditor(editor) })
     elements.redoButton.addEventListener('click', () => { editor.focus(); redoSourceEditor(editor) })
-    app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => button.addEventListener('click', applyMode))
     app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => button.addEventListener('click', () => {
       if (isWorkspaceLayout(button.dataset.layout)) applyLayout(button.dataset.layout)
     }))
@@ -160,6 +150,14 @@ export function mountMarkdownApp(app: HTMLDivElement): void {
         })
         return
       }
+      const range = readSourceRange(target.closest<HTMLElement>('[data-source-start]') ?? target)
+      if (!range) return
+      applyLayout('split')
+      editor.focus()
+      editor.dispatch({
+        selection: { anchor: range.start },
+        effects: EditorView.scrollIntoView(range.start, { y: 'center' }),
+      })
     })
     elements.preview.addEventListener('scroll', () => {
       setScrollRatio(elements.preview, editor.scrollDOM)

@@ -36,7 +36,7 @@ Do not invent a decision when a document is unclear.
 - Use Cloudflare Pages as the initial deployment target.
 - Do not add server infrastructure or a Cloudflare Worker without a product requirement.
 - Treat raw Markdown as the canonical document state.
-- Protect the low-friction flow: paste Markdown, make small edits, inspect Live Preview, and download a polished PDF.
+- Protect the low-friction flow: paste Markdown, make small edits, inspect the Rendered View, and download a polished PDF.
 - Preserve source Markdown and whitespace as much as possible.
 - Do not rewrite or normalize source Markdown without a deliberate user action.
 - Keep local recovery automatic, but do not present it as explicit file saving.

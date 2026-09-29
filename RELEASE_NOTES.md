@@ -1,13 +1,13 @@
-# Another Markdown Viewer v0.1.3
+# Another Markdown Viewer v0.1.4
 
 ## Release scope
 
-This release removes the Live Preview editor mode. The editor uses raw Markdown, and the Rendered View remains separate and updates as the source changes.
+This release documents the Cloudflare Pages deployment and removes repository-local OMH workflow metadata that is not required to build, deploy, or use the application.
 
-- Removes Live Preview controls and editor behavior.
-- Keeps editor-only, rendered-only, and split layouts.
-- Restores legacy recovery drafts in Source without losing Markdown or layout state.
-- Removes the unused Live Preview dependency.
+- Adds the production URL to the project documentation.
+- Adds the setup, usage, command, and verification guide in `README.md`.
+- Ignores `.omh/` because it contains local workflow metadata rather than application source or deployment configuration.
+- Keeps the current Source and Rendered View workflow accurate in the documentation.
 
 ## Verification
 

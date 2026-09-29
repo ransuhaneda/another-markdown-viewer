@@ -2,7 +2,9 @@
 
 Another Markdown Viewer is a focused, client-side Markdown workspace built with Vite and TypeScript.
 
-- Edit Markdown in CodeMirror 6 with Live Preview or Source mode.
+The production app is deployed at [md-viewer.384721.xyz](https://md-viewer.384721.xyz/) on Cloudflare Pages.
+
+- Edit raw Markdown in CodeMirror 6 beside the rendered document.
 - Render GitHub-Flavored Markdown and sanitize rendered HTML.
 - Open and download Markdown files in the browser.
 - Export a print-ready PDF through the browser print flow.

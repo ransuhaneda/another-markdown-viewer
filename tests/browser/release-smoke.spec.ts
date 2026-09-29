@@ -4,8 +4,8 @@ test('production release exposes Source and keeps rendered Preview current', asy
   await page.addInitScript(() => localStorage.clear())
   await page.goto('/')
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
-  await expect(page.locator('[data-mode="source"]')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.locator('[data-mode="live-preview"]')).toHaveCount(0)
+  await expect(page.locator('[data-mode]')).toHaveCount(0)
+  await expect(page.locator('.workspace-toolbar')).not.toContainText('Source Markdown')
 
   const editor = page.getByRole('textbox')
   await editor.fill('# Release check\n\nRendered **bold** text.')

@@ -30,7 +30,7 @@ describe('phase 2 markdown flow', () => {
     expect(html).toMatch(/<ol(?:\s[^>]*)?>[\s\S]*<li>First item<ul>[\s\S]*<\/ul>[\s\S]*<\/li>[\s\S]*<\/ol>/u)
   })
 
-  it('renders GitHub alert blockquotes without source-position attributes', () => {
+  it('renders GitHub alert blockquotes with source-position attributes', () => {
     const source = [
       '> [!NOTE]\n> A note with **emphasis**.',
       '> [!TIP]\n> A useful tip.',
@@ -56,8 +56,8 @@ describe('phase 2 markdown flow', () => {
     expect(html).toContain('An ordinary blockquote.')
     expect(html).toContain('[!UNKNOWN]')
     expect(html).not.toContain('[!NOTE]')
-    expect(html).not.toContain('data-source-start=')
-    expect(html).not.toContain('data-source-end=')
+    expect(html).toContain('data-source-start="0"')
+    expect(html).toContain('data-source-end=')
     expect(html.match(/class="markdown-alert-icon"/gu)).toHaveLength(5)
   })
 
@@ -77,7 +77,7 @@ describe('phase 2 markdown flow', () => {
     expect(html).toContain('<th scope="row">title</th><td>Welcome</td>')
     expect(html).toContain('<span class="markdown-frontmatter-tag">markdown</span> <span class="markdown-frontmatter-tag">notes</span>')
     expect(html).toContain('>Content</h1>')
-    expect(html).not.toContain('data-source-start')
+    expect(html).toContain(`data-source-start="${source.indexOf('# Content')}"`)
     expect(html).not.toContain('---')
   })
 
@@ -177,6 +177,30 @@ describe('phase 2 markdown flow', () => {
     expect(convertPastedContent('', '<h2>Title</h2><p><strong>Bold</strong> text</p>')).toBe('## Title\n\n**Bold** text')
     expect(convertPastedContent('', '<ol><li>One</li><li><em>Two</em></li></ol><pre><code>const x = 1</code></pre>')).toBe('1. One\n2. *Two*\n\n```\nconst x = 1\n```')
     expect(convertPastedContent('**already Markdown**', '<strong>ignored</strong>')).toBe('**already Markdown**')
+  })
+
+  it('maps repeated Markdown blocks in source order', () => {
+    const source = 'Same\n\nSame'
+    const html = renderMarkdown(source)
+    expect(html).toContain('data-source-start="0" data-source-end="4"')
+    expect(html).toContain('data-source-start="6" data-source-end="10"')
+  })
+
+  it('keeps source ranges aligned after nested block content', () => {
+    const source = '## Blockquote\n\n> This is a blockquote.\n\n## Mixed List\n\n1. First item\n- Sub-item\n\n## Task List — GFM\n\n- [x] Completed'
+    const html = renderMarkdown(source)
+    const ranges = [...html.matchAll(/data-source-start="(\d+)" data-source-end="(\d+)"/gu)]
+      .map((match) => [Number(match[1]), Number(match[2])] as const)
+
+    expect(ranges).toEqual([
+      [0, 13],
+      [15, 38],
+      [40, 53],
+      [55, 68],
+      [69, 79],
+      [81, 99],
+      [101, 116],
+    ])
   })
 
 

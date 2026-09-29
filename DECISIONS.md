@@ -14,9 +14,9 @@ This file records the accepted product contract. Implementation must follow it.
 ## Editing model
 
 - The canonical document state is the raw Markdown string.
-- Source editing operates on the canonical Markdown document.
-- Preserve source structure and whitespace as much as possible.
-- Do not normalize or rewrite Markdown automatically.
+- Source editing operates on the raw Markdown document.
+- Source structure and whitespace should be preserved as much as possible.
+- The editor should not normalize or rewrite Markdown automatically.
 - The editor shows raw Markdown.
 - The rendered document is a separate pane and updates as the source changes.
 - The editor has no alternate Live Preview mode.
@@ -113,9 +113,9 @@ This file records the accepted product contract. Implementation must follow it.
 
 ## Product flow
 
-- The production flow is: paste Markdown into Source, make small edits, inspect Preview, and download a polished PDF.
-- Do not require users to complete an entire long-form writing workflow in the app.
-- Use local recovery to protect copied and lightly edited content. Keep it secondary to the inspect-and-download flow.
+- The primary user flow is: copy Markdown into the source editor, make small edits, inspect the Rendered View, and download a polished PDF.
+- The product does not need to encourage users to complete an entire long-form writing workflow inside the app.
+- Local recovery protects copied and lightly edited content, but it is secondary to the inspect-and-download flow.
 
 ## Markdown support contract
 

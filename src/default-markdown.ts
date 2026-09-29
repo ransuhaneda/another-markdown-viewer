@@ -8,7 +8,7 @@ export const DEFAULT_MARKDOWN = [
   '',
   '# Another Markdown Viewer',
   '',
-  '> A focused, browser-based Markdown editor. Edit your source, inspect the rendered document, and export a polished PDF.',
+  '> A focused, browser-based Markdown editor. Edit your source, inspect the rendered result, and export a polished PDF.',
   '',
   '![Another Markdown Viewer workspace](/images/another-markdown-viewer-workspace.svg)',
   '',

@@ -28,8 +28,8 @@ button:focus-visible, [tabindex='0']:focus-visible { outline: 2px solid var(--co
 .app-shell[data-focus-mode] .pane-header { display: none; }
 .app-shell[data-focus-mode] .workspace { padding: 0; grid-template-rows: minmax(0, 1fr); }
 .app-shell[data-focus-mode] .document-region { border: 0; border-radius: 0; }
-.app-shell[data-focus-mode] .pane-preview > .preview-content { padding-top: calc(var(--space-5) + var(--control-size) + var(--space-4)); }
-.app-shell[data-focus-mode] .pane-editor .cm-content { padding-top: calc(var(--space-6) + var(--control-size) + var(--space-4)); }
+.app-shell[data-focus-mode] .pane-preview > .preview-content { padding-top: var(--space-6); }
+.app-shell[data-focus-mode] .pane-editor .cm-content { padding-top: var(--space-6); }
 .focus-mode-unfocus { position: fixed; z-index: 10; top: var(--space-4); right: var(--space-4); visibility: hidden; border-color: var(--color-rule); background: var(--color-raised); color: var(--color-ink); }
 .app-shell[data-focus-mode] > .focus-mode-unfocus { visibility: visible; }
 .app-header, .app-footer { padding-inline: clamp(var(--space-5), 4vw, var(--space-7)); }

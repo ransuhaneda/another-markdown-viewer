@@ -10,6 +10,7 @@ test('shows only Source editing and the Rendered View', async ({ page }) => {
   await page.goto('/')
 
   await expect(page.locator('[data-mode]')).toHaveCount(0)
+  await expect(page.locator('.workspace-toolbar')).not.toContainText('Source Markdown')
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
   await expect(page.locator('[data-pane="preview"] .pane-label')).toHaveText('Rendered View')
 
@@ -237,6 +238,7 @@ test('renders YAML frontmatter above the Markdown body without changing the sour
   await expect(metadata.locator('tr').nth(1).locator('td')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(metadata.locator('tr').nth(1).locator('th')).toHaveCSS('text-align', 'end')
   await expect(page.locator('[data-preview] h1')).toHaveText('Rendered body')
+  await expect(page.locator('[data-preview] h1')).toHaveAttribute('data-source-start', String(source.indexOf('# Rendered body')))
   await expect(editor.locator('.cm-line')).toHaveText(source.split('\n'))
 })
 
@@ -335,6 +337,7 @@ test('opens the source editor when a rendered block is clicked', async ({ page }
   await page.locator('[data-preview] h1').first().click()
 
   await expect(page.locator('[data-editor-label]')).toHaveText('Source')
+  await expect(page.locator('.cm-focused')).toBeVisible()
   await expect(page.locator('.cm-activeLine')).toContainText('Another Markdown Viewer')
 })
 

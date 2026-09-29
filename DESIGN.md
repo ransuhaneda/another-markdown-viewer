@@ -189,7 +189,7 @@ Use 14px icons for compact toolbar actions.
 
 ### Source and layout controls
 
-Show raw Markdown in the source editor. Do not add an editor mode switch.
+Show Source Markdown as the only editor mode.
 Expose editor-only, rendered-view-only, and split behavior as pane layouts.
 Keep Rendered View visible in split layout beside the source editor.
 Use text labels where an icon could be unclear.

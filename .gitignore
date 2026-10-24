@@ -6,3 +6,7 @@ dist
 .DS_Store
 .hermes
 .omh
+test-results/
+.vitest/
+.vite-hooks
+.vscode

@@ -24,18 +24,18 @@ The app is client-side and does not require a backend runtime. Cloudflare Pages 
 ### Requirements
 
 - Node.js
-- pnpm
+- Vite+
 
 ### Install dependencies
 
 ```bash
-pnpm install
+vp install
 ```
 
 ### Start the development server
 
 ```bash
-pnpm dev
+vp dev
 ```
 
 Open the local URL printed by Vite. The repository configuration uses `http://127.0.0.1:5173` for the development server.
@@ -53,29 +53,29 @@ Use **Markdown help** in the app for the syntax reference and keyboard shortcuts
 
 | Command | Purpose |
 | --- | --- |
-| `pnpm dev` | Start the Vite development server. |
-| `pnpm run check` | Run the TypeScript check without emitting files. |
-| `pnpm run test` | Run the Vitest unit test suite, excluding browser tests. |
-| `pnpm run test:browser` | Run the Playwright browser smoke tests. |
-| `pnpm run test:browser:headed` | Run the Playwright tests with a visible browser. |
-| `pnpm run build` | Create the production bundle in `dist/`. |
-| `pnpm run preview` | Serve the production bundle locally. |
+| `vp dev` | Start the Vite development server. |
+| `vp run check` | Run the TypeScript check without emitting files. |
+| `vp run test` | Run the Vitest unit test suite, excluding browser tests. |
+| `vp run test:browser` | Run the Playwright browser smoke tests. |
+| `vp run test:browser:headed` | Run the Playwright tests with a visible browser. |
+| `vp run build` | Create the production bundle in `dist/`. |
+| `vp run preview` | Serve the production bundle locally. |
 
 ## Verification
 
 Run the complete local verification set before a deployment:
 
 ```bash
-pnpm run check
-pnpm run test
-pnpm run test:browser
-pnpm run build
+vp run check
+vp run test
+vp run test:browser
+vp run build
 ```
 
 The browser tests use the local production preview server by default. Set `PLAYWRIGHT_BASE_URL` to test another deployment, for example:
 
 ```bash
-PLAYWRIGHT_BASE_URL=https://md-viewer.384721.xyz pnpm run test:browser
+PLAYWRIGHT_BASE_URL=https://md-viewer.384721.xyz vp run test:browser
 ```
 
 ## Project boundaries

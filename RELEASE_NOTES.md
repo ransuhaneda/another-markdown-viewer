@@ -1,19 +1,21 @@
-# Another Markdown Viewer v0.1.4
+# Another Markdown Viewer v0.1.5
 
 ## Release scope
 
-This release documents the Cloudflare Pages deployment and removes repository-local OMH workflow metadata that is not required to build, deploy, or use the application.
+This release adopts Vite+ as the repository toolchain and consolidates the project's current status and release-verification guidance.
 
-- Adds the production URL to the project documentation.
-- Adds the setup, usage, command, and verification guide in `README.md`.
-- Ignores `.omh/` because it contains local workflow metadata rather than application source or deployment configuration.
-- Keeps the current Source and Rendered View workflow accurate in the documentation.
+- Uses Vite+ for development, testing, production builds, and preview commands.
+- Refreshes the supported dependency versions and lockfile.
+- Adds Vite+ formatting, lint, and staged-check configuration.
+- Documents the current implementation status and local release verification.
+- Restores TypeScript recognition for CSS side-effect imports.
+- Keeps embedded Base64/data-URI image conversion deferred until a product decision authorizes it.
 
 ## Verification
 
-- `pnpm run check`
-- `pnpm run test`
-- `pnpm run test:browser`
-- `pnpm run build`
+- `vp run check`
+- `vp run test`
+- `vp run test:browser`
+- `vp run build`
 
-The production build may report a non-blocking Vite warning because the main JavaScript bundle is larger than 500 kB after minification.
+All four commands pass. The production build reports a non-blocking warning because the main JavaScript bundle is larger than 500 kB after minification.

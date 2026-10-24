@@ -90,11 +90,11 @@ Do not invent a decision when a document is unclear.
 Use these scripts when they exist in `package.json`:
 
 ```text
-pnpm dev
-pnpm check
-pnpm test
-pnpm build
-pnpm preview
+vp dev
+vp run check
+vp run test
+vp run build
+vp run preview
 ```
 
 Use focused tests after each related change.

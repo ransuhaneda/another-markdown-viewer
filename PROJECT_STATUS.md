@@ -20,7 +20,7 @@ Local release verification is complete. Hosted deployment verification remains s
 | Unit tests | 31 tests pass across 6 files | `vp run test` |
 | Production build | Passes | `vp run build` |
 | Browser tests | 36 tests pass against the local Vite+ preview | `vp run test:browser` |
-| Build warning | Main JavaScript bundle is 851.79 kB minified | Vite+ build output |
+| Build warning | Main JavaScript bundle is 851.78 kB minified | Vite+ build output |
 | Working tree | Clean after release preparation | Git status inspection |
 
 ## Implemented product surface
@@ -60,7 +60,7 @@ The local browser suite passes all 36 tests against the Markdown Viewer producti
 
 ### Performance follow-up
 
-Investigate the 851.79 kB minified JavaScript bundle. Code splitting or dependency review may reduce it, but this is not a release blocker by itself.
+Investigate the 851.78 kB minified JavaScript bundle. Code splitting or dependency review may reduce it, but this is not a release blocker by itself.
 
 ### Product-owner verification
 

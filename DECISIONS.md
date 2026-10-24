@@ -177,11 +177,11 @@ This file records the accepted product contract. Implementation must follow it.
 
 ## Repository and agent workflow
 
-- Use pnpm for package management and project scripts.
+- Use Vite+ (`vp`) for package management and project scripts.
 - Use kebab-case filenames, PascalCase types and components, camelCase functions and variables, and UPPER_SNAKE_CASE only for true constants.
 - Keep the initial repository structure small: root project documents, `public/`, `src/`, and `tests/`.
 - Use Vitest for focused unit tests and Playwright for browser smoke tests.
-- Keep scripts minimal: `pnpm dev`, `pnpm check`, `pnpm test`, `pnpm build`, and `pnpm preview`.
+- Keep scripts minimal: `vp dev`, `vp run check`, `vp run test`, `vp run build`, and `vp run preview`.
 - Use `AGENTS.md` as task router, `DECISIONS.md` as product contract, `DESIGN.md` as design identity, and `README.md` as setup and command guide.
 - Use the Google `DESIGN.md` shape: YAML front matter for tokens and Markdown sections for rationale and rules.
 - Keep CSS tokens in `src/styles/tokens.css` and use semantic tokens in components.

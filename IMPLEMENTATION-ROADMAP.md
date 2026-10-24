@@ -1,6 +1,14 @@
 # Another Markdown Viewer Implementation Roadmap
 
-This roadmap breaks the product contract into focused phases. Each phase should use a separate `feat/*` branch and focused commits. Use `fix/*` branches for defects discovered after integration.
+This roadmap breaks the product contract into focused phases. Each phase should use a separate `feat/*` branch and focused commits. Use `fix/*` branches for defects discovered after integration. For verified current status and release evidence, read [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) first.
+
+## Current phase status
+
+- **Phase 0 — Project foundation:** complete in the current repository.
+- **Phases 1–8 — Product implementation:** implemented in the current source tree, with unit coverage present for the main phase areas.
+- **Phase 9 — Release verification:** open. TypeScript, unit tests, and build pass. The browser suite requires a confirmed Markdown Viewer preview target before its failures can be classified.
+
+These markers describe repository evidence, not a substitute for the browser and product-owner checks listed below.
 
 ## Git baseline and workflow
 
@@ -10,7 +18,7 @@ This roadmap breaks the product contract into focused phases. Each phase should 
 - Use `fix/*` for defects.
 - Keep commits focused on one behavior, boundary, security policy, test group, or visual concern.
 - Run focused tests after related changes.
-- Run `pnpm check`, `pnpm test`, and `pnpm build` before integrating a phase.
+- Run `vp run check`, `vp run test`, and `vp run build` before integrating a phase.
 - Verify editing, persistence, rendering, file access, PDF export, and responsive work in a real browser.
 - Do not add backend infrastructure, Workers, accounts, analytics, a theme picker, or undocumented Markdown features.
 
@@ -18,13 +26,13 @@ This roadmap breaks the product contract into focused phases. Each phase should 
 
 **Branch:** `feat/phase-0-foundation`
 
-Check the project-init commit before starting this phase. If Vite, TypeScript, pnpm scripts, Vitest, the initial documents, and the initial token structure are already present and verified, mark Phase 0 complete and do not recreate it.
+Check the project-init commit before starting this phase. If Vite, TypeScript, Vite+ scripts, Vitest, the initial documents, and the initial token structure are already present and verified, mark Phase 0 complete and do not recreate it.
 
 Scope:
 
 - Vite and TypeScript setup.
 - Strict TypeScript configuration.
-- Minimal pnpm scripts: `dev`, `check`, `test`, `build`, and `preview`.
+- Minimal Vite+ scripts: `dev`, `check`, `test`, `build`, and `preview`.
 - Vitest setup.
 - Initial project documents.
 - Initial CSS token structure.
@@ -42,9 +50,9 @@ test: add foundation smoke test
 Acceptance checks:
 
 ```bash
-pnpm check
-pnpm test
-pnpm build
+vp run check
+vp run test
+vp run build
 ```
 
 ## Phase 1 — Application shell and visual foundation
@@ -276,10 +284,10 @@ Scope:
 Required commands:
 
 ```bash
-pnpm check
-pnpm test
-pnpm build
-pnpm dev
+vp run check
+vp run test
+vp run build
+vp dev
 ```
 
 ## Phase completion checklist
@@ -291,9 +299,9 @@ pnpm dev
 [ ] Raw Markdown remains the canonical document state.
 [ ] Focused tests were added or updated.
 [ ] Focused tests pass.
-[ ] pnpm check passes.
-[ ] pnpm test passes.
-[ ] pnpm build passes.
+[ ] `vp run check` passes.
+[ ] `vp run test` passes.
+[ ] `vp run build` passes.
 [ ] Real-browser verification was performed when required.
 [ ] The diff contains no unrelated changes.
 [ ] Known limitations are recorded.
@@ -301,4 +309,4 @@ pnpm dev
 
 ## Current starting point
 
-The project-init commit is the baseline for deciding whether Phase 0 is complete. The previous Phase 2 implementation is being removed from the active branch so work can restart from the first incomplete phase.
+The project is past the foundation and implementation phases. Start remaining work at Phase 9: confirm the browser test target, rerun the browser suite, investigate any genuine product failures, and record the result in `PROJECT_STATUS.md`. Do not restart earlier phases unless new evidence shows that an accepted contract is missing.

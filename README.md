@@ -2,6 +2,8 @@
 
 Another Markdown Viewer is a focused, client-side browser workspace for editing Markdown, checking the rendered document, and exporting a print-ready PDF.
 
+**Current status:** read [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) for the verified implementation and release state.
+
 **Try the deployed app:** [md-viewer.384721.xyz](https://md-viewer.384721.xyz/)
 
 ## What it does
@@ -84,3 +86,15 @@ PLAYWRIGHT_BASE_URL=https://md-viewer.384721.xyz pnpm run test:browser
 - The visual identity does not include user-selectable themes.
 
 See [`DECISIONS.md`](./DECISIONS.md) for the product contract, [`DESIGN.md`](./DESIGN.md) for visual and interaction rules, and [`RELEASE_NOTES.md`](./RELEASE_NOTES.md) for release-specific changes.
+
+## Documentation map
+
+- [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) — verified implementation status, release state, known failures, and next actions.
+- [`AGENTS.md`](./AGENTS.md) — documentation authority, project guardrails, and task routing.
+- [`DECISIONS.md`](./DECISIONS.md) — accepted product contract and scope boundaries.
+- [`DESIGN.md`](./DESIGN.md) — visual identity, interaction rules, and accessibility direction.
+- [`IMPLEMENTATION-ROADMAP.md`](./IMPLEMENTATION-ROADMAP.md) — phase sequence with current completion markers.
+- [`future-feature-list.md`](./future-feature-list.md) — deferred ideas only; not a prioritized roadmap.
+- [`RELEASE_NOTES.md`](./RELEASE_NOTES.md) — version-specific release notes.
+
+`PROJECT_STATUS.md` is the current-status source. The other documents define the contract or provide focused guidance; they must not duplicate release verification claims.

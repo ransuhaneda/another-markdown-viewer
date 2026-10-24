@@ -17,6 +17,7 @@ Do not implement an item without an explicit product decision.
 - A plugin system.
 - Git integration.
 - Image upload and asset management.
+- Convert embedded Base64/data-URI images from pasted or imported Markdown into actual image assets, while preserving the document content and image references. This supports Google Docs Markdown exports that embed images as definitions such as `[image1]: <data:image/png;base64,...>`.
 - Full mobile editing.
 - User-selectable visual themes.
 - Custom CSS and rendered-document theme controls.

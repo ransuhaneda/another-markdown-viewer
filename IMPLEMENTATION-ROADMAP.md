@@ -1,6 +1,14 @@
 # Another Markdown Viewer Implementation Roadmap
 
-This roadmap breaks the product contract into focused phases. Each phase should use a separate `feat/*` branch and focused commits. Use `fix/*` branches for defects discovered after integration.
+This roadmap breaks the product contract into focused phases. Each phase should use a separate `feat/*` branch and focused commits. Use `fix/*` branches for defects discovered after integration. For verified current status and release evidence, read [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) first.
+
+## Current phase status
+
+- **Phase 0 — Project foundation:** complete in the current repository.
+- **Phases 1–8 — Product implementation:** implemented in the current source tree, with unit coverage present for the main phase areas.
+- **Phase 9 — Release verification:** open. TypeScript, unit tests, and build pass. The browser suite requires a confirmed Markdown Viewer preview target before its failures can be classified.
+
+These markers describe repository evidence, not a substitute for the browser and product-owner checks listed below.
 
 ## Git baseline and workflow
 
@@ -301,4 +309,4 @@ pnpm dev
 
 ## Current starting point
 
-The project-init commit is the baseline for deciding whether Phase 0 is complete. The previous Phase 2 implementation is being removed from the active branch so work can restart from the first incomplete phase.
+The project is past the foundation and implementation phases. Start remaining work at Phase 9: confirm the browser test target, rerun the browser suite, investigate any genuine product failures, and record the result in `PROJECT_STATUS.md`. Do not restart earlier phases unless new evidence shows that an accepted contract is missing.
